@@ -7,6 +7,6 @@ The API, CLI and MCP return `service_unavailable` with HTTP 503. Repeating the s
 
 ## What to do
 
-The service could not complete or confirm this request; it may already have taken effect. Wait, then repeat exactly the same request with the same idempotency key, waiting longer each time; never switch to a new key. If 'ohmyhost plan' keeps failing, check that the commit is pushed to the linked repository and that 'ohmyhost init --dry-run --json' at that commit reports no blockers. If it still fails, report the request_id through feedback.
+The service could not complete or confirm this request; it may already have taken effect. Wait, then repeat exactly the same request with the same idempotency key, waiting longer each time; never switch to a new key. If 'ohmyhost plan' keeps failing, check that the commit is saved in the project's selected source and that 'ohmyhost init --dry-run --json' at that commit reports no blockers. If it still fails, report the request_id through feedback.
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

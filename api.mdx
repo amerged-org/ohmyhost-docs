@@ -28,6 +28,45 @@ An error uses `application/problem+json` with a stable `code`, `retryable`, `sug
 
 List endpoints return their documented cursor. Send that cursor on the next request and stop when it is absent. [Errors, limits and polling](/limits).
 
+## Source bindings and managed versions
+
+Read `GET /v1/projects/{project_id}/source` before choosing how to save files. Its default GitHub response keeps the released status fields. Request `?include_binding=true` before using source-connection or generation guards; managed source returns its full binding in either view. Preserve the selected project and its existing source. [Sources and versions](/sources) explains the local and connected-chat workflows.
+
+The API contract names the operations below. Use the endpoint's exact request schema and keep its `Idempotency-Key` with the original request.
+
+| Operation                   | Request                                            | Result                                                                                          |
+| --------------------------- | -------------------------------------------------- | ----------------------------------------------------------------------------------------------- |
+| `initializeManagedSource`   | `POST /v1/projects/{project_id}/source:initialize` | An accepted template-initialization operation; observe it and reread the source before editing. |
+| `listManagedSourceFiles`    | `GET /v1/projects/{project_id}/source/files`       | The saved file manifest, or a selected path's base64 content at the requested commit.           |
+| `listManagedSourceVersions` | `GET /v1/projects/{project_id}/source/versions`    | Saved history with `next_commit_sha` for pagination.                                            |
+| `diffManagedSource`         | `GET /v1/projects/{project_id}/source/diff`        | Added, modified and deleted paths between the two exact commits.                                |
+| `changeManagedSource`       | `POST /v1/projects/{project_id}/source/changes`    | An accepted edit under the current generation and reconciled parent commit.                     |
+| `restoreManagedSource`      | `POST /v1/projects/{project_id}/source:restore`    | A new version containing the selected earlier tree; no deployment or database rollback.         |
+
+REST edit bodies use `content_base64`; null deletes a path. MCP can accept `content_text` and returns UTF-8 text when available. Do not mix those transport shapes. Every changed file retains its executable flag. Read the current generation and reconcile changes before supplying `expected_commit_sha`; a fresh remote head does not make stale local files current.
+
+### Complete snapshots
+
+A complete tree uses one prepared upload, exact per-file receipts and a final manifest. Native MCP clients follow [the complete-tree flow](/sources#save-a-complete-tree-in-chat); the local [source publisher](/sources#save-current-local-files) performs staging and saves the checkout's confirmed base.
+
+| Operation                   | Request                                                               | Purpose                                                                                                                                  |
+| --------------------------- | --------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------- |
+| `createManagedSourceUpload` | `POST /v1/projects/{project_id}/source/uploads`                       | Prepare initialize, commit or an explicitly requested switch with its original generation, source connection, parent commit and message. |
+| `putManagedSourceBlob`      | `PUT /v1/projects/{project_id}/source/uploads/{operation_id}/files`   | Stage one complete file under this upload and obtain its validated receipt.                                                              |
+| `getManagedSourceUpload`    | `GET /v1/projects/{project_id}/source/uploads/{operation_id}`         | Observe the same upload's state, expiry and confirmed commit.                                                                            |
+| `commitManagedSourceUpload` | `POST /v1/projects/{project_id}/source/uploads/{operation_id}:commit` | Seal the complete manifest for initialize or commit mode.                                                                                |
+| `switchManagedSource`       | `POST /v1/projects/{project_id}/source:switch`                        | Finalize only a switch upload with the original GitHub connection and generation.                                                        |
+
+For initialize, the project must be genuinely unbound with no pending initialization: use generation `0`, null source connection and null parent commit. For commit, use the actual managed connection/generation and the reconciled parent SHA. For switch, retain the original GitHub connection/generation and use a null parent commit. A switch requires the customer's explicit source choice; it does not create another project or import GitHub history.
+
+REST blob bodies contain the actual base64 file contents, their canonical SHA-256 and executable flag. Remote `source_blob_put` accepts exactly one `content_text` or `content_base64`, computes the hash and byte length from the real bytes, and returns a validated receipt. Retain each returned `{path, sha256, byte_length, executable}` exactly. Do not invent hashes or use a receipt from another upload.
+
+Stage every file that should remain, including unchanged retained files. Build the complete final `files` array from receipts of **this upload**; every staged path must occur exactly. An incomplete or altered manifest is rejected. Omit a previously committed file without staging it to delete it from the next tree. Normal finalize includes the original `expected_source_generation`; switch also supplies the upload ID and original connection ID.
+
+Keep the same operation, manifest and step keys after uncertainty. Observe the receipt before replaying; sealed or committed uploads must not be restaged. `sealed` can identify an unpushed candidate; only a succeeded operation and `committed` receipt confirm the version. `getManagedSourceUpload` returns state and commit, not a file inventory. Recover a lost blob receipt by replaying its identical request/key. A committed receipt's `commit_sha` is that upload's exact version even if the current source head later advances. Initialize/switch change source generation; normal commits use parent-SHA concurrency checks. None of these source operations deploys, changes project addresses or reverts database data.
+
+The current bounds are 2,000 files, 2 MiB decoded per file/change batch and 8 MiB for the tree. [Path and secret restrictions](/sources#file-and-request-bounds) apply to every entry. For local snapshots, the [CLI source publisher](/sources#save-current-local-files) already implements this staged flow and completes the checkout's own cached base.
+
 ## Download the contract
 
 - [OpenAPI YAML](/openapi.yaml)

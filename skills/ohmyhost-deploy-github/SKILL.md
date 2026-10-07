@@ -1,12 +1,66 @@
 ---
 name: ohmyhost-deploy-github
-description: Deploy a GitHub application to ohmyho.st, share protected Dev or make Dev public, and publish to Prod by promotion or a direct build. Also use for a requested rollback, project deletion, Dev reset or Dev/Prod data-mode change. Use the troubleshooting Skill for an already stuck operation.
+description: Deploy an explicitly selected or already bound GitHub application to ohmyho.st, verify Dev and publish the exact version to Prod. Also use for its requested rollback, deletion or Dev/Prod data changes. Use ohmyhost-deploy to choose a source for an unbound app; use troubleshooting for a stuck operation.
 ---
 
 # Deploy a GitHub app
 
 Read the installed CLI help or MCP tool schemas before supplying arguments. Use the customer's selected repository and branch.
 Write concise customer-facing guidance in the customer's language and preserve their chosen scope.
+
+Read the saved checkout binding and `source_get` before this workflow. A managed binding is
+authoritative; use **ohmyhost-deploy** rather than adding a GitHub remote or replacing its source.
+An existing Git repository is not proof that it is hosted on GitHub: inspect its remotes and
+the selected project. If an unbound local app has no GitHub source and the customer has not
+chosen one, ask once whether to keep its versions with ohmyho.st or set up GitHub. An explicit
+choice already authorizes that route and needs no repeated routing question.
+
+Converting a GitHub-backed project to managed source uses the same project, URLs and data.
+Follow the explicit switch path in **ohmyhost-deploy**; do not create a replacement project or
+invent a source generation. Before a generation-aware change, call `source_get` with
+`include_binding: true`; the default keeps the released GitHub source view. Do not
+unlink the existing source before its replacement is complete.
+For a native switch, stage the intended complete tree with `source_upload_prepare`
+(`mode: "switch"`) and `source_blob_put`, then finalize `source_switch` from the receipts
+using the original GitHub connection/generation. The existing binding stays until completion;
+project URLs and data remain, GitHub auto-deploy is disabled, and deployment is separate.
+The remote hosting connection cannot read GitHub files by itself: use the client's actual
+repository/file context or state the missing capability; never invent a replacement tree.
+
+## Connected chat with a GitHub source
+
+The source choice follows the selected repository and user preference, including when the agent
+runs in a cloud environment. Use this flow when the authenticated remote tools are available;
+the local CLI flow below remains available for a local checkout.
+
+1. Complete the remote OAuth and project-grant flow in **ohmyhost-get-started**. Reuse the saved
+   project through `project_list`, `project_get` and `project_context_get`. For a new GitHub app,
+   send `source_provider: "github"` explicitly to `project_create`, together with the user's
+   organization, name, region, data mode and Dev access choice. This avoids queuing a managed
+   template over the selected GitHub source.
+2. Develop and push the actual repository through the client's available repository tools.
+   Inspect the repository-root `ohmyhost.yaml`, lockfile and selected application root through
+   those tools. Use **ohmyhost-build-portable-app** to resolve framework/configuration blockers.
+   If this client cannot read or write the selected repository, state the concrete missing
+   capability; a connected hosting tool does not itself provide GitHub editing.
+3. Read `github_status` for the approved organization. When a connection is needed, call
+   `github_connect` with one saved key and present its private `url`. The existing signed-in
+   portal leads the user through **Continue to GitHub** and the official GitHub authorization.
+   Return to `github_status` to confirm the result. Do not request a provider token or construct
+   a GitHub callback. Then call `source_link` with the same project and selected repository
+   owner/name, observe its accepted operation, and confirm the binding with `source_get`.
+4. Supply required credentials with `secret_input_request` for Dev or Prod and observe the
+   private input through `connection_status`; never put secret values into chat or tool calls.
+   Plan the exact pushed commit with `deployment_plan`, create the reviewed plan with
+   `deployment_create`, and observe its original `operation_get`. Verify Dev with the returned
+   URL and, when protected, `project_dev_share_link_get` for the user or a one-use
+   `project_dev_access_create` ticket for the agent. Keep entry links out of source and logs.
+5. When publication is requested and its separate project grant permits it, use `promotion_plan`
+   and `deployment_promote` with the actual ETag, confirmation and idempotency guards. Shared
+   data requires Dev followed by promotion; isolated data also permits an exact commit planned
+   into Prod. Supply Prod's own credentials, observe completion and verify the public result.
+
+## Local checkout with GitHub
 
 1. Run `ohmyhost init --dry-run --json` in that repository. A blocked repository reports `status: "blocked"` and exits non-zero while still returning the full analysis; read `blockers` rather than the exit code alone. Resolve returned blockers and requirements; preserve existing auth, migrations and configuration. Without an `ohmyhost.yaml`, run `ohmyhost init --json` once no blockers remain: it writes the file at the repository root (`--root DIR` picks one of several apps, `--region eu` for an EU project). Commit and push it before planning. Init never overwrites an existing file: it answers `repository_configuration_exists`, while `--dry-run` still analyzes the repository. Use the portable-app Skill for source changes, or the Supabase Skill only for a requested migration.
 2. Complete installation, login and organization selection with the ohmyhost-get-started Skill; use `identity_get` to confirm the selected organization and `projects_list` to reuse an existing project. When several ohmyho.st logins are saved, or the prompt names a user and organization, run every authenticated call as that one login (`--profile-name` / `profile_name`) and confirm it with `identity_get` first; `init` is offline and takes no login flag. For a new project, ask: "Should your Dev page be public or protected by a shareable link?" Protected is the default; public lets anyone with the Dev URL open it, including when Dev and Prod share data. Explain isolated Dev/Prod data versus shared data and the hosting region, then use `project_create` with the chosen `dev_access_mode`, data mode and `region`. Recommend isolated data; two databases consume credits separately. `data_mode` is optional and defaults to `shared`; send the customer's choice explicitly. A later change uses the confirmed data-change flow below and never copies data. An explicit region wins over a supplied browser-location hint; without either, ask once. Preserve an existing project's region and never use the agent IP. The API defaults to `us`; `eu` places the project's Postgres database, files, build sandbox and build objects in the EU, and the application runs next to its database. The region cannot change after creation and prices are identical in both regions; `storage.jurisdiction` in `ohmyhost.yaml` must equal the project's region, and `init` writes `us` unless it gets `--region eu`. Transactional mail is sent from the platform's mail region and is not a per-project choice. Hosting needs no mail domain: ask whether the app should send or receive email, and configure one only when the customer wants mail or the app declares `mail.enabled`; a Dev URL, a new project or a Better Auth package alone never calls for one. Mail requires Paid access: without it, `mail_setup` answers `paid_plan_required`. An app declaring `mail.enabled` also needs its configured mail domain before deployment (`mail_domain_required`); activate Paid and configure mail, or set `mail.enabled: false` when the app sends no mail.

@@ -1,17 +1,18 @@
 ---
 name: ohmyhost-get-started
-description: Connect a customer agent to ohmyho.st. Determine what is already installed and signed in, guide the customer through browser sign-in, and select an organization before the first GitHub deployment. Also use when one computer holds several accounts, a prompt names the user and organization to work as, the customer needs support, or an automation needs a non-expiring API token. Use the deployment Skill once access is ready.
+description: Connect a customer agent or native chat to ohmyho.st, verify the intended account and workspace, and continue an application from its saved source. Use managed OAuth for a remote chat and the existing local login for a terminal agent. Also use for account selection, customer support, or private automation credentials; use ohmyhost-deploy once access is ready.
 ---
 
 # Start with ohmyho.st
 
-Connect this agent to the customer's account, then continue with the selected GitHub app.
+Connect this agent to the customer's account, then continue with the selected app and its saved source.
 
 ## What ohmyho.st is and what you can do with it
 
-ohmyho.st hosts a customer's GitHub app: Vite/React, TanStack Start, Next.js or a plain Worker
-module with HTTP handlers and optional cron schedules. Their coding agent operates it through the local
-MCP server or CLI, both calling the same REST API. Deploy a pushed commit to Dev or Prod,
+ohmyho.st hosts a customer's app: Vite/React, TanStack Start, Next.js or a plain Worker
+module with HTTP handlers and optional cron schedules. A coding agent uses the local MCP server or
+CLI; a connected native chat uses the remote MCP server. Both use the same product REST contract.
+Source can be a connected GitHub repository or an ohmyho.st-managed repository. Deploy an exact commit to Dev or Prod,
 verify the app, and promote a tested Dev artifact when appropriate. Dev is protected by default;
 the deployment Skill handles public Dev, data choices and the shared-database promotion rule.
 You can also give the app Postgres, private runtime secrets, Cloudflare R2 files, optional
@@ -19,12 +20,13 @@ transactional mail and a custom domain, export its database as an encrypted SQL 
 usage, credits and project budgets. The customer keeps their own application authentication;
 nothing here replaces it. Sign-up is open and free to start.
 
-The initial connection normally asks the customer to sign in and authorize GitHub for the
-workspace. A working saved login or API token can avoid another sign-in, and a connected
-workspace can reuse its GitHub connection. Optional payments, DNS/account consent or harness
+The initial connection asks the customer to sign in and approve the access they want to give this
+agent. GitHub authorization is needed only for the GitHub source route. A working saved local login
+or API token can avoid another local sign-in; a remote chat uses its managed OAuth connection.
+Optional payments, DNS/account consent or harness
 reloads can require further customer action; use the relevant Skill for the feature they chose.
 
-The whole path, and the proof that each step is done:
+The local-agent path, and the proof that each step is done:
 
 | Step | Result                                                        | Proof                                                                                                                         | Section      |
 | ---- | ------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------- | ------------ |
@@ -45,7 +47,8 @@ Which Skill to read next:
 | ---------------------------------------------------------------- | ---------------------------------- |
 | prepare or adapt an app so it runs here                          | ohmyhost-build-portable-app        |
 | convert a real Supabase database, Auth, Storage or Functions use | ohmyhost-migrate-supabase-postgres |
-| deploy a commit, verify it, promote Dev to Prod                  | ohmyhost-deploy-github             |
+| deploy a commit, verify it, promote Dev to Prod                  | ohmyhost-deploy                    |
+| deploy an explicitly selected GitHub repository                  | ohmyhost-deploy-github             |
 | understand a queued, stuck or failed deployment, or report a bug | ohmyhost-troubleshoot-deployment   |
 | read or change data, database size or Dev-to-Prod migrations     | ohmyhost-manage-database           |
 | connect a custom domain or mail sender                           | ohmyhost-domains-and-mail          |
@@ -53,16 +56,77 @@ Which Skill to read next:
 | see usage, credits or set a spending limit                       | ohmyhost-usage-and-budgets         |
 
 Users normally reach this Skill from a prompt such as "connect this agent to ohmyho.st and deploy
-this project". In that case finish Steps 1 to 6 with as few messages as possible, then continue
+this project". In that case finish the relevant access steps with as few messages as possible, then continue
 with the deployment Skill without asking again for anything already decided.
+
+## Native chat with a remote connection
+
+Use this path when the enabled authenticated remote server exposes `connection_request`.
+Discover its tools and call `identity_get`; do not install a CLI,
+start a device-code login, or ask for an API key in this chat. The client completes the managed
+OAuth sign-in itself. A configured plugin or completed browser page is not proof of authorization.
+
+Verify the account and read `connection_grants` for the returned organization silently.
+A returned `allow_create: true` records consent to create a new application, even when `projects`
+is empty; do not request another project-selection approval just because that list is empty.
+Every operation still checks current human and project authorization.
+`allow_publish_created_projects` records consent inherited only by newly created apps; an existing
+app needs its own entry in `projects`.
+Reuse the customer's selected project when its grant allows the requested action. Otherwise
+use `connection_request` for that exact
+organization and the intended `project_ids`; request `allow_create: true` only when the user
+wants a new application, and `allow_publish: true` only when they asked to publish. Prefer the
+**Review connection** card when the client displays it; otherwise present the actual returned
+private approval URL. Let the host preserve its actual return-to-chat context; pass `return_url`
+only when the actual conversation URL is available, never derive it from an anonymized session
+ID. After the user completes approval, verify `connection_status` with its `request_id` and
+reread the grants silently. The browser must be signed in as the same person as the chat connection.
+Continue with app creation, editing and Dev previews when authorized. Explain missing publication
+permission only when a requested publication needs its own approval handoff; never promise
+publication before that access is confirmed.
+
+If the intended existing project is not yet visible to this client, request the workspace's
+portal picker with `project_ids: []` and `allow_create: false`. The signed-in user selects their
+existing project there. After approval, reread `connection_grants` and `project_list`; do not
+invent a project ID or create a replacement application to gain visibility.
+
+An identity with no organization needs `workspace_setup` before project work. Present its
+returned portal URL and ask the customer to sign in there with the same connected account.
+After setup, call `identity_get` again, then obtain the selected workspace's project grant.
+Reconnect OAuth if its actual authorization response requires it. Never
+guess an organization from a project name or treat identity-only access as a project grant.
+
+Continue with **ohmyhost-deploy**. A new application developed entirely in this chat uses managed
+source. Read the project's source and context before continuing a saved app; changing chats does
+not create another project. Before using source connection/generation guards, request
+`source_get` with `include_binding: true`; ordinary source selection may use its default
+released GitHub view, while managed source includes those guards in either view.
+For a complete native file tree or an explicitly requested GitHub-to-managed switch,
+**ohmyhost-deploy** uses `source_upload_prepare`, `source_blob_put`, `source_upload`,
+`source_upload_commit` or `source_switch`; retain the actual upload operation and receipts.
+These remote tools accept bounded file contents, not local directory paths or credentials.
+For private application credentials, use `secret_input_request` and its portal handoff,
+then `connection_status`. Values stay out of chat, source, tools and logs.
+If the required remote tools are unavailable, state that concrete capability gap; local device
+tokens are not a substitute for a missing remote connection.
 
 ## How to talk to the customer here
 
 - One action per message, in short plain sentences. Give the link, then what they will see.
+- For native `connection_request` handoffs, use only one short localized sentence plus the actual
+  **Review connection** card or returned approval link, such as "Please confirm the connection."
+  Let the portal show the requested rights. Omit rights lists, routine status summaries such as
+  "not confirmed" or "no app created", and timestamps or validity details unless the customer asks
+  or an expired link needs action. Verify the actual grant internally after approval.
 - Write in the language the customer writes in. Translate the message templates below; copy no
   other sentence from this file into the chat.
 - Keep customer-facing messages focused on the action and why it is needed. Avoid narrating
   routine internal steps; explain an actual limitation when it prevents the requested work.
+- After the verified connection, if the customer has not said what they want to build or host,
+  ask only "What would you like to host?" in their language (for example, "Was möchtest du hosten?").
+  If the app or task is already known, continue directly without this question.
+- Keep raw account/grant IDs, permission tables, `projectId: null` and routine access diagnostics
+  out of normal chat replies. Use recognizable account or application names when a choice is needed.
 - Wait for required browser input before taking actions that depend on it. Independent repository
   inspection can continue while the customer signs in; do not start another sign-in for the same
   account or repeat the instruction without new information. Respect the customer's existing authorization and scope.
@@ -340,6 +404,10 @@ anything is sent.
 
 ## Step 6 — continue with the app
 
+First use **ohmyhost-deploy** to resolve the saved source or the customer's explicit source
+choice. The GitHub connection instructions below apply only to the GitHub route. A managed
+source does not require a GitHub account, App installation, repository or provider token.
+
 Confirm the selected directory and GitHub repository. Read `github_status` for the selected workspace. If it is not connected, an Owner or Admin uses `github_connect` (CLI below), opens its single `authorization_url`, then repeats the same request/key after the browser completes until the returned status is `connected`.
 
 ```sh
@@ -361,7 +429,10 @@ new key for the same workspace; never poll a terminal failure.
 
 Use `projects_list` to reuse a project and `project_context_get` when resuming one. Preserve an existing project's region. For a new project, an explicit customer region wins; otherwise use a browser-location hint supplied in the customer's onboarding prompt and send that region explicitly. Without either, ask once for US or EU. Never infer customer location from the agent/server IP. The API default remains US; the selected region cannot change later.
 
-Continue with the **ohmyhost-deploy-github** Skill when a deployment is requested. Login, workspace creation, GitHub connection and project linking are distinct results; check each returned state rather than treating a completed browser page as deployment success.
+Continue with **ohmyhost-deploy-github** when GitHub is the selected source, or return to
+**ohmyhost-deploy** for managed source. Login, workspace creation, source connection and project
+linking are distinct results; check each returned state rather than treating a completed browser
+page as deployment success.
 
 For a repository containing several apps, run local `init` from its Git root and check that the
 repository-root `ohmyhost.yaml` selects the intended `applicationRoot` before planning the pushed

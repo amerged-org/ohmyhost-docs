@@ -1,6 +1,6 @@
 ---
 title: "CLI"
-description: "Install the public clients and deploy a GitHub commit with real commands."
+description: "Install the public clients, save an app version and deploy it with real commands."
 ---
 
 import InstallClients from "/snippets/install-clients.mdx";
@@ -9,7 +9,7 @@ import InstallClients from "/snippets/install-clients.mdx";
 
 <InstallClients />
 
-Run `ohmyhost login --json` and open the returned sign-in URL. The link already carries its confirmation code, so you do not type one. Sign in there, or create your account on that same page if you do not have one yet; signing up is open. Use the organizations returned by `whoami`; when several are available, select the one for this project. If none exists, create one through the get-started Skill.
+Run `ohmyhost login --json` and open the returned sign-in URL. Check that the page shows the confirmation code returned by the CLI; the link carries it, so you do not type one. Sign in there, or create your account on that same page if you do not have one yet; signing up is open. Use the organizations returned by `whoami`; when several are available, select the one for this project. If none exists, create one through the get-started Skill.
 
 ## Authenticate
 
@@ -31,7 +31,7 @@ ohmyhost init --dry-run --json
 ohmyhost project list --json
 ```
 
-Resolve actual hosted blockers. Without a root `ohmyhost.yaml`, run `ohmyhost init --json` once blockers are resolved; `--root DIR` selects a nested app and `--region eu` prepares EU storage. Commit and push the file. Init never overwrites an existing configuration. Reuse an existing project, or create one after choosing isolated or shared data, protected or public Dev access, and setting `HOSTING_REGION` to the chosen `us` or `eu`:
+Resolve actual hosted blockers. Without a root `ohmyhost.yaml`, run `ohmyhost init --json` once blockers are resolved; `--root DIR` selects a nested app and `--region eu` prepares EU storage. Save the file in your managed version, or commit and push it for a GitHub source. Init never overwrites an existing configuration. Reuse an existing project, or create one after choosing isolated or shared data, protected or public Dev access, and setting `HOSTING_REGION` to the chosen `us` or `eu`:
 
 ```sh
 ohmyhost project create --organization "$ORGANIZATION_ID" --name "My app" --data-mode isolated --dev-access-mode protected --region "$HOSTING_REGION" --idempotency-key "$PROJECT_REQUEST_KEY" --json
@@ -42,6 +42,29 @@ ohmyhost project list --json
 `ORGANIZATION_ID` comes from `whoami`. Create a unique `PROJECT_REQUEST_KEY` once and retain it for retries. `PROJECT_OPERATION_ID` is the creation response's `operation.id`. After success, select the created project's ID from the list as `PROJECT_ID`.
 
 ## Connect and deploy
+
+Read the saved source first and keep its binding:
+
+```sh
+ohmyhost source status --project "$PROJECT_ID" --json
+```
+
+Continue an existing managed or GitHub source on that project. For an unbound checkout, use the selected GitHub remote or choose managed source. A missing local remote does not replace an existing binding. [Sources and versions](/sources).
+
+### Save managed source
+
+Inspect the local files before saving them. For an unbound project with no pending initialization, choose and retain a unique `SOURCE_REQUEST_KEY` for this save:
+
+```sh
+ohmyhost source inspect --json
+ohmyhost source publish --project "$PROJECT_ID" --mode initialize --expected-source-generation 0 --message "Initial application" --idempotency-key "$SOURCE_REQUEST_KEY" --wait --json
+```
+
+For an existing managed source, use `--mode commit` with its current `--expected-source-generation` and `--expected-source-connection`. Keep the checkout's confirmed base; supply `--expected-commit` only after merging newer saved changes into these files. `--mode switch` replaces a GitHub binding only when you explicitly request that change. Exclude credentials, private env files, dependencies, caches and build output. Saving source starts no build and imports no Git history.
+
+Retain the accepted operation and key after an uncertain response; `SOURCE_OPERATION_ID` is its `operation.id`. Observe that operation, then use `ohmyhost source publish complete --project "$PROJECT_ID" --operation "$SOURCE_OPERATION_ID" --json` in the same directory and login to confirm a pending publication. Use the committed upload receipt's own `commit_sha` as `COMMIT_SHA`; a candidate SHA before completion is not a saved version. [Save current local files](/sources#save-current-local-files).
+
+### Connect GitHub source
 
 Read the workspace's GitHub connection first. If it is not connected, an Owner or Admin runs connect:
 
@@ -60,7 +83,9 @@ ohmyhost link --project "$PROJECT_ID" --repository-owner "$GITHUB_OWNER" --repos
 
 Observe the returned source-link operation; it needs no second browser authorization for a covered repository. Missing access is repaired through `github.connection.settings_url` returned by GitHub status, then the same link command/key. No build starts until you deploy a plan. From the repository root, link also records `.ohmyhost/` and adds `/.ohmyhost/` to `.gitignore`. Later commands may omit `--project`; the CLI names the selected project on stderr. A checkout keeps one link per organization: when several match, supply `--project` or `--profile-name` (`linked_project_selection_required`).
 
-Use the full SHA of the pushed commit as `COMMIT_SHA`:
+### Deploy the saved commit
+
+Use the full SHA of the saved managed version or pushed GitHub commit as `COMMIT_SHA`:
 
 ```sh
 ohmyhost plan --project "$PROJECT_ID" --commit "$COMMIT_SHA" --json

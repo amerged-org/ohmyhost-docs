@@ -1,37 +1,45 @@
 ---
 title: "Your first deployment"
-description: "Connect GitHub, deploy one app and verify its Dev URL."
+description: "Save a managed or GitHub version, deploy one app and verify its Dev URL."
 ---
 
-Start in the directory of the GitHub app you want to deploy. You need its pushed source and lockfile, and access to authorize that repository. Signing up is open: your browser is needed once.
+Start with the app you want to deploy, in a local checkout or a connected chat. Continue its saved managed or GitHub source. A new app developed entirely in chat uses managed source; a local checkout without a saved binding can use managed source or GitHub. Signing up is open. [Sources and versions](/sources).
 
 ## 1. Give your agent the task
 
-> Read https://ohmyho.st/llms.txt and https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md. Connect this agent to ohmyho.st and deploy this GitHub project using only the capabilities it needs. Follow the deployment Skill, keep my existing project decisions and verify the app.
+> Read https://ohmyho.st/llms.txt and https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md. Connect this agent to ohmyho.st and deploy this app using only the capabilities it needs. Keep its existing source binding, or choose managed source or GitHub if it is unbound. Follow the deployment Skill, preserve my project decisions and verify the app.
 
-Your agent uses the [get-started Skill](https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md). It first checks what is installed and whether you are signed in, installs the current CLI/MCP only if required, and then gives you one sign-in link. Open it, sign in or create your account on that page, and tell the agent when you are done. It confirms the result with `identity_get` or `ohmyhost whoami --json`.
+Your agent uses the [get-started Skill](https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md). A local agent first checks what is installed and whether you are signed in, installs the current CLI/MCP only if required, and gives you a sign-in link when needed. Open it, check the confirmation code, sign in or create your account on that page, and tell the agent when you are done. It confirms the result with `identity_get` or `ohmyhost whoami --json`.
 
-Read the organizations returned by `whoami` and reuse the workspace for this app. If none exists, create one through the get-started Skill. If you already have projects, select the existing project instead of creating another.
+A connected chat uses managed OAuth and the returned **Review connection** card or private portal link. It verifies the intended account, workspace and project grants before continuing; it needs no local CLI installation or copied API token. Choose the existing app in the portal picker when it is not yet visible. Consent to create a new app is sufficient to begin it; publishing has its own grant. [Connect MCP](/agents/mcp).
+
+Reuse the workspace for this app. A local agent reads the organizations returned by `whoami` and follows the get-started Skill if none exists. A connected chat with no workspace uses the `workspace_setup` portal handoff and verifies its identity again. If you already have projects, select the existing project instead of creating another.
 
 ## 2. Inspect the application
+
+For a local checkout:
 
 ```sh
 ohmyhost init --dry-run --json
 ```
 
-The result identifies the framework, requirements and concrete blockers. Resolve the reported issue and repeat inspection. When no blockers remain and the repository has no `ohmyhost.yaml`, run `ohmyhost init --json` at the repository root (`--root DIR` for a nested app, `--region eu` for an EU project). It writes the file without overwriting an existing one. Commit and push it: a commit without that root file fails planning as `repository_configuration_missing`. Keep one pinned package manager and its matching lockfile. Preserve application auth and existing migrations; a package name alone does not require replacing them.
+The result identifies the framework, requirements and concrete blockers. Resolve the reported issue and repeat inspection. When no blockers remain and the repository has no `ohmyhost.yaml`, run `ohmyhost init --json` at the repository root (`--root DIR` for a nested app, `--region eu` for an EU project). It writes the file without overwriting an existing one. Save it in the managed version, or commit and push it for GitHub: a commit without that root file fails planning as `repository_configuration_missing`. Keep one pinned package manager and its matching lockfile. Preserve application auth and existing migrations; a package name alone does not require replacing them.
 
-Upgrade the CLI and MCP to the [current release](/cli) first. When the result reports `runtime.packages.customerRuntime` for any framework (also exposed under companion/worker packages), install the application runtime under its import name as exactly that npm alias, for example `"@ohmyhost/customer-runtime": "npm:@amerged/ohmyhost-runtime@<version>"` in `package.json`, then refresh and commit the lockfile. Every `@ohmyhost/customer-runtime/*` import stays unchanged. A bare `@ohmyhost/customer-runtime` version fails the platform build. Replace a runtime pinned to an `ohmyho.st/releases/` URL with the alias: only the current release is served there, and older versions carry no compatibility promise.
+In a connected chat, the agent reads the selected project's source and context before editing. A new managed app starts from the chosen supported template. The agent observes its source initialization, then saves purposeful file changes with the current source generation and commit guards. If another chat advanced the version, it reads and merges that work before retrying. [Edit from a connected chat](/sources).
+
+Upgrade local CLI and MCP clients to the [current release](/cli) first. When the inspection reports `runtime.packages.customerRuntime` for any framework (also exposed under companion/worker packages), install the application runtime under its import name as exactly that npm alias, for example `"@ohmyhost/customer-runtime": "npm:@amerged/ohmyhost-runtime@<version>"` in `package.json`, then refresh and save the lockfile with the source. Every `@ohmyhost/customer-runtime/*` import stays unchanged. A bare `@ohmyhost/customer-runtime` version fails the platform build. Replace a runtime pinned to an `ohmyho.st/releases/` URL with the alias: only the current release is served there, and older versions carry no compatibility promise.
 
 For data-backed apps, choose isolated Dev/Prod databases and files or shared data. Creation defaults to shared when `data_mode` is omitted; later guarded [data changes](/environments#change-data-assignments) never copy data. Isolation is recommended; two databases consume credits independently. [How environments work](/environments).
 
-Choose whether the Dev URL should be protected by a reusable share link (the default) or public without a platform token. The agent asks before creating a project and records the choice.
+For a new project, choose whether the Dev URL should be protected by a reusable share link (the default) or public without a platform token. The agent records the choice and preserves existing project decisions.
 
 For a new project, choose **US or EU** before creation. An explicit choice overrides any browser-location suggestion; an existing project's region is preserved. US is the API default when no region is supplied. EU places the project's database, files and builds in the EU, with the application next to its database. The region cannot be changed later and prices are identical. Transactional mail is processed in the US by the platform's mail provider, whatever the project's region. A cloud agent's own IP address does not establish your preferred hosting region.
 
-## 3. Connect the selected GitHub repository
+## 3. Save or connect the selected source
 
-The agent reads the selected workspace's `github_status`. If needed, `github_connect` provides one browser link for the installation/user authorization. Open it in the GitHub account that has repository access. The agent repeats that same connect request/key after consent until the connection is confirmed.
+Managed source saves the intended application files as a version on the same project. A local agent uses `source publish`; a connected chat uses the remote source tools. No GitHub account or installation is required. Saving a version starts no build. The agent observes the accepted source operation and keeps its exact committed SHA for deployment. [Save current local files](/sources#save-current-local-files).
+
+For a GitHub source, the agent reads the selected workspace's `github_status`. If needed, `github_connect` provides one browser link for the installation/user authorization. Open it in the GitHub account that has repository access. The agent repeats that same connect request/key after consent until the connection is confirmed.
 
 It then creates or selects the project and uses `source_link` for a covered repository. This returns a normal operation without another browser authorization and does not start a build. If the repository is missing, add it through `connection.settings_url` from GitHub status and repeat the same source-link request/key. [Exact CLI sequence](/cli#connect-and-deploy).
 
@@ -39,7 +47,7 @@ It then creates or selects the project and uses `source_link` for a covered repo
 
 If you want a custom domain, the agent can [reserve it and obtain Cloudflare consent](/domains) now. A reservation waits in `awaiting_deployment` without DNS changes, certificates or custom-hostname charges. Prod can deploy on its existing ohmyho.st hosting address before your own DNS is changed.
 
-The agent plans the exact pushed commit and shows the required services, estimated credit effects and missing configuration. It sets needed private application secrets through the supported stdin flow, then executes that plan with one saved idempotency key. Hosting needs no mail domain; if the plan returns `mail_domain_required`, the app declares `mail.enabled`, so either set up [your own sender domain](/email) or set it to false when the app sends no mail through ohmyho.st. [Published usage rates](/pricing) explain what each measured resource costs.
+The agent plans the exact saved managed commit or pushed GitHub commit and shows the required services, estimated credit effects and missing configuration. A local agent sets private application secrets through stdin; a connected chat uses `secret_input_request` and its private portal handoff, then verifies `connection_status` and delivery metadata. Values stay outside chat and source. It executes the plan with one saved idempotency key. Hosting needs no mail domain; if the plan returns `mail_domain_required`, the app declares `mail.enabled`, so either set up [your own sender domain](/email) or set it to false when the app sends no mail through ohmyho.st. [Published usage rates](/pricing) explain what each measured resource costs.
 
 The response supplies an operation ID. The agent observes that operation until it succeeds or returns an actionable error. A network timeout does not cancel it and is not a reason to create another project or deployment.
 
@@ -47,7 +55,9 @@ The response supplies an operation ID. The agent observes that operation until i
 
 The agent reads `dev_access_mode` and the URL from project status. For protected Dev it obtains the persistent owner-only share link; for public Dev it opens the clean URL directly. Check navigation and, where used, application login and a real data read/write. A successful build alone is not the finished app.
 
-When you request publication, the agent creates a promotion plan and publishes the verified artifact to Prod. Isolated promotion applies migrations without copying Dev records into Prod. With isolated data, the agent can also build a commit straight into Prod; a project whose Dev and Prod share a database always deploys to Dev and promotes. [Deploy to Prod](/environments#deploy-to-prod).
+When you request publication, the agent confirms the connected chat's publishing grant when applicable, creates a promotion plan and publishes the verified artifact to Prod. Isolated promotion applies migrations without copying Dev records into Prod. Prod receives its own private secret inputs. With isolated data, the agent can also build a commit straight into Prod; a project whose Dev and Prod share a database always deploys to Dev and promotes. [Deploy to Prod](/environments#deploy-to-prod).
+
+Managed source keeps version history across chats. Restoring an earlier source version creates a new commit; it is separate from deployment rollback and does not roll back database migrations. [Restore a version](/sources).
 
 After Prod works on its hosting address, the agent repeats the original domain apply with the saved hostname and key, then checks DNS, HTTPS and the application on the final domain. Cloudflare consent and successful deployment do not activate a reserved domain automatically.
 

@@ -1,13 +1,13 @@
 ---
 title: "Deploy with ohmyho.st"
-description: "Host your GitHub app and manage it through your agent."
+description: "Host your app and manage its saved source through your agent."
 ---
 
 Paste this prompt into Codex, Claude Code, Cursor, Hermes or OpenClaw:
 
-> Read https://ohmyho.st/llms.txt and https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md. Connect this agent to ohmyho.st and deploy this GitHub project using only the capabilities it needs. Follow the deployment Skill, keep my existing project decisions and verify the app.
+> Read https://ohmyho.st/llms.txt and https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md. Connect this agent to ohmyho.st and deploy this app using only the capabilities it needs. Keep its existing source binding, or choose managed source or GitHub if it is unbound. Follow the deployment Skill, preserve my project decisions and verify the app.
 
-Your agent tells you what it needs, gives you one sign-in link, reuses your workspace and inspects the selected app before creating anything. Signing up is open; you only need a browser once.
+Your agent tells you what it needs, connects the intended account, reuses your workspace and inspects the selected app before creating anything. A connected chat uses managed OAuth; a terminal agent can reuse its saved login. Signing up is open. [Sources and versions](/sources) work across chats without creating another app.
 
 ## Start with what your app needs
 
@@ -17,7 +17,7 @@ A public Vite app can start with hosting alone. Add Postgres, [files](/files), r
 
 The agent follows the accepted deployment and verifies the real application. Dev is protected by default: ask your agent for the reusable Dev share link, or choose public Dev when the project is created. Publish to Prod after you are ready.
 
-- [First deployment](/quickstart): the complete GitHub workflow.
+- [First deployment](/quickstart): managed source and GitHub workflows.
 - [Connect MCP](/agents/mcp): setup for your agent.
 - [CLI](/cli): install and run the commands yourself.
 - [API](/api): use your account token from another tool.

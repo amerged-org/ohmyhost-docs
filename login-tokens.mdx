@@ -13,6 +13,12 @@ Six commands require an interactive login: `organization create`, `organization 
 
 `ohmyhost login` and `ohmyhost logout` also refuse to run while `OHMYHOST_TOKEN` is set, and exit with `environment_token_active`. Run all of these from a shell where the variable is unset; your token file is not touched.
 
+## Connected chat access
+
+A native chat uses its authenticated remote MCP connection and managed OAuth. Approve the returned **Review connection** card or private portal link, then let the agent verify `identity_get`, `connection_status` and the workspace's `connection_grants`. Select the intended account and existing project; an empty visible project list is not a reason to create a replacement app. Creating a new app and publishing it have separate grants. [MCP connection](/agents/mcp).
+
+This access is separate from the local CLI device sign-in and a user API token. A connected chat needs no local CLI installation or copied device token. Keep private application credentials in the [portal input flow](/secrets#connected-chat-input), outside chat and tool arguments. The non-expiring API token policy does not change browser, CLI or OAuth session lifetimes.
+
 ## Sign in interactively
 
 ```sh
@@ -20,7 +26,7 @@ ohmyhost login --json
 ohmyhost whoami --json
 ```
 
-Open the returned link and sign in or sign up. Direct signup, including a malformed referral source, creates a Free **My workspace**; a valid referral may add its configured benefit. `ohmyhost whoami --json` confirms the actual selection. Reuse an existing workspace. With several organizations, bind an unbound login using `ohmyhost organization use --organization ULID --json`; if none exists, use `organization create`. A saved login keeps its workspace (`profile_organization_fixed`): add a separate login with `ohmyhost login --organization ULID --json` for another workspace. Existing customers can return through [login](https://app.ohmyho.st/login).
+Open the returned link, check its displayed confirmation code against the CLI's code, and sign in or sign up. Direct signup, including a malformed referral source, creates a Free **My workspace**; a valid referral may add its configured benefit. `ohmyhost whoami --json` confirms the actual selection. Reuse an existing workspace. With several organizations, bind an unbound login using `ohmyhost organization use --organization ULID --json`; if none exists, use `organization create`. A saved login keeps its workspace (`profile_organization_fixed`): add a separate login with `ohmyhost login --organization ULID --json` for another workspace. Existing customers can return through [login](https://app.ohmyho.st/login).
 
 Sessions are kept in the operating system's credential store, also read by local MCP. On `credential_store_unavailable`, unlock the desktop store and retry; a headless/CI host can use a private `OHMYHOST_TOKEN` from the portal instead. `logout --json` removes the selected saved login; `--revoke` also ends its server session. Neither revokes an API token.
 

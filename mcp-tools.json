@@ -3,6 +3,544 @@
   "command": "ohmyhost-mcp",
   "tools": [
     {
+      "name": "source_inspect",
+      "title": "Inspect local application source",
+      "description": "Read local working-directory, Git/worktree, monorepo and sanitized remote context without sign-in. This tool exists only in local MCP and never proves repository authorization. No source files or history are uploaded.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "directory": {
+            "default": ".",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          }
+        }
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "source_initialize",
+      "description": "Create managed version history for an unbound project. Normal blank chat uses vite-react; existing local files use source_publish instead. Returns an asynchronous operation; poll operation_get and source_get with include_binding true before planning the resulting commit. Does not publish an application.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "template": {
+            "default": "vite-react",
+            "type": "string",
+            "enum": [
+              "empty",
+              "vite-react"
+            ]
+          },
+          "expected_source_generation": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483646
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "expected_source_generation",
+          "idempotency_key"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "source_files",
+      "description": "List the exact managed source tree at a version; omit commit_sha to read current main. Read source_get with include_binding true before changing files and keep the generation and commit for concurrency checks.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "commit_sha": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{40}$"
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "source_file",
+      "description": "Read one managed source file with its exact hash and mode. UTF-8 content_text is the default; binary files retain content_base64 with guidance. Use format base64 for legacy byte payloads, and keep the executable flag when replacing a file.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "path": {
+            "type": "string"
+          },
+          "commit_sha": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{40}$"
+          },
+          "format": {
+            "default": "text",
+            "type": "string",
+            "enum": [
+              "text",
+              "base64"
+            ]
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "path"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "source_versions",
+      "description": "Read managed version history for this project; next_commit_sha continues the same history page.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "limit": {
+            "default": 50,
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "before_commit_sha": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{40}$"
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "source_diff",
+      "description": "Compare two managed versions without changing files or deployments.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "from_commit_sha": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{40}$"
+          },
+          "to_commit_sha": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{40}$"
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "from_commit_sha",
+          "to_commit_sha"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "source_changes",
+      "description": "Save an atomic file batch against the generation and parent commit you read. Each file takes exactly one UTF-8 content_text or binary/legacy content_base64; null content_base64 deletes it. Keep executable flags. A conflict requires reading the new version; publication is separate.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "expected_source_generation": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483646
+          },
+          "expected_commit_sha": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{40}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "changes": {
+            "minItems": 1,
+            "maxItems": 2000,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "path": {
+                  "type": "string"
+                },
+                "content_text": {
+                  "type": "string",
+                  "maxLength": 2097152
+                },
+                "content_base64": {
+                  "anyOf": [
+                    {
+                      "type": "string",
+                      "maxLength": 2796204
+                    },
+                    {
+                      "type": "null"
+                    }
+                  ]
+                },
+                "executable": {
+                  "default": false,
+                  "type": "boolean"
+                }
+              },
+              "required": [
+                "path"
+              ],
+              "additionalProperties": false
+            }
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "expected_source_generation",
+          "expected_commit_sha",
+          "message",
+          "idempotency_key",
+          "changes"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "source_restore",
+      "description": "Restore an earlier managed file tree as a new version against current generation and parent. This preserves history and does not automatically deploy or revert database data.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "expected_source_generation": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483646
+          },
+          "expected_commit_sha": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{40}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "restore_commit_sha": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{40}$"
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "expected_source_generation",
+          "expected_commit_sha",
+          "message",
+          "idempotency_key",
+          "restore_commit_sha"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "source_publish",
+      "description": "Local MCP only: capture current filtered files, including uncommitted/new files, and save one managed version without importing Git history. Use initialize for unbound source, commit for managed source, or explicit switch for the current GitHub project's move to managed; project URL and data stay with that project. Honors nested ignore rules and excludes credentials, links, dependencies and generated output. Rejects symlinks and changing files. Reuse the key after uncertainty and observe the upload before any new attempt; publication is a separate deployment action.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "expected_source_generation": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483646
+          },
+          "expected_commit_sha": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[a-f0-9]{40}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 200
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "directory": {
+            "default": ".",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "initialize",
+              "commit",
+              "switch"
+            ]
+          },
+          "expected_source_connection_id": {
+            "anyOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 256
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "expected_source_generation",
+          "message",
+          "idempotency_key",
+          "mode",
+          "expected_source_connection_id"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "source_publish_complete",
+      "description": "Complete a local pending source publication after polling its operation. Uses the owner-only directory record and verified login, checks the exact confirmed source manifest, and stores that operation's commit as this directory's base even when another chat has advanced main. Never reads a fresh remote head as the local base. No files are uploaded and no deployment starts.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "directory": {
+            "default": ".",
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 4096
+          },
+          "operation_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "source_upload",
+      "description": "Observe the exact managed snapshot upload after an uncertain response. sealed and committed uploads must not be uploaded again; commit_sha identifies the saved version.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "operation_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "operation_id"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
       "name": "database_compute_get",
       "description": "Read current managed database size, memory, region and compute state without running SQL or waking the database. Shared Dev/Prod resolves to one physical database. A null database means no confirmed managed placement. suspend_timeout_seconds=0 uses the provider default; -1 disables scale to zero. A configured value is not proof that an in-progress resize finished. This read never resizes or changes billing.",
       "inputSchema": {
@@ -2219,7 +2757,7 @@
     },
     {
       "name": "source_get",
-      "description": "Get linked source status",
+      "description": "Get linked source status. Set include_binding to true to read the source connection ID and generation before managed changes or an explicit source switch.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -2228,6 +2766,10 @@
             "type": "string",
             "minLength": 1,
             "maxLength": 256
+          },
+          "include_binding": {
+            "default": false,
+            "type": "boolean"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",

@@ -1693,19 +1693,29 @@ paths:
     get:
       operationId: getProjectSource
       summary: Get the linked source status
+      description:
+        GitHub sources use the unchanged released projection by default. Set include_binding=true
+        to request the exact GitHub source connection ID and generation. Managed sources always
+        return their full source binding. The explicit projections are strict; binding fields are
+        never inferred from a legacy response.
       parameters:
         - $ref: "#/components/parameters/RequestId"
         - $ref: "#/components/parameters/ProjectId"
+        - name: include_binding
+          in: query
+          required: false
+          schema: { type: boolean, default: false }
+          description: Return exact source binding metadata for GitHub; managed sources are always full.
       responses:
         "200":
-          description: The current GitHub source connection and status.
+          description: The current source, using the default or explicitly requested binding projection.
           headers:
             X-Request-Id:
               $ref: "#/components/headers/XRequestId"
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/ProjectSource"
+                $ref: "#/components/schemas/ProjectSourceResponse"
         "400":
           $ref: "#/components/responses/Problem"
         "401":
@@ -1719,6 +1729,424 @@ paths:
         "503":
           $ref: "#/components/responses/Problem"
       x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/source:initialize:
+    post:
+      operationId: initializeManagedSource
+      summary: Initialize a managed Cloudflare Git source
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagedSourceInitializeRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/AcceptedOperation"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "413":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+      x-ohmyhost-idempotency:
+        canonicalRequestVersion: v1
+        identicalRequest: replay-stored-response
+        changedRequest: 409-idempotency-key-reused
+  /v1/projects/{project_id}/source/files:
+    get:
+      operationId: listManagedSourceFiles
+      summary: Read managed source files
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - name: commit_sha
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/CommitSha"
+        - name: path
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/ManagedSourcePath"
+      responses:
+        "200":
+          description: The tenant-scoped managed source result.
+          headers:
+            X-Request-Id: { $ref: "#/components/headers/XRequestId" }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManagedSourceFilesResponse"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "413":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/source/versions:
+    get:
+      operationId: listManagedSourceVersions
+      summary: Read managed source version history
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - name: limit
+          in: query
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: before_commit_sha
+          in: query
+          required: false
+          schema:
+            $ref: "#/components/schemas/CommitSha"
+      responses:
+        "200":
+          description: The tenant-scoped managed source result.
+          headers:
+            X-Request-Id: { $ref: "#/components/headers/XRequestId" }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManagedSourceVersions"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "413":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/source/diff:
+    get:
+      operationId: diffManagedSource
+      summary: Compare two managed source versions
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - name: from_commit_sha
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/CommitSha"
+        - name: to_commit_sha
+          in: query
+          required: true
+          schema:
+            $ref: "#/components/schemas/CommitSha"
+      responses:
+        "200":
+          description: The tenant-scoped managed source result.
+          headers:
+            X-Request-Id: { $ref: "#/components/headers/XRequestId" }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManagedSourceDiff"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "413":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/source/changes:
+    post:
+      operationId: changeManagedSource
+      summary: Save an atomic managed source file batch
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagedSourceChangesRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/AcceptedOperation"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "413":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+      x-ohmyhost-idempotency:
+        canonicalRequestVersion: v1
+        identicalRequest: replay-stored-response
+        changedRequest: 409-idempotency-key-reused
+  /v1/projects/{project_id}/source:restore:
+    post:
+      operationId: restoreManagedSource
+      summary: Restore an earlier file tree as a new version
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagedSourceRestoreRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/AcceptedOperation"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "413":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+      x-ohmyhost-idempotency:
+        canonicalRequestVersion: v1
+        identicalRequest: replay-stored-response
+        changedRequest: 409-idempotency-key-reused
+  /v1/projects/{project_id}/source/uploads:
+    post:
+      operationId: createManagedSourceUpload
+      summary: Start a stable managed source snapshot upload
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagedSourceUploadRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/AcceptedOperation"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "413":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+      x-ohmyhost-idempotency:
+        canonicalRequestVersion: v1
+        identicalRequest: replay-stored-response
+        changedRequest: 409-idempotency-key-reused
+  /v1/projects/{project_id}/source/uploads/{operation_id}:
+    get:
+      operationId: getManagedSourceUpload
+      summary: Read a managed source upload receipt
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/OperationId"
+      responses:
+        "200":
+          description: The tenant-scoped managed source result.
+          headers:
+            X-Request-Id: { $ref: "#/components/headers/XRequestId" }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ManagedSourceUploadReceipt"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "413":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/source/uploads/{operation_id}/files:
+    put:
+      operationId: putManagedSourceBlob
+      summary: Upload one source file with its content hash
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/OperationId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagedSourceBlobRequest"
+      responses:
+        "200":
+          description: The tenant-scoped managed source result.
+          headers:
+            X-Request-Id: { $ref: "#/components/headers/XRequestId" }
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SourceManifestFile"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "413":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+      x-ohmyhost-idempotency:
+        canonicalRequestVersion: v1
+        identicalRequest: replay-stored-response
+        changedRequest: 409-idempotency-key-reused
+  /v1/projects/{project_id}/source/uploads/{operation_id}:commit:
+    post:
+      operationId: commitManagedSourceUpload
+      summary: Commit one complete uploaded source snapshot
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/OperationId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagedSourceFinalizeRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/AcceptedOperation"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "413":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+      x-ohmyhost-idempotency:
+        canonicalRequestVersion: v1
+        identicalRequest: replay-stored-response
+        changedRequest: 409-idempotency-key-reused
+  /v1/projects/{project_id}/source:switch:
+    post:
+      operationId: switchManagedSource
+      summary: Switch an existing GitHub project to a prepared managed source
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ManagedSourceSwitchRequest"
+      responses:
+        "202":
+          $ref: "#/components/responses/AcceptedOperation"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/ResourceNotFound"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "413":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+      x-ohmyhost-idempotency:
+        canonicalRequestVersion: v1
+        identicalRequest: replay-stored-response
+        changedRequest: 409-idempotency-key-reused
   /v1/projects/{project_id}/source/auto-deploy:
     put:
       operationId: configureProjectSourceAutoDeploy
@@ -4732,6 +5160,19 @@ components:
         repository_name:
           type: string
     ProjectSource:
+      oneOf:
+        - $ref: "#/components/schemas/GithubProjectSource"
+        - $ref: "#/components/schemas/ManagedProjectSource"
+    ProjectSourceBinding:
+      oneOf:
+        - $ref: "#/components/schemas/GithubSourceBinding"
+        - $ref: "#/components/schemas/ManagedProjectSource"
+    ProjectSourceResponse:
+      oneOf:
+        - $ref: "#/components/schemas/GithubProjectSource"
+        - $ref: "#/components/schemas/GithubSourceBinding"
+        - $ref: "#/components/schemas/ManagedProjectSource"
+    GithubProjectSource:
       type: object
       additionalProperties: false
       required:
@@ -4771,6 +5212,287 @@ components:
           type: string
           minLength: 1
           maxLength: 512
+    GithubSourceBinding:
+      type: object
+      additionalProperties: false
+      required:
+        - provider
+        - source_connection_id
+        - source_generation
+        - installation_id
+        - repository_full_name
+        - status
+        - linked_at
+        - updated_at
+      properties:
+        source_connection_id: { $ref: "#/components/schemas/Ulid" }
+        source_generation: { type: integer, minimum: 1, maximum: 2147483646 }
+        provider:
+          type: string
+          const: github
+        installation_id:
+          type: string
+          pattern: ^[1-9][0-9]*$
+          maxLength: 20
+        repository_full_name:
+          type: string
+          minLength: 3
+          maxLength: 201
+          pattern: ^[^/]+/[^/]+$
+        status:
+          type: string
+          enum:
+            - pending
+            - ready
+            - failed
+            - revoked
+        linked_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        failure_summary:
+          type: string
+          minLength: 1
+          maxLength: 512
+    CommitSha:
+      type: string
+      pattern: ^[a-f0-9]{40}$
+    NullableCommitSha:
+      type: [string, "null"]
+      pattern: ^[a-f0-9]{40}$
+    SourceGeneration:
+      type: integer
+      minimum: 0
+      maximum: 2147483646
+    ManagedSourcePath:
+      type: string
+      minLength: 1
+      maxLength: 240
+      description: Printable ASCII USTAR-compatible relative repository path without dot segments, backslashes, Git metadata or credential files. Environment secrets use the protected secret form; .env.example is allowed.
+    SourceContentBase64:
+      type: string
+      contentEncoding: base64
+      maxLength: 2796204
+      pattern: ^(?:[A-Za-z0-9+/]{4})*(?:[A-Za-z0-9+/]{2}==|[A-Za-z0-9+/]{3}=)?$
+    SourceMessage:
+      type: string
+      minLength: 1
+      maxLength: 200
+    SourceManifestFile:
+      type: object
+      additionalProperties: false
+      required: [path, sha256, byte_length, executable]
+      properties:
+        path: { $ref: "#/components/schemas/ManagedSourcePath" }
+        sha256: { type: string, pattern: "^sha256:[a-f0-9]{64}$" }
+        byte_length: { type: integer, minimum: 0, maximum: 2097152 }
+        executable: { type: boolean }
+    SourceManifest:
+      type: array
+      maxItems: 2000
+      items: { $ref: "#/components/schemas/SourceManifestFile" }
+    ManagedProjectSource:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          provider,
+          source_connection_id,
+          source_generation,
+          namespace,
+          repository_name,
+          branch,
+          current_commit_sha,
+          status,
+          linked_at,
+          updated_at,
+        ]
+      properties:
+        initialization_operation_id:
+          $ref: "#/components/schemas/Ulid"
+          description: Actual source initialization child operation, when one exists; present only while pending or failed.
+        initialization_error_code:
+          type: string
+          description: Canonical public operation failure code for failed initialization; never a provider error.
+        provider: { type: string, const: managed }
+        source_connection_id: { $ref: "#/components/schemas/Ulid" }
+        source_generation: { $ref: "#/components/schemas/SourceGeneration" }
+        namespace: { type: string, pattern: "^[a-z0-9][a-z0-9_-]{0,127}$" }
+        repository_name: { type: string, pattern: "^[a-z0-9][a-z0-9_-]{0,127}$" }
+        branch: { type: string, const: main }
+        current_commit_sha: { $ref: "#/components/schemas/NullableCommitSha" }
+        status: { type: string, enum: [pending, ready, failed, revoked] }
+        linked_at: { type: string, format: date-time }
+        updated_at: { type: string, format: date-time }
+    ManagedSourceInitializeRequest:
+      type: object
+      additionalProperties: false
+      required: [template, expected_source_generation]
+      properties:
+        template: { type: string, enum: [vite-react, empty] }
+        expected_source_generation: { $ref: "#/components/schemas/SourceGeneration" }
+    ManagedSourceUploadRequest:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          mode,
+          expected_source_generation,
+          expected_source_connection_id,
+          expected_commit_sha,
+          message,
+        ]
+      properties:
+        mode: { type: string, enum: [initialize, commit, switch] }
+        expected_source_generation: { $ref: "#/components/schemas/SourceGeneration" }
+        expected_source_connection_id:
+          { type: [string, "null"], pattern: "^[0-7][0-9A-HJKMNP-TV-Z]{25}$" }
+        expected_commit_sha: { $ref: "#/components/schemas/NullableCommitSha" }
+        message: { $ref: "#/components/schemas/SourceMessage" }
+    ManagedSourceBlobRequest:
+      type: object
+      additionalProperties: false
+      required: [path, content_base64, sha256, executable]
+      properties:
+        path: { $ref: "#/components/schemas/ManagedSourcePath" }
+        content_base64: { $ref: "#/components/schemas/SourceContentBase64" }
+        executable: { type: boolean }
+        sha256: { type: string, pattern: "^sha256:[a-f0-9]{64}$" }
+    ManagedSourceFinalizeRequest:
+      type: object
+      additionalProperties: false
+      required: [files, expected_source_generation]
+      properties:
+        files: { $ref: "#/components/schemas/SourceManifest" }
+        expected_source_generation: { $ref: "#/components/schemas/SourceGeneration" }
+    ManagedSourceSwitchRequest:
+      type: object
+      additionalProperties: false
+      required:
+        [upload_operation_id, files, expected_source_generation, expected_source_connection_id]
+      properties:
+        upload_operation_id: { $ref: "#/components/schemas/Ulid" }
+        files: { $ref: "#/components/schemas/SourceManifest" }
+        expected_source_generation: { $ref: "#/components/schemas/SourceGeneration" }
+        expected_source_connection_id: { $ref: "#/components/schemas/Ulid" }
+    ManagedSourceChangesRequest:
+      type: object
+      additionalProperties: false
+      required: [expected_source_generation, expected_commit_sha, message, changes]
+      properties:
+        expected_source_generation: { $ref: "#/components/schemas/SourceGeneration" }
+        expected_commit_sha: { $ref: "#/components/schemas/NullableCommitSha" }
+        message: { $ref: "#/components/schemas/SourceMessage" }
+        changes:
+          type: array
+          minItems: 1
+          maxItems: 2000
+          items:
+            type: object
+            additionalProperties: false
+            required: [path, content_base64, executable]
+            properties:
+              path: { $ref: "#/components/schemas/ManagedSourcePath" }
+              executable: { type: boolean }
+              content_base64:
+                { type: [string, "null"], maxLength: 2796204, contentEncoding: base64 }
+    ManagedSourceRestoreRequest:
+      type: object
+      additionalProperties: false
+      required: [expected_source_generation, expected_commit_sha, restore_commit_sha, message]
+      properties:
+        expected_source_generation: { $ref: "#/components/schemas/SourceGeneration" }
+        expected_commit_sha: { $ref: "#/components/schemas/NullableCommitSha" }
+        restore_commit_sha: { $ref: "#/components/schemas/CommitSha" }
+        message: { $ref: "#/components/schemas/SourceMessage" }
+    ManagedSourceUploadReceipt:
+      type: object
+      additionalProperties: false
+      required:
+        [
+          operation_id,
+          state,
+          expected_source_generation,
+          expected_commit_sha,
+          commit_sha,
+          expires_at,
+        ]
+      properties:
+        operation_id: { $ref: "#/components/schemas/Ulid" }
+        state: { type: string, enum: [staging, sealed, committed, failed] }
+        expected_source_generation: { $ref: "#/components/schemas/SourceGeneration" }
+        expected_commit_sha: { $ref: "#/components/schemas/NullableCommitSha" }
+        commit_sha: { $ref: "#/components/schemas/NullableCommitSha" }
+        expires_at: { type: string, format: date-time }
+    ManagedSourceFilesResponse:
+      oneOf:
+        - $ref: "#/components/schemas/ManagedSourceFiles"
+        - $ref: "#/components/schemas/ManagedSourceFileResponse"
+    ManagedSourceFiles:
+      type: object
+      additionalProperties: false
+      required: [commit_sha, files]
+      properties:
+        commit_sha: { $ref: "#/components/schemas/CommitSha" }
+        files: { $ref: "#/components/schemas/SourceManifest" }
+    ManagedSourceFileResponse:
+      type: object
+      additionalProperties: false
+      required: [commit_sha, file]
+      properties:
+        commit_sha: { $ref: "#/components/schemas/CommitSha" }
+        file:
+          type: object
+          additionalProperties: false
+          required: [path, sha256, byte_length, executable, content_base64]
+          properties:
+            path: { $ref: "#/components/schemas/ManagedSourcePath" }
+            sha256: { type: string, pattern: "^sha256:[a-f0-9]{64}$" }
+            byte_length: { type: integer, minimum: 0, maximum: 2097152 }
+            executable: { type: boolean }
+            content_base64: { $ref: "#/components/schemas/SourceContentBase64" }
+    ManagedSourceVersions:
+      type: object
+      additionalProperties: false
+      required: [versions, next_commit_sha]
+      properties:
+        next_commit_sha: { $ref: "#/components/schemas/NullableCommitSha" }
+        versions:
+          type: array
+          maxItems: 100
+          items:
+            type: object
+            additionalProperties: false
+            required: [commit_sha, parent_commit_sha, message, created_at]
+            properties:
+              commit_sha: { $ref: "#/components/schemas/CommitSha" }
+              parent_commit_sha: { $ref: "#/components/schemas/NullableCommitSha" }
+              message: { type: string, maxLength: 20000 }
+              created_at: { type: string, format: date-time }
+    ManagedSourceDiff:
+      type: object
+      additionalProperties: false
+      required: [from_commit_sha, to_commit_sha, changes]
+      properties:
+        from_commit_sha: { $ref: "#/components/schemas/CommitSha" }
+        to_commit_sha: { $ref: "#/components/schemas/CommitSha" }
+        changes:
+          type: array
+          maxItems: 4000
+          items:
+            type: object
+            additionalProperties: false
+            required:
+              [path, change, before_sha256, after_sha256, before_executable, after_executable]
+            properties:
+              path: { $ref: "#/components/schemas/ManagedSourcePath" }
+              change: { type: string, enum: [added, modified, deleted] }
+              before_sha256: { type: [string, "null"], pattern: "^sha256:[a-f0-9]{64}$" }
+              after_sha256: { type: [string, "null"], pattern: "^sha256:[a-f0-9]{64}$" }
+              before_executable: { type: [boolean, "null"] }
+              after_executable: { type: [boolean, "null"] }
     FunctionRun:
       type: object
       additionalProperties: false
@@ -5579,6 +6301,13 @@ components:
         - organization_id
         - name
       properties:
+        source:
+          type: object
+          additionalProperties: false
+          required: [provider, template]
+          properties:
+            provider: { type: string, const: managed }
+            template: { type: string, enum: [vite-react, empty] }
         organization_id:
           $ref: "#/components/schemas/Ulid"
         data_mode:
@@ -6289,6 +7018,10 @@ components:
           enum:
             - operation_failed
             - operation_abandoned
+            - authorization_changed
+            - source_commit_conflict
+            - source_snapshot_invalid
+            - source_upload_expired
             - recovery_dispatch_failed
             - recovery_job_failed
             - recovery_input_expired

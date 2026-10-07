@@ -1,0 +1,12 @@
+---
+title: "Source snapshot invalid"
+description: "What the `source_snapshot_invalid` error means and what to do next."
+---
+
+The API, CLI and MCP return `source_snapshot_invalid` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Verify the source file contents, hashes and complete manifest before preparing a new upload.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

@@ -7,6 +7,6 @@ The API, CLI and MCP return `repository_configuration_missing` with HTTP 409. Re
 
 ## What to do
 
-The planned commit has no ohmyhost.yaml at the Git repository root. If the repository has none, run 'ohmyhost init --json' at the root (--root DIR when the app lives in a subdirectory, --region eu for an EU project). Otherwise move the existing file to the root and set applicationRoot to the app directory, for example website. Commit and push, then plan the new commit.
+The planned commit has no ohmyhost.yaml at the Git repository root. If the repository has none, run 'ohmyhost init --json' at the root (--root DIR when the app lives in a subdirectory, --region eu for an EU project). Otherwise move the existing file to the root and set applicationRoot to the app directory, for example website. Save or push the corrected version, then plan its commit.
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

@@ -1,0 +1,12 @@
+---
+title: "Source upload conflict"
+description: "What the `source_upload_conflict` error means and what to do next."
+---
+
+The API, CLI and MCP return `source_upload_conflict` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Read the existing upload and operation. Reuse a key only for its original request; complete its original manifest or start a new upload.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

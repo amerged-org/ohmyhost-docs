@@ -1,5 +1,16 @@
 | Tool | Required arguments | Action |
 | --- | --- | --- |
+| `source_inspect` | None | Read |
+| `source_initialize` | `project_id`, `expected_source_generation`, `idempotency_key` | Change or prepare a change |
+| `source_files` | `project_id` | Read |
+| `source_file` | `project_id`, `path` | Read |
+| `source_versions` | `project_id` | Read |
+| `source_diff` | `project_id`, `from_commit_sha`, `to_commit_sha` | Read |
+| `source_changes` | `project_id`, `expected_source_generation`, `expected_commit_sha`, `message`, `idempotency_key`, `changes` | Change or prepare a change |
+| `source_restore` | `project_id`, `expected_source_generation`, `expected_commit_sha`, `message`, `idempotency_key`, `restore_commit_sha` | Change or prepare a change |
+| `source_publish` | `project_id`, `expected_source_generation`, `message`, `idempotency_key`, `mode`, `expected_source_connection_id` | Change or prepare a change |
+| `source_publish_complete` | `project_id` | Change or prepare a change |
+| `source_upload` | `project_id`, `operation_id` | Read |
 | `database_compute_get` | `project_id` | Read |
 | `database_compute_set` | `project_id`, `environment`, `profile`, `confirm`, `idempotency_key` | Change or prepare a change |
 | `project_context_get` | `project_id` | Read |

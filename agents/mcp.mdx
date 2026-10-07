@@ -1,27 +1,53 @@
 ---
 title: "Connect your agent"
-description: "Use the local ohmyho.st MCP server in Codex, Claude Code, Cursor, Hermes or OpenClaw."
+description: "Connect through remote OAuth or keep the local stdio workflow in your agent."
 ---
 
 import InstallClients from "/snippets/install-clients.mdx";
 
 ## When to use ohmyho.st
 
-Use this server when the customer wants to deploy or update an authorized GitHub app; inspect a project’s deployment, database or DNS/mail readiness; manage usage and budgets; or request an encrypted SQL export.
+Use ohmyho.st when the customer wants to develop or deploy an app using its managed versions or selected GitHub source; inspect a project's deployment, database or DNS/mail readiness; manage usage and budgets; or request an encrypted SQL export. Use the transport and operations available in this client.
 
 Your agent follows the [get-started Skill](https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md) for installation, sign-in and workspace selection before its first deployment ([what it covers](/skills#start-with-the-get-started-skill)).
 
-Start with `identity_get`, select the customer’s project using `projects_list`, then read `project_context_get` before acting. Configure only the capabilities the application needs and keep its chosen authentication provider. Use the matching [task Skill](/skills) for the workflow.
+Start with `identity_get`, then select the customer's project with the available list tool: remote `project_list` or local `projects_list`. Read `project_context_get` and `source_get` before acting. Use `include_binding: true` on `source_get` before using connection/generation guards. Default GitHub reads preserve their existing status fields; managed reads always include the full binding. The server's current source binding is authoritative; an agent's location or copied Git remote does not replace it. A new app developed entirely in chat starts with managed versions, while an explicitly selected GitHub repository uses GitHub. Configure only the capabilities the application needs and keep its chosen authentication provider. Use the matching [task Skill](/skills) for the workflow.
 
-For a new project, ask whether Dev should be protected or public before `project_create`; protected is the default. `project_dev_share_link_get` returns the Owner's reusable protected link. `project_dev_access_mode_set` changes the choice, while `project_dev_share_link_rotate` and `project_dev_share_link_revoke` block old links and browser sessions on their next request. [Dev access details](/environments#choose-who-can-open-dev).
+For a new project, ask whether Dev should be protected or public before `project_create`; protected is the default. `project_dev_share_link_get` returns the Owner's reusable protected link. Local clients expose `project_dev_access_mode_set` to change the choice, while `project_dev_share_link_rotate` and `project_dev_share_link_revoke` block old links and browser sessions on their next request. Discover the connected client's actual tools before requesting those changes. [Dev access details](/environments#choose-who-can-open-dev).
 
-For a custom domain before the first Prod deployment, use `domain_paid_plan` and `domain_paid_apply` to reserve it, then `domain_cloudflare_authorize` and `domain_cloudflare_status` for scoped consent. `awaiting_deployment` means no DNS or certificate provisioning has started. Deploy and verify the Prod hosting address, then repeat `domain_paid_apply` with the original hostname and idempotency key. Consent and deployment alone do not activate it. [Domain setup](/domains).
+When the client's tools support the requested custom domain before the first Prod deployment, use `domain_paid_plan` and `domain_paid_apply` to reserve it, then `domain_cloudflare_authorize` and `domain_cloudflare_status` for scoped consent. `awaiting_deployment` means no DNS or certificate provisioning has started. Deploy and verify the Prod hosting address, then repeat `domain_paid_apply` with the original hostname and idempotency key. Consent and deployment alone do not activate it. [Domain setup](/domains).
 
-## Install and sign in
+## Connected chat with remote OAuth
+
+For a client that supports authenticated remote MCP, connect:
+
+```text
+https://app.ohmyho.st/mcp
+```
+
+Complete the client's OAuth sign-in. The agent verifies `identity_get` and `connection_grants` in the background. If you already described an application or task, it continues that request. Otherwise it asks only "What would you like to host?" in your language—for example, "Was möchtest du hosten?" in German. Routine checks need no permission table, internal IDs, empty fields or grant timestamps.
+
+New-app consent is explicit: `allow_create: true` permits creation even when the approved project list is empty. An empty list without that consent does not authorize creation. `allow_publish_created_projects` covers only applications created under that consent; an existing application needs its own publication permission. Every operation still checks current account and project authorization.
+
+Editing and Dev previews are separate from publication. The agent requests a publication handoff only when you have asked to publish and the relevant permission is missing. If workspace setup is needed, `workspace_setup` returns the account portal; the agent verifies identity again after you finish.
+
+When project access is missing, the agent uses `connection_request`. Open its **Review connection** card when your client displays it; otherwise open the returned private portal link. Use the browser profile signed in to the ohmyho.st account connected to this client. Check the account, workspace, selected applications and requested access before confirming. The card opens the consent page; it does not approve access.
+
+When the client provides the actual current chat address, the portal can return you to that conversation after approval. The agent may supply `return_url` only when it knows that exact address. Never construct it from anonymized session IDs or session metadata. Without a conversation address, a recognized client's home page is the fallback; with an unrecognized client, return to your chat manually. Returning to chat does not confirm project access: the agent checks `connection_status` and `connection_grants` in the background before continuing.
+
+Project-access portal links are valid for one hour. Portal links for secret input and GitHub setup last ten minutes. If a link expires, ask your agent for a fresh one.
+
+The client manages its OAuth credential. This route needs no copied platform token or local device-code login. A plugin installation or completed browser page is not the access check: verify an authenticated tool call and the actual project grant. Discover this connected server's tools rather than assuming the local catalog applies to it. Private application values use the portal flow in [Runtime secrets](/secrets).
+
+For a complete file tree, the remote tools are `source_upload_prepare`, `source_blob_put`, `source_upload`, `source_upload_commit` and `source_switch`. They use actual file contents available to the client; a local directory path gives the chat no filesystem access. Blob uploads return server-computed hash/length receipts. Retain those exact receipts for the complete manifest, and require a succeeded operation plus a committed upload before using its saved SHA. Saving or switching source starts no deployment. Follow [the full snapshot and switch flow](/sources#save-a-complete-tree-in-chat).
+
+MCP file reads return valid UTF-8 as `content_text` by default, or base64 when the file cannot be decoded. Remote `source_files` accepts `path` and `format: "text" | "base64"`; local `source_file` provides the corresponding file read. `source_changes` accepts exactly one `content_text` or `content_base64` per change, with null base64 for deletion. Follow the returned schemas and preserve the file's executable flag and source revision guards.
+
+## Install and sign in locally
 
 <InstallClients />
 
-The MCP server uses `OHMYHOST_TOKEN` when that variable is set in the server process, and otherwise the logins saved by ohmyhost login. With several, pass `profile_name` per call (`profile_list` shows names) or bind the server to `OHMYHOST_PROFILE`=NAME; another requested profile fails `profile_context_mismatch`. A login added later works on the next call without restarting. A token on its own is enough — no login and no browser. Put it in the same `env` block as `OHMYHOST_ENVIRONMENT`; the server reads no `.env` file and never calls the CLI.
+The local stdio MCP server uses `OHMYHOST_TOKEN` when that variable is set in the server process, and otherwise the logins saved by ohmyhost login. With several, pass `profile_name` per call (`profile_list` shows names) or bind the server to `OHMYHOST_PROFILE`=NAME; another requested profile fails `profile_context_mismatch`. A login added later works on the next call without restarting. A token on its own is enough — no login and no browser. Put it in the same `env` block as `OHMYHOST_ENVIRONMENT`; the server reads no `.env` file and never calls the CLI.
 
 With a token, every tool works except `organization_create`, `organization_list`, `organization_use`, `token_create`, `tokens_list` and `token_revoke`. Those need an interactive login: run the matching `ohmyhost` command in a shell without `OHMYHOST_TOKEN`.
 
@@ -86,8 +112,8 @@ Use the installed `openclaw mcp add --help` to confirm support. `mcp serve` expo
 
 ## Confirm the connection
 
-Ask the agent: “Read my ohmyho.st identity and list my projects.” It should call `identity_get` and `projects_list`, then read `project_context_get` for the project you select. If a tool is missing, compare the installed client with the [current release](https://ohmyho.st/client-release.json) and reconnect after updating.
+Ask the agent: “Read my ohmyho.st identity and list my projects.” It should call `identity_get`, then remote `project_list` or local `projects_list`, and read `project_context_get` for the project you select. If a tool is missing, compare the installed client with the [current release](https://ohmyho.st/client-release.json) and reconnect after updating.
 
-The product server uses local stdio. Mintlify's search MCP answers documentation questions; it cannot deploy or access your account. No product URL-only OAuth connection is advertised here.
+These harness commands and the downloadable MCP configuration set up the local `ohmyhost-mcp` stdio server, with its CLI/device-login profiles and private automation-token support. Its published catalog describes that local client. The remote product endpoint above is a separate OAuth connection. Keep the transport your client supports and its existing permission policy. Mintlify's search MCP answers documentation questions; it cannot deploy or access your account.
 
 [Task Skills](/skills) · [Actual tool catalogue](/mcp-tools) · [CLI](/cli)

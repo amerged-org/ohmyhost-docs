@@ -66,6 +66,17 @@ and follow the returned schema rather than guessing arguments.
 - `ohmyhost link` — ohmyhost link --project ULID --repository-owner OWNER --repository-name REPOSITORY --idempotency-key KEY --json (uses the workspace GitHub connection and waits for the source-link operation)
 - `ohmyhost source auto-deploy set` — ohmyhost source auto-deploy set --project ULID --branch BRANCH --enabled true|false --idempotency-key KEY --json
 - `ohmyhost source auto-deploy status` — ohmyhost source auto-deploy status --project ULID --json
+- `ohmyhost source inspect` — ohmyhost source inspect [--directory PATH] --json (read local source and sanitized GitHub context without sign-in)
+- `ohmyhost source status` — ohmyhost source status --project ULID --json
+- `ohmyhost source files` — ohmyhost source files --project ULID [--commit SHA] --json
+- `ohmyhost source file` — ohmyhost source file --project ULID --path PATH [--commit SHA] --json
+- `ohmyhost source versions` — ohmyhost source versions --project ULID [--limit 1..100] [--before SHA] --json
+- `ohmyhost source diff` — ohmyhost source diff --project ULID --from SHA --to SHA --json
+- `ohmyhost source upload` — ohmyhost source upload --project ULID --operation ULID --json (observe the same upload after uncertainty)
+- `ohmyhost source publish` — ohmyhost source publish --project ULID --mode initialize|commit|switch [--directory PATH] --expected-source-generation N [--expected-source-connection ULID] [--expected-commit SHA] --message TEXT --idempotency-key KEY [--wait] --json (current files, no history import; one managed commit)
+- `ohmyhost source publish complete` — ohmyhost source publish complete --project ULID [--directory PATH] [--operation ULID] --json (confirm the recorded publication and save this directory's own committed base)
+- `ohmyhost source initialize` — ohmyhost source initialize --project ULID --template empty|vite-react --expected-source-generation N --idempotency-key KEY [--wait] --json
+- `ohmyhost source restore` — ohmyhost source restore --project ULID --expected-source-generation N --expected-commit SHA --restore-commit SHA --message TEXT --idempotency-key KEY [--wait] --json (restore as a new version; publication is separate)
 - `ohmyhost domain cloudflare authorize` — ohmyhost domain cloudflare authorize --project ULID --zone ZONE --idempotency-key KEY --json
 - `ohmyhost domain cloudflare status` — ohmyhost domain cloudflare status --project ULID --json
 - `ohmyhost domain cloudflare apply` — ohmyhost domain cloudflare apply --project ULID --idempotency-key KEY --yes --wait --json
@@ -101,6 +112,17 @@ and follow the returned schema rather than guessing arguments.
 
 ## MCP tools
 
+- `source_inspect` — Read local working-directory, Git/worktree, monorepo and sanitized remote context without sign-in.
+- `source_initialize` — Create managed version history for an unbound project.
+- `source_files` — List the exact managed source tree at a version; omit commit_sha to read current main.
+- `source_file` — Read one managed source file with its exact hash and mode.
+- `source_versions` — Read managed version history for this project; next_commit_sha continues the same history page.
+- `source_diff` — Compare two managed versions without changing files or deployments.
+- `source_changes` — Save an atomic file batch against the generation and parent commit you read.
+- `source_restore` — Restore an earlier managed file tree as a new version against current generation and parent.
+- `source_publish` — Local MCP only: capture current filtered files, including uncommitted/new files, and save one managed version without importing Git history.
+- `source_publish_complete` — Complete a local pending source publication after polling its operation.
+- `source_upload` — Observe the exact managed snapshot upload after an uncertain response.
 - `database_compute_get` — Read current managed database size, memory, region and compute state without running SQL or waking the database.
 - `database_compute_set` — Select standard or performance compute for an existing database: Free 0.25 CU/1 GB/60-second idle suspension, Paid 0.5 CU/2 GB/60-second idle suspension.
 - `project_context_get` — Read fresh project status, DNS/mail next actions, authorized usage and bounded shared notes.
@@ -159,7 +181,7 @@ and follow the returned schema rather than guessing arguments.
 - `github_connect` — Owner or Admin: connect GitHub once for this workspace.
 - `github_status` — Read this workspace's GitHub connection.
 - `source_link` — Link a repository covered by the workspace GitHub connection.
-- `source_get` — Get linked source status
+- `source_get` — Get linked source status.
 - `deployment_plan` — Plan an immutable deployment.
 - `deployment_create` — Start a reviewed deployment plan
 - `deployments_list` — List project deployments

@@ -7,6 +7,6 @@ The API, CLI and MCP return `migration_filename_noncanonical` with HTTP 409. Rep
 
 ## What to do
 
-Every file in the migrations directory (database.migrations in ohmyhost.yaml) must be named YYYYMMDDHHMMSS_name.sql: 14 digits, an underscore, then lowercase letters, digits, _ or -. Rename each file that does not match and move any other file, such as README.md or .gitkeep, out of that directory. Commit and push, then plan the new commit. Never rename a migration a deployment already applied.
+Every file in the migrations directory (database.migrations in ohmyhost.yaml) must be named YYYYMMDDHHMMSS_name.sql: 14 digits, an underscore, then lowercase letters, digits, _ or -. Rename each file that does not match and move any other file, such as README.md or .gitkeep, out of that directory. Save or push the corrected version, then plan its commit. Never rename a migration a deployment already applied.
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

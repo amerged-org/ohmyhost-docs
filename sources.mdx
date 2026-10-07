@@ -1,0 +1,164 @@
+---
+title: "Sources and versions"
+description: "Save application versions with ohmyho.st or GitHub, then preview and publish an exact version."
+---
+
+An application has one source binding. **Managed source** keeps its files and version history with ohmyho.st; **GitHub source** builds pushed commits from the linked repository. Both routes use the same project, supported [frameworks](/quickstart), deployment plans and application addresses.
+
+## Continue the existing source
+
+Read the project's source before choosing a route:
+
+```sh
+ohmyhost source inspect --directory . --json
+ohmyhost source status --project "$PROJECT_ID" --json
+```
+
+`source inspect` reads local checkout and sanitized remote information without signing in or uploading files. `source status` requests the authenticated project's full binding. In MCP, use `source_get` with `include_binding: true` before using source connection or generation guards; REST uses `GET /v1/projects/{project_id}/source?include_binding=true`. Default GitHub reads retain the existing status view; managed reads always include their full binding. The saved binding takes precedence over a local Git remote. A Git directory alone does not imply GitHub.
+
+For an unbound checkout, an explicit source choice already answers the question. Otherwise use its selected GitHub repository, or ask once whether to keep versions with ohmyho.st or set up GitHub. A new application developed entirely in a connected chat uses managed source. Keep the selected account, project, region, framework and data mode when continuing work.
+
+Use [GitHub setup](/github) for a GitHub source. Commit and push changes there before planning their full commit SHA. Managed source needs no GitHub account or GitHub push.
+
+## Save current local files
+
+Run [the CLI setup](/cli) and `ohmyhost init --dry-run --json` first. Resolve framework blockers and include the actual `ohmyhost.yaml` and lockfile. `source publish` captures current files, including uncommitted and new files, as one managed version. It does not import local Git history or deploy the app.
+
+For a project with no source and no pending initialization, use `initialize`. Its expected source generation is `0`; omit the source connection and commit flags:
+
+```sh
+ohmyhost source publish --project "$PROJECT_ID" --mode initialize \
+  --directory . --expected-source-generation 0 \
+  --message "Save the initial app" --idempotency-key "$SAVE_REQUEST_KEY" --wait --json
+```
+
+Choose a new `SAVE_REQUEST_KEY` for each new save and retain it with that request for retries. The capture honors root and nested ignore rules, excludes credentials, local link records, dependencies and build output, and rejects symlinks or files changing during capture. Review the intended files; keep private values in [runtime secrets](/secrets).
+
+For later local saves, read `source status` for the binding's `source_connection_id` and `source_generation`. Use `commit` with those values:
+
+```sh
+ohmyhost source publish --project "$PROJECT_ID" --mode commit \
+  --directory . --expected-source-generation "$SOURCE_GENERATION" \
+  --expected-source-connection "$SOURCE_CONNECTION_ID" \
+  --message "Add the booking form" --idempotency-key "$SAVE_REQUEST_KEY" --wait --json
+```
+
+Omit `--expected-commit` when this directory has a confirmed base from a successful local `source publish`/`source publish complete`: the CLI uses that directory's own last confirmed commit. A template initialization alone does not establish that base. If another chat has saved newer files, first read and merge them into the checkout. Supply an explicit `--expected-commit` only after that reconciliation. Using a newly fetched remote head with stale local files can overwrite work.
+
+### Finish a pending save
+
+A save returns `operation.id`. A committed upload receipt has `state: "committed"` and `commit_sha`; that exact SHA identifies your saved version. `snapshot.sha256` is the snapshot checksum, not the commit. An accepted response or wait timeout does not mean the version is ready.
+
+```sh
+ohmyhost operation get "$SOURCE_OPERATION_ID" --json
+ohmyhost source upload --project "$PROJECT_ID" --operation "$SOURCE_OPERATION_ID" --json
+ohmyhost source publish complete --project "$PROJECT_ID" --directory . \
+  --operation "$SOURCE_OPERATION_ID" --json
+```
+
+Use the same directory, project and login. `source publish complete` checks once and can return `status: "pending"`; follow the operation and call it again. Only a succeeded operation and committed receipt confirm the persisted version and finish the local binding. Completion uploads no files and records your operation's commit even if another chat has since advanced the source. With `--wait`, a successful `source publish` performs this completion itself.
+
+After an interruption, `source inspect` lists safe `pending_publications` IDs. Observe that saved operation and receipt before retrying. If it is still staging, repeat `source publish` with the unchanged files, original arguments and original key to finish uploading. Preserve that attempt after an uncertain response; do not start another upload when the receipt is sealed or committed. An expired or failed upload needs its reported cause resolved before a new attempt.
+
+## Develop in a connected chat
+
+Use the [remote OAuth connection](/agents/mcp) and its approved project grants. The remote server edits saved files directly; it does not read a directory on your computer. Read its actual `tools/list` schema, since the local and remote catalogs differ.
+
+For a new managed app, remote `project_create` accepts `source_provider: "managed"` and `template: "vite-react"` or `"empty"`. Use the basic Vite template for a blank web app, or an empty source for an explicitly selected supported stack. Follow `operation_get`, then `source_get` with `include_binding: true` until the source is `ready` with a persisted commit. Project creation can finish before source initialization. Do not issue a duplicate `source_initialize` while it is pending. A returned `initialization_operation_id` identifies the child operation; `initialization_error_code` explains a failed initialization.
+
+For an existing unbound project without pending initialization, `source_initialize` creates the chosen template under the current generation and a saved idempotency key. Local CLI equivalents are listed [below](#initialize-or-switch-source).
+
+Read the current manifest with `source_files`. On remote MCP, add `path` to read one file; on local MCP use `source_file`. Text reads default to `format: "text"` and return `content_text` with `encoding: "utf8"`. Binary files return `content_base64`; request `format: "base64"` for exact binary bytes.
+
+For example, pass this argument object to `source_changes`, replacing the IDs, generation and commit with the values you read:
+
+```json
+{
+  "project_id": "PROJECT_ULID",
+  "expected_source_generation": 1,
+  "expected_commit_sha": "CURRENT_40_CHARACTER_COMMIT_SHA",
+  "message": "Update the homepage heading",
+  "changes": [
+    {
+      "path": "src/App.tsx",
+      "content_text": "export default function App() { return <h1>Book a visit</h1>; }\n",
+      "executable": false
+    }
+  ],
+  "idempotency_key": "homepage-save-1"
+}
+```
+
+Each change supplies exactly one content field: `content_text` for UTF-8, `content_base64` for binary, or `content_base64: null` to delete a file. Preserve an existing file's `executable` flag. Follow the accepted operation, then read `source_get` with `include_binding: true` before planning its resulting commit. Keep application passwords and model keys out of file content, chat and tool arguments; use the private [secret input flow](/secrets).
+
+## Save a complete tree in chat
+
+Use the files actually available to the connected client. Remote upload tools accept file contents, not a path to a directory on your computer. If the chat cannot read or transfer the complete intended tree, arrange that file context before saving or switching source.
+
+1. Read `source_get` with `include_binding: true`, then call `source_upload_prepare` once. Keep its `operation.id`, original guards and `idempotency_key`. `initialize` uses an unbound source, generation `0` and null connection/commit; `commit` uses the managed connection, generation and reconciled parent commit; `switch` uses the original GitHub connection/generation and a null parent commit.
+2. Call `source_blob_put` for every intended file, including unchanged files that should remain. Supply the same project/upload operation, a relative `path`, its `executable` flag, a saved per-file key and exactly one `content_text` or `content_base64`. The server computes SHA-256 and byte length from the validated bytes. Retain each returned `{path, sha256, byte_length, executable}` receipt exactly; do not calculate or invent hashes in chat.
+3. Pass the complete `files` manifest built from receipts of **this upload** to `source_upload_commit` for initialize/commit, retaining the original generation and a saved finalize key. Use `source_switch` for switch mode. Every staged file must appear exactly; an incomplete or altered manifest is rejected. An unstaged, previously saved file omitted from the next full snapshot is deleted. A staged path's contents and executable flag cannot be changed within that upload.
+4. Follow the same `operation_get` and `source_upload`. The version is saved only when the operation succeeds and the receipt is `committed`. A `sealed` receipt can name an unpushed candidate and is not confirmation. Use this operation's own committed `commit_sha`, even if another chat later advances the source.
+
+After uncertainty, observe the original upload before repeating a step. `source_upload` reports state and commit, not a file inventory. Recover a lost file receipt by repeating the identical `source_blob_put` arguments and key. Retain the original manifest and step keys; do not restage sealed or committed work. Resolve a reported failure or conflict before a deliberate new attempt. Saving a tree starts no deployment.
+
+## Resolve concurrent changes
+
+`source_generation` changes when a source binding is initialized or switched. A commit or restore of a ready managed source also requires the exact parent `expected_commit_sha`. A source conflict means another change or binding has won; repeating stale guards cannot resolve it.
+
+Read the current source and affected files, compare the versions, then merge the intended edits. Submit the reconciled change with the new guards and a new key. For local files, reconcile the checkout before changing its explicit base. After an uncertain response, observe or replay the original request first so the same work is not saved twice. Follow the returned error's `code` and `suggested_action`.
+
+## Read history and restore files
+
+```sh
+ohmyhost source files --project "$PROJECT_ID" --commit "$COMMIT_SHA" --json
+ohmyhost source file --project "$PROJECT_ID" --path src/App.tsx --commit "$COMMIT_SHA" --json
+ohmyhost source versions --project "$PROJECT_ID" --limit 25 --json
+ohmyhost source diff --project "$PROJECT_ID" --from "$OLDER_SHA" --to "$NEWER_SHA" --json
+```
+
+The manifest contains file paths, hashes, byte lengths and executable flags. CLI/REST file content uses base64; MCP also offers the text format above. History returns `next_commit_sha`; pass it as `--before SHA` for the next page. `source diff` reports added, modified and deleted paths and their before/after hashes and executable flags.
+
+To restore an earlier file tree, read the current generation and commit, then use:
+
+```sh
+ohmyhost source restore --project "$PROJECT_ID" \
+  --expected-source-generation "$SOURCE_GENERATION" --expected-commit "$CURRENT_SHA" \
+  --restore-commit "$OLDER_SHA" --message "Restore the earlier homepage" \
+  --idempotency-key "$RESTORE_REQUEST_KEY" --wait --json
+```
+
+Restore creates a new version and preserves history. It does not deploy that version or revert database migrations. A deployment rollback selects an earlier deployed artifact through its own reviewed plan; it does not change the source head or undo database data. See [environments and promotion](/environments).
+
+## Initialize or switch source
+
+If an unbound project needs a template rather than local files:
+
+```sh
+ohmyhost source initialize --project "$PROJECT_ID" --template vite-react \
+  --expected-source-generation 0 --idempotency-key "$INITIALIZE_REQUEST_KEY" --wait --json
+```
+
+Use `empty` for an explicitly chosen supported stack. Wait for the accepted operation and read source status before editing. Initializing a template does not copy template files into a local checkout or confirm a local base. Before its first local commit, read and reconcile the saved template with the local files, then supply that commit explicitly with `--expected-commit`.
+
+Switch a GitHub-bound project to managed source only when requested. Read its full source binding for the current connection and generation, review the complete replacement tree, then run:
+
+```sh
+ohmyhost source publish --project "$PROJECT_ID" --mode switch --directory . \
+  --expected-source-generation "$SOURCE_GENERATION" \
+  --expected-source-connection "$GITHUB_SOURCE_CONNECTION_ID" \
+  --message "Keep app versions with ohmyho.st" \
+  --idempotency-key "$SWITCH_REQUEST_KEY" --wait --json
+```
+
+In a connected chat, use the [complete-tree upload](#save-a-complete-tree-in-chat) with `mode: "switch"`. Stage the actual intended files, then call `source_switch` with their receipts, the original `upload_operation_id`, GitHub connection/generation and a saved key. Use the same project; `source_upload_commit` cannot finalize a switch.
+
+The old binding remains active until the switch succeeds. This keeps the same project ID, environment URLs, secrets, domains and database/data mode, and disables this project's GitHub auto-deploy. It replaces the source with the selected current files; it does not import GitHub history, delete the GitHub repository, edit its remotes or publish the app. Observe the original operation and committed upload, then reread `source_get` before planning the exact resulting commit.
+
+## File and request bounds
+
+Managed source accepts at most **2,000 files**, **2 MiB decoded per file or change batch**, and **8 MiB decoded for the complete tree**. These are server limits; a connected chat can have a smaller transfer capacity. Use a local publisher when that client cannot transfer the intended files.
+
+Use relative, archive-compatible ASCII paths, at most 240 characters. Paths cannot contain traversal, empty segments, backslashes, control characters or reserved credential directories. Private `.env` contents, keys, credentials, local link records, caches and dependency/build output are not application source. Preserve safe `.env.example` placeholders without real values. The local publisher filters the excluded files, honors ignore rules and refuses symbolic links; review its selected file inventory before saving.
+
+Keep runtime values in [private secret input](/secrets). Source generation and parent-commit guards, saved idempotency keys and observed upload receipts remain required within these bounds.

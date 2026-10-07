@@ -7,6 +7,6 @@ The API, CLI and MCP return `workers_runtime_incompatible` with HTTP 409. Repeat
 
 ## What to do
 
-A Next.js file under app/, pages/, middleware or proxy imports a native addon (.node) or a Node.js module that does not run on Workers: child_process, cluster, dgram, domain, http2, inspector, readline, repl, sqlite, trace_events, tty, v8, vm, wasi, worker_threads or _stream_wrap, with or without node:. Remove or replace that import, commit and push, then plan the new commit.
+A Next.js file under app/, pages/, middleware or proxy imports a native addon (.node) or a Node.js module that does not run on Workers: child_process, cluster, dgram, domain, http2, inspector, readline, repl, sqlite, trace_events, tty, v8, vm, wasi, worker_threads or _stream_wrap, with or without node:. Remove or replace that import, save or push the corrected version, then plan its commit.
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

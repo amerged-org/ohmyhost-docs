@@ -1,0 +1,12 @@
+---
+title: "Source snapshot too large"
+description: "What the `source_snapshot_too_large` error means and what to do next."
+---
+
+The API, CLI and MCP return `source_snapshot_too_large` with HTTP 413. Repeating the same request unchanged does not help.
+
+## What to do
+
+Use safe repository-relative paths and a bounded source snapshot. Keep generated outputs and large media outside the source tree.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

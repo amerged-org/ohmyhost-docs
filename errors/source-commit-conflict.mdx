@@ -1,0 +1,12 @@
+---
+title: "Source commit conflict"
+description: "What the `source_commit_conflict` error means and what to do next."
+---
+
+The API, CLI and MCP return `source_commit_conflict` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Read the current managed version and its changes, reconcile them with your working files, then publish against that exact commit.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.
