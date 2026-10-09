@@ -5,6 +5,8 @@ description: "Keep application users and sessions separate from your hosting acc
 
 Your ohmyho.st login authorizes hosting operations. Your application chooses its own users, sessions and auth provider. A deliberately public app requires no application login.
 
+To enforce a verified user's row permissions in PostgreSQL, use [backend row-level security](/row-level-security). Validate the server session before calling `database.withRls`; pass only selected authorization claims from trusted membership or administrator data. Application auth and RLS remain explicit choices, and authentication tables are not automatically protected.
+
 ## Choose the integration your app already uses
 
 Better Auth has retained integration proof; customer-owned WorkOS Next.js has hosted proof. Other framework/provider combinations need their own verification. Any other OAuth or OIDC provider is hosted the same way as an ordinary application dependency, without a completed support claim. Support is checked against the actual framework, runtime, secrets and callback behavior. Read the returned compatibility result; one verified framework combination does not establish every combination.

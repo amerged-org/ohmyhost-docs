@@ -31,6 +31,12 @@ const results = await database.transaction([
 ]);
 ```
 
+For database-enforced per-user rows, follow [backend row-level security](row-level-security.md).
+Its `withRls(identity, callback)` opens a service-owned transaction after the application verifies
+its user session. This is a coordinated new capability; check both the deployed service and SDK,
+and never fall back to an ordinary query if RLS is unavailable. Existing `withConnection` lets the
+caller control transactions and is not a replacement for the RLS scope.
+
 For JSON/JSONB parameters, pass ordinary JavaScript objects, including nested objects and arrays:
 
 ```ts

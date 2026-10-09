@@ -16,6 +16,8 @@ Application requests use `createPrivateDatabaseClient(env.OHMYHOST_DATABASE)` fr
 
 Inside a `withConnection` callback that performs an atomic transaction, pass its current connection and SQL executor to every participating repository and identity lookup. Do not open another database connection for those reads. Complete the short transaction and close the connection before a file transfer, email or AI call, then open a new short transaction to store the result.
 
+For application-user or organization row permissions, use [`withRls` and PostgreSQL policies](/row-level-security). RLS is explicit per table and requires the coordinated 0.1.30 or later runtime and deployed service. The backend verifies the session first; the service then owns the transaction and supplies its local identity. Existing unprotected tables keep their current behavior.
+
 JSON/JSONB object parameters work with the current runtime. Pass ordinary JavaScript objects, including nested objects and arrays, as parameters:
 
 ```ts
@@ -178,7 +180,7 @@ The write endpoint is `POST /v1/projects/{project_id}/database/write`; supply th
 
 ## Permissions and shared data
 
-Application row-level security (RLS) applies to reads and writes. Hosting Owner permission does not bypass those policies or sign you in as an application user. A filtered or empty query does not prove the database is empty. Keep the policies; use the separate authorized [SQL export](/backups) when a complete archive is required.
+Application [row-level security (RLS)](/row-level-security) applies to reads and writes on explicitly protected tables. Hosting Owner permission does not bypass those policies or sign you in as an application user. A filtered or empty query does not prove the database is empty. Keep the policies; use the separate authorized [SQL export](/backups) when a complete archive is required.
 
 Shared Dev/Prod data resolves to one physical database, so a selected-environment write can affect both apps. In isolated mode each environment resolves its own data. Schema changes remain versioned [GitHub migrations](/migrations); roles/grants are unsupported. [Assignment changes/reset](/environments#change-data-assignments) keep files with their data identity and never copy records.
 

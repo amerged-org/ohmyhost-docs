@@ -1,0 +1,158 @@
+---
+title: "Row-level security"
+description: "Enforce application-user and organization permissions with PostgreSQL policies and a verified backend identity."
+---
+
+Row-level security (RLS) lets PostgreSQL decide which rows an application user may read, create, change or delete. Your backend verifies the user's session and supplies that identity through `database.withRls()`. PostgreSQL then applies your policies inside the transaction.
+
+RLS is an explicit choice for each application table. Existing databases and applications keep their current behavior until you add policy and enforcement migrations. Authentication tables are not automatically changed.
+
+Use the coordinated **0.1.30 or later** customer-runtime release with the matching deployed database service, CLI and Skills. Install the exact runtime alias returned by `ohmyhost init --dry-run --json` and commit the updated lockfile. An older service may refuse an RLS call; report that failure instead of falling back to an ordinary query.
+
+## Protect a table
+
+Add a new immutable [migration](/migrations). This example gives each signed-in user access to their own notes:
+
+```sql
+CREATE TABLE public.notes (
+  id text PRIMARY KEY,
+  owner_id text NOT NULL,
+  body text NOT NULL
+);
+
+CREATE POLICY own_notes ON public.notes
+  FOR ALL TO PUBLIC
+  USING (owner_id = ohmyhost.user_id())
+  WITH CHECK (owner_id = ohmyhost.user_id());
+
+ALTER TABLE public.notes ENABLE ROW LEVEL SECURITY;
+ALTER TABLE public.notes FORCE ROW LEVEL SECURITY;
+```
+
+`USING` controls which existing rows the user can see or change. `WITH CHECK` controls the rows they can insert and the new values they can save. In this example, a user cannot read another user's note or change a note's owner to someone else. Anonymous access has no user ID and matches no rows.
+
+Every table touched by an RLS migration must be both enabled and forced when the complete migration run finishes. An enforced table without an applicable policy denies row access. Existing SQL privileges still determine which commands the connection can execute; policies restrict rows within those privileges.
+
+A filtered read, update or delete may affect zero rows. A rejected insert or new value produces PostgreSQL `SQLSTATE` `42501`. Check the affected-row count and verify that a denied write left its target unchanged.
+
+## Pass a verified application identity
+
+Authenticate before opening the RLS transaction. Use your application's server session API, such as Better Auth or your own WorkOS integration, and reject missing, tampered, expired or revoked sessions. A decoded token, browser-supplied user ID or ohmyho.st hosting login does not establish an application identity. Preserve the [supported framework and auth integration](/application-auth) for your app.
+
+The following route code assumes that `session` has already been verified on the server and `env` contains the actual Worker binding:
+
+```ts
+import { createPrivateDatabaseClient } from "@ohmyhost/customer-runtime/database";
+
+const database = createPrivateDatabaseClient(env.OHMYHOST_DATABASE);
+
+const notes = await database.withRls(
+  { subject: session.user.id },
+  async (tx) => {
+    const result = await tx.query({
+      text: "SELECT id, body FROM public.notes ORDER BY id",
+      values: [],
+    });
+    return result.rows;
+  },
+);
+```
+
+`subject` is nonempty text, so UUIDs and provider-specific user IDs can both be used. The platform installs two SQL helpers:
+
+| Helper               | Result                                                     |
+| -------------------- | ---------------------------------------------------------- |
+| `ohmyhost.user_id()` | The verified subject as text, or `NULL` without a user.    |
+| `ohmyhost.claims()`  | The transaction's JSON claims, including `sub` and `role`. |
+
+Use `database.withRls(null, callback)` to select anonymous access explicitly. The platform derives `role` as `authenticated` for an identity or `anon` for `null`. Callers cannot override `sub` or `role`. An ordinary query outside `withRls` receives no implicit application user.
+
+The callback receives only `query()`. The service owns the transaction, sets the context locally and clears it when the transaction ends. Do not issue `BEGIN`, `COMMIT`, `ROLLBACK`, savepoints or session-control commands. A query or result error prevents commit even if your callback catches it. Already-started queries finish before successful completion; saved transaction handles cannot be used afterwards.
+
+Keep the scope short: at most 100 statements, 30 seconds total and five seconds idle, with the existing [query and result limits](/database#application-connection-and-result-limits). Finish database work before waiting for email, uploads or an external provider. If commit confirmation is lost, `database_transaction_outcome_unknown` is nonretryable: inspect the business outcome before deliberately retrying.
+
+## Use trusted authorization claims
+
+Derive organization membership and administrator permissions from server-controlled authority. Do not copy freely editable profile metadata into authorization claims.
+
+For example, after your backend checks an active membership, it can pass the checked organization ID:
+
+```ts
+await database.withRls(
+  {
+    subject: session.user.id,
+    claims: { organization_id: verifiedMembership.organizationId },
+  },
+  async (tx) => {
+    // Run this organization's application queries here.
+  },
+);
+```
+
+A table with an `organization_id` column can use this condition in both `USING` and `WITH CHECK`:
+
+```sql
+organization_id = ohmyhost.claims()->>'organization_id'
+```
+
+Claims must be plain JSON. The complete context is limited to 16 KiB, depth eight and 1,000 nodes; keys have a 128-byte UTF-8 limit. The subject has a 512-byte UTF-8 limit. Reserved fields and invalid values are rejected before use.
+
+Background jobs and administrative routes receive no automatic `service_role` bypass. Give them an explicit trusted identity and policies for the work they need. PostgreSQL's session context is an assertion by your backend; it is not cryptographic token verification and cannot protect against a compromised backend or arbitrary SQL injection. Continue to parameterize SQL and verify sessions before choosing an identity.
+
+## Use Kysely in the same transaction
+
+The optional adapter uses the already-open RLS transaction:
+
+```ts
+import { Kysely } from "kysely";
+import { createRlsTransactionDialect } from "@ohmyhost/customer-runtime/database-kysely";
+
+type AppDatabase = {
+  notes: { id: string; owner_id: string; body: string };
+};
+
+const notes = await database.withRls(
+  { subject: session.user.id },
+  async (tx) => {
+    const db = new Kysely<AppDatabase>({
+      dialect: createRlsTransactionDialect(tx),
+    });
+    try {
+      return await db.selectFrom("notes").select(["id", "body"]).execute();
+    } finally {
+      await db.destroy();
+    }
+  },
+);
+```
+
+Do not open a nested Kysely transaction or use streaming in this scope. `destroy()` releases the adapter's wrappers; `withRls` still owns commit or rollback. The existing private dialect remains available for unprotected work and authentication/session lookup.
+
+## Change policies through migrations
+
+Native RLS migrations support `CREATE POLICY`, `ALTER POLICY` conditions, and atomic `DROP POLICY`/recreation, with permissive or restrictive rules for `ALL`, `SELECT`, `INSERT`, `UPDATE` and `DELETE`. Name the target table explicitly in `public` or `private`. It must be an ordinary table owned by the application migrator. Use `TO PUBLIC` or omit the role.
+
+Multiple permissive policies combine with OR. Restrictive policies add AND requirements and need an applicable permissive policy. Review these combinations when adding a rule; a new permissive policy can widen access.
+
+Append a new migration for each change. Never edit an applied file. All pending files apply atomically. `DISABLE ROW LEVEL SECURITY`, `NO FORCE`, policy renames, `CASCADE`, role/grant changes and ordinary destructive schema changes are unsupported. The `ohmyhost` schema is reserved; use only its two provided helpers in policies and do not create or replace platform objects.
+
+## Adopt RLS on an existing app
+
+1. Deploy and verify application code that authenticates users and sends all protected-table operations through `withRls`. Keep the tables unenforced during this first step.
+2. Check every active consumer of the physical database, including background jobs. For shared Dev/Prod data, both active applications must be ready immediately before enforcement.
+3. Add policies and `ENABLE`/`FORCE` in a new migration, then verify existing records and allowed/denied CRUD for two users and anonymous access.
+4. Keep a tested, context-ready application version as the rollback target. After enforcement, an older context-free build is not a supported rollback; policies are not automatically disabled to restore access.
+
+This order matters because migrations run before the new application version takes over. A successful new-database setup alone does not prove a populated database upgrade preserves the expected access behavior.
+
+CLI/MCP queries, writes and temporary SQL logins do not sign in as an application user or bypass its policies. An empty result does not prove that no records exist. For a complete backup, use the authorized [SQL export](/backups) and verify that the restored archive retains all rows, policies and helpers.
+
+## Bring Supabase policies deliberately
+
+Use the migration Skill's [reviewed RLS-preserving conversion mode](https://ohmyho.st/skills/ohmyhost-migrate-supabase-postgres/references/provider-contracts.md#preserving-backend-rls). Select every protected table and review the identity and claim mappings. UUID conversion requires confirmation that the backend preserves those user IDs. Claims must map to values supplied by verified server authority.
+
+The converter preserves supported policy commands, permissive/restrictive behavior and role applicability. Unsupported functions, unknown roles, service-role assumptions or missing claim mappings stop conversion with an error. Do not remove a policy to make conversion pass, and do not rewrite already-applied migrations. Compare allowed and denied outcomes for the original and converted policies before adopting the baseline.
+
+This feature provides backend PostgreSQL row authorization. It does not provide Supabase's public Data API, direct browser SQL, Storage RLS or Realtime authorization. Those integrations require separate product support and verification.
+
+[Database access](/database) · [Application auth](/application-auth) · [Schema migrations](/migrations).

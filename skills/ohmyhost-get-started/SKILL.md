@@ -374,7 +374,8 @@ ohmyhost whoami --json
 
 ## Step 5 — keep access for later
 
-The current CLI login is enough to continue; MCP uses it.
+The current CLI login is enough to continue; MCP uses it. Ordinary account connection,
+development and deployment do not authorize creating a persistent API token.
 
 `ohmyhost login` saves each login in the operating system's credential store, and MCP reads it
 there. `credential_store_unavailable` means the CLI cannot use that store. On a desktop, ask the
@@ -382,17 +383,22 @@ customer to unlock it, then retry. In a container, CI runner or headless Linux, 
 sign-in that cannot be saved: ask the customer to create a user token at
 <https://app.ohmyho.st/tokens> and load it as `OHMYHOST_TOKEN` from a private env file.
 
-For automation, use `token_create` with `out_file`, or
+Only when the customer explicitly requests an automation credential and authorizes its
+account, workspace and private output file, use `token_create` with `out_file`, or
 `ohmyhost token create --organization ULID --name NAME --idempotency-key KEY --out .env.local --json`.
 The client appends `OHMYHOST_TOKEN` once to that private env file, sets mode `600` and returns
 only metadata; the value is never shown in the client result and cannot be read again. The file
 name must start or end with `.env`, be ignored by Git or lie outside the repository
 (`token_file_not_ignored`), and not already hold `OHMYHOST_TOKEN` (`token_file_has_token`).
 Configure the process to load it. Preserve existing credentials and never put the value in chat,
-source or a command argument. If `token_file_changed` names an issued key that could not be saved,
-revoke that key with `token_revoke` or the returned CLI command before creating a replacement
-with a new idempotency key; `token_value_unavailable` means use the original file or revoke and
-replace the key, since replay cannot reveal its value.
+source or a command argument. New user tokens remain valid until revoked; a general hosting
+request is not consent for that lasting access. On replay, reuse the original private file.
+If `token_file_changed` names an issued key that could not be saved, or
+`token_value_unavailable` means the original file is unavailable, do not revoke or replace an
+existing key automatically. Revoke or replace only the exact key covered by scoped customer
+authorization; existing explicit cleanup authorization can cover that action without another
+question. Otherwise explain the failed save and obtain that authorization first. Never change
+an already working credential merely to make a replay return a new value.
 
 `OHMYHOST_TOKEN` overrides the saved logins in any process where it is set. A token alone runs every
 command in these Skills except these, which need the interactive login: `login`, `logout` (including

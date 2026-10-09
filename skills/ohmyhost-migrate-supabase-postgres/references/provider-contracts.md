@@ -27,13 +27,55 @@ First-party references: [Supabase migration scope](https://supabase.com/docs/gui
 
 ## Baseline helper
 
-Only after the customer chooses Better Auth and its server authorization/boundaries are implemented and reviewed, run:
+Choose the authorization mode explicitly. With no authorization selection, provider dependencies and RLS state are rejected. The helper prepares a new, reviewed schema baseline; it never rewrites already-applied immutable migrations, moves customer data or proves that the application is ready to enforce policies.
+
+All output modes create new files only. An existing output file or symlink stops generation, including an identical file from an earlier run. Choose a new `--output` filename or a fresh `--migration-prefix`; do not replace an applied migration. Directory output checks every generated target for collisions before writing and uses exclusive file creation to refuse concurrent replacements.
+
+### Preserving backend RLS
+
+Use `--authorization-mode preserve-rls --rls-options <reviewed-json-file>` after reviewing every original RLS table and the application's session verification. The JSON file accepts only these fields:
+
+```json
+{
+  "backendRlsTables": ["public.profiles"],
+  "userIdMapping": "uuid",
+  "claimMappings": [
+    {
+      "sourcePath": ["app_metadata", "organization_id"],
+      "targetPath": ["organization_id"],
+      "trust": "server-verified"
+    },
+    {
+      "sourcePath": ["role"],
+      "targetPath": ["role"],
+      "trust": "server-verified"
+    }
+  ]
+}
+```
+
+```text
+scripts/create-portable-baseline.mjs --input <dump> --output-directory <migrations> --migration-prefix <YYYYMMDDHHMMSS_slug> --authorization-mode preserve-rls --rls-options <reviewed-json-file>
+```
+
+- `backendRlsTables` is an explicit selection of newly created ordinary tables in `public` or app-owned `private`. It must cover every original policy and RLS-enabled/forced table. Each selected table must have an input ENABLE statement; the output retains ENABLE and adds FORCE where absent. Review `normalizedForceRlsTables` before applying the baseline, including every application/job that uses a shared Dev/Prod database.
+- Set `userIdMapping: "uuid"` only after confirming that the verified backend subject preserves the original Supabase UUID identity. Only then does `auth.uid()` become `ohmyhost.user_id()::uuid`. Omit it when unused; opaque or remapped subjects require an explicit application/data migration outside this helper.
+- `claimMappings` explicitly maps supported literal `auth.jwt()->'field'->>'nested_field'` paths to the JSON fields populated from verified server-side authority in `withRls`. Review the origin of every value; the `trust` field records that review and does not authenticate a value. User-editable `user_metadata`/`raw_user_meta_data`, whole-JWT copies, dynamic paths and missing mappings are rejected. Target field names must satisfy the runtime's 128-byte key limit and exclude `__proto__`, `prototype` and `constructor` at every depth. A role mapping can only map `role` to `role`; the runtime derives that role from the explicit anonymous or authenticated identity. Supported role predicates compare text to literal `anon`/`authenticated` with equality/inequality or IN/NOT IN; service-role branches and dynamic role expressions require manual conversion.
+- Source `TO anon` and `TO authenticated` become `TO PUBLIC` with role applicability inside each condition. Permissive conditions use `role_match AND predicate`; restrictive conditions use `NOT role_match OR predicate`. Implicit PostgreSQL USING/WITH CHECK defaults are expanded before adding these guards. Policy names, commands and permissive/restrictive modes are retained; missing role context does not match either source role. Existing `TO PUBLIC` remains universal.
+- This baseline path supports CREATE POLICY with ALL/SELECT/INSERT/UPDATE/DELETE and USING/WITH CHECK, boolean/comparison expressions, selected PostgreSQL conditional syntax and scalar `SELECT auth.uid()` forms. Custom function calls, physical-role checks (including SQL `USER`), service-role bypass, other roles, policy ALTER/DROP lifecycle statements, partitioned/inherited tables, Unicode-escaped tokens, adjacent/newline-concatenated strings and unsupported JWT extraction forms stop with a concrete error. `standard_conforming_strings` must remain explicitly enabled; disabling forms and unknown settings are rejected. Lexical parsing preserves literal/comment/quoted-identifier boundaries; PostgreSQL admission/execution still validates SQL expression semantics. Do not work around an unsupported form by deleting its policy.
+- The report exposes `inputPolicyCount`, `emittedPolicyCount`, `translatedPolicyCount`, `omittedPolicyCount`, identity-reference conversions and normalized FORCE tables. In `preserve-rls`, every policy must be emitted and omissions are zero. Verify original and converted anonymous/user/tenant read and write outcomes, including denied writes, on disposable PostgreSQL before deployment.
+
+Retaining policies does not select Better Auth or another auth provider. If an independently selected Better Auth migration has preserved UUID user identities and the dump references `auth.users`, add the existing explicit `--auth-mode better-auth-uuid`; only those relation references become `auth."user"`. Unsupported Auth/Storage dependencies still stop. Authenticate before the short `withRls` transaction; these transaction claims are trusted backend assertions, not protection from SQL injection or a compromised backend. Adopt context-ready application code before applying enforcement, and roll back only to a context-ready version.
+
+### Existing server authorization mode
+
+Only after the customer chooses Better Auth and its replacement server authorization/boundaries are implemented and reviewed, run:
 
 ```text
 scripts/create-portable-baseline.mjs --input <dump> --output-directory <migrations> --migration-prefix <YYYYMMDDHHMMSS_slug> --auth-mode better-auth-uuid --authorization-mode server
 ```
 
-The helper converts only `auth.users` and `auth.uid()`, replaces the service-request helper, reports omitted RLS policies, retains admitted app-private functions, and splits output under platform limits. Nonzero conversion/omission counts require review; they are never automatic approval.
+This explicitly selected mode converts only executable `auth.users` and `auth.uid()` references, replaces the service-request helper, reports omitted RLS policies, retains admitted app-private functions, and splits output under platform limits. It keeps the existing `public.current_actor_id()` contract. Nonzero conversion/omission counts require review; they are never automatic approval. It is not a fallback when RLS preservation cannot translate a policy.
 
 ## Completion
 
