@@ -59,9 +59,24 @@ Users normally reach this Skill from a prompt such as "connect this agent to ohm
 this project". In that case finish the relevant access steps with as few messages as possible, then continue
 with the deployment Skill without asking again for anything already decided.
 
+## Choose the existing project context first
+
+Before continuing an existing app, inspect the execution environment, any reachable checkout and
+its saved project binding, then verify the intended account and workspace with the matching
+credential context.
+Reuse a working local CLI/MCP login or private token source that matches that project unless the
+user explicitly chooses a remote connection; the availability of `connection_request` alone
+does not select the remote path.
+If a remote connection cannot see the intended project, verify that connection's account and
+workspace before requesting additional access, and stop the access-link loop when they do not match.
+If the previous local workspace or credential store is unreachable in this session, explain that
+concrete environment gap without claiming credentials were deleted, changing the saved source
+or using an unrelated Review/demo account as a substitute.
+
 ## Native chat with a remote connection
 
-Use this path when the enabled authenticated remote server exposes `connection_request`.
+Use this path when the task's established access context calls for the authenticated remote
+server and it exposes `connection_request`.
 Discover its tools and call `identity_get`; do not install a CLI,
 start a device-code login, or ask for an API key in this chat. The client completes the managed
 OAuth sign-in itself. A configured plugin or completed browser page is not proof of authorization.
