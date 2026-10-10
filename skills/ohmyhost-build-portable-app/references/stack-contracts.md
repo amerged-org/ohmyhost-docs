@@ -122,7 +122,8 @@ verify the provider's chosen callback mode instead of assuming a redirect proves
 - Vite static applications need no server companion. With or without a companion, an unknown file path answers `index.html` with HTTP 200, so client-side routing reloads work; render not-found in the client router. Keep Vite `base` unset or `/`. Add the returned companion source only when the application uses database, Auth, mail, files, request functions, or schedules.
 - The functions runtime is a plain Worker module without a framework: `runtime.mode: functions`, `build.install` only, no `build.command` or `build.output`, HTTP through `fetch` and schedules through `scheduled`. Do not add customer Wrangler configuration.
 - TanStack Start uses its native server routes/functions. Import `tanstackStart` from `@tanstack/react-start/plugin/vite`. Static mode needs `tanstackStart({ prerender: { enabled: true } })` and no Cloudflare plugin; edge mode calls `cloudflare({ viteEnvironment: { name: "ssr" } })` before `tanstackStart()`. Unknown paths return 404. Keep an active TanStack Start Vite plugin; do not add a customer Wrangler file or platform base path.
-- Next.js Workers builds use the platform OpenNext 1.20.9 overlay and Webpack, including `proxy.ts` Node middleware. The service supplies `--webpack` for Next 16 and later; Next 15 already uses Webpack and does not accept that option; customers do not need to rename middleware or add platform tools/configuration. A committed `open-next.config.ts` is ignored because ohmyho.st writes its own OpenNext configuration, but two `open-next.config` variants (`.js`, `.mjs`, `.ts`) are still refused as `framework_config_ambiguous`; keep at most one. Custom loaders must support Webpack; a Turbopack-only configuration is not evidence of a compatible Workers build. Keep route handlers, RSC/SSR, assets and images framework-native. Use a default-exported next.config, without `output: standalone`/`export`, `cacheComponents: true` or non-root `basePath`/`assetPrefix`, and pin exact React and react-dom versions. New Next.js 16.4 apps enable Cache Components with `cacheComponents: true`, which ohmyho.st refuses (`next_cache_components_unsupported`): remove it or set it to `false`. Unknown paths return 404.
+- Next.js Workers builds use the platform OpenNext 1.20.9 overlay and Webpack, including `proxy.ts` Node middleware. The service supplies `--webpack` for Next 16 and later; Next 15 already uses Webpack and does not accept that option; customers do not need to rename middleware or add platform tools/configuration. A committed `open-next.config.ts` is ignored because ohmyho.st writes its own OpenNext configuration, but two `open-next.config` variants (`.js`, `.mjs`, `.ts`) are still refused as `framework_config_ambiguous`; keep at most one. Custom loaders must support Webpack; a Turbopack-only configuration is not evidence of a compatible Workers build. Keep route handlers, RSC/SSR, assets and images framework-native. Use a default-exported next.config, without `output: standalone`/`export` or non-root `basePath`/`assetPrefix`, and pin exact React and react-dom versions. Cache Components (`cacheComponents: true`, also with `partialPrefetching: true` as `create-next-app` 16.4 writes them) build within the Cache Components rules below. CLI 0.1.32 and older still refuse them in `ohmyhost init` as `next_cache_components_unsupported`; upgrade the CLI and MCP instead of removing them. Unknown paths return 404.
+- The Webpack build ignores Turbopack rules. A next.config that names the loader `@tailwindcss/turbopack` is refused as `next_tailwind_turbopack_only` unless the application root has a PostCSS configuration that Webpack reads: a `postcss` object in package.json, `.postcssrc.json`, `postcss.config.json`, `.postcssrc.js` or `postcss.config.js`/`.mjs`/`.cjs` (not `postcss.config.ts`, and not a file in a parent directory). `create-next-app` 16.4 with Tailwind CSS, its `--yes` default, writes only that Turbopack rule, so the site would deploy without its Tailwind classes. Add `postcss.config.mjs` to the application root with `export default { plugins: { "@tailwindcss/postcss": {} } }` and remove the Turbopack rule. Use the package manager to add `@tailwindcss/postcss` to devDependencies at the same version as `tailwindcss` and to remove `@tailwindcss/turbopack`, so the lockfile records both; then commit, push and plan the new commit. An app created with `--no-tailwind` needs no change.
 - Next.js server files must be included in its output-file traces. The platform carries traced JSON, text and other non-executable inputs in the Worker filesystem at their application-relative paths, within the existing module and artifact budgets. For dynamically selected files that Next cannot infer, use the ordinary Next.js `outputFileTracingIncludes` configuration. These private runtime files do not become public HTTP assets; files under `public` keep their normal public behavior. Absolute paths, escaping symlinks, missing inputs and native addons are refused.
 - Workers cannot generate JavaScript from strings at request time (`eval` or `new Function`). In particular, rendering MDX through `next-mdx-remote/rsc` at request time fails even when a Node build succeeds. Compile trusted repository MDX to ordinary ES modules with `@mdx-js/mdx` and `outputFormat: "program"` during the Next build, then statically import the generated components. Preserve the canonical content, existing component mappings and remark plugins. A deterministic generator awaited by the default-exported Next config keeps `scripts.build` exactly `next build`; provide declarations for generated imports so a fresh checkout can typecheck. Verify actual article/detail routes and client navigation on the Worker, not just its landing page.
 
@@ -162,13 +163,47 @@ ohmyho.st. Choosing a larger capacity does not add a storage fee. Build compute 
 request/CPU charges remain unchanged; a cached page can still execute Worker code. See
 [Cloudflare Static Assets billing](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/).
 
-This cache is refreshed by a new deployment. Time-based or on-demand revalidation and Cache
-Components are unsupported. Preserve existing static pages; do not force every page to render
-dynamically to work around a platform packaging error. If the build log begins a diagnostic
+This cache is refreshed by a new deployment. Time-based or on-demand revalidation is unsupported;
+Cache Components follow the rules below. Preserve existing static pages; do not force every page to
+render dynamically to work around a platform packaging error. If the build log begins a diagnostic
 with `ohmyho.st platform:`, report its operation ID through feedback. An `ohmyho.st packaging:`
-line identifies an output limit the application can address. A prerendered page whose URL path is
-longer than about 95 bytes may not fit the deployment archive; that line then names the page:
-shorten its URL or render it on request.
+line identifies an output limit or a Next.js cache rule the application can address. A prerendered
+page whose URL path is longer than about 95 bytes may not fit the deployment archive; that line then
+names the page: shorten its URL or render it on request.
+
+### Next.js Cache Components
+
+Next.js 16 Cache Components build and run here, also with `partialPrefetching: true`. A page's
+prerendered static shell comes from the private SSG cache, and its Suspense holes render for each
+request. `"use cache"` directives are admitted, and so are these `next/cache` functions imported
+or re-exported by name: `cacheLife`, `cacheTag`, `unstable_cacheLife`, `unstable_cacheTag`, `io`,
+`navigation`, `prefetch`, `refresh` and `unstable_noStore`. These rules apply:
+
+- The cache is read-only: request-time `"use cache"` values are never stored, so a later request
+  computes them again. Concurrent identical calls in one isolate may share one computation, so a
+  cached function must depend on request data only through its arguments.
+- A `"use cache"` value in a static shell stays frozen until the next deployment. Every built-in
+  `cacheLife` profile, including the default, revalidates, so the build refuses such a value unless
+  it uses `cacheLife({ revalidate: Infinity, expire: Infinity })`. Otherwise call the cached
+  function inside a Suspense boundary after reading request data (for example `await connection()`).
+- Every other `next/cache` use is refused, including `revalidateTag`, `revalidatePath`,
+  `updateTag`, `unstable_expireTag`, `unstable_expirePath`, `unstable_cache`, default and
+  namespace imports and `export *`. So are `res.revalidate`, fetch `next.revalidate` values other
+  than `0` or `false`, and time-based revalidation of prerendered pages and route handlers.
+- Each dynamic page needs a static shell: read `params` inside a Suspense boundary, without
+  `ensureStatic` and without a root layout inside a dynamic segment. With
+  `partialPrefetching: true`, dynamic pages must not use `generateStaticParams`. Otherwise Next.js
+  prerenders the page while a visitor waits, and Workers stop that request and later requests for
+  the same page.
+- The runtime caps `experimental.maxPostponedStateSize` at 25 MB and keeps a smaller value.
+
+A refused build ends with one fixed `ohmyho.st packaging:` line that names the fix; apply it, then
+commit, push and deploy the new commit. These lines begin:
+
+- `Next.js on-demand or time-based revalidation is not supported by this read-only hosting cache.`
+- `Next.js time-based revalidation of prerendered pages and route handlers is not supported by this read-only hosting cache.` (without Cache Components)
+- `Next.js time-based revalidation of prerendered pages and route handlers is not supported by this read-only hosting cache: a revalidate setting or a "use cache" value in a Cache Components static shell would stay frozen until the next deployment.`
+- `Next.js Cache Components pages that are prerendered while a visitor waits are not supported by this hosting:`
 
 ## Completion
 

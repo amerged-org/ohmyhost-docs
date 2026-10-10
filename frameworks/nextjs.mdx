@@ -9,13 +9,26 @@ Run `ohmyhost init --dry-run --json` in the Next.js project. Keep an exact packa
 
 Next.js needs at least its security floor, with no upper bound: `15.5.27` on 15.x and `16.3.8` from 16 on. Prereleases and older majors are refused. The version that the committed `package-lock.json` or `pnpm-lock.yaml` resolves decides; otherwise the exact version or `^`/`~` range in `package.json` does, and a range spanning the floor stays `pending` until the build checks the installed version. A newer release passes this check but must still build: OpenNext refuses a Next.js major it does not support yet. Next.js 15 builds stop about 21 October 2026, so use Next.js 16 for new work. Pin exact `react` and `react-dom` versions and commit the matching package-manager lockfile.
 
-Keep `scripts.build` as `next build`. The service supplies OpenNext `1.20.9` and adds `--webpack` for Next.js 16 and later; Next.js 15 uses its normal build without that flag. Next.js 16 also accepts `next build --webpack`. A committed `open-next.config.ts` is ignored because the service writes its own OpenNext configuration. New Next.js 16.4 apps set `cacheComponents: true`; remove it or set it to `false`. Use one default-exported `next.config.js`, `.mjs` or `.ts`; do not set `output: standalone`, `output: export`, `cacheComponents: true` or a non-root `basePath` or `assetPrefix`.
+Keep `scripts.build` as `next build`. The service supplies OpenNext `1.20.9` and adds `--webpack` for Next.js 16 and later; Next.js 15 uses its normal build without that flag. Next.js 16 also accepts `next build --webpack`. A committed `open-next.config.ts` is ignored because the service writes its own OpenNext configuration. Use one default-exported `next.config.js`, `.mjs` or `.ts`; do not set `output: standalone`, `output: export` or a non-root `basePath` or `assetPrefix`.
+
+The Webpack build ignores Turbopack rules. `create-next-app` 16.4 with Tailwind CSS, its `--yes` default, loads Tailwind only through the Turbopack rule `@tailwindcss/turbopack`, so planning refuses it as `next_tailwind_turbopack_only` until the application root has a PostCSS configuration that Webpack reads. Add `postcss.config.mjs` with `export default { plugins: { "@tailwindcss/postcss": {} } }`, remove the Turbopack rule, and use the package manager to add `@tailwindcss/postcss` at the same version as `tailwindcss` and remove `@tailwindcss/turbopack`, so the lockfile records both. An app created with `--no-tailwind` needs no change.
 
 The service-owned Next.js bundle uses `keep_names: false` to prevent injected name helpers from breaking browser scripts serialized by libraries. This setting is supplied by the platform; no customer Wrangler override is needed.
 
 ## Build-time static pages and cache limits
 
-Pages and route responses prerendered during the build use an immutable cache carried with that deployment. Ordinary request-time rendering and route handlers remain available. A new deployment refreshes the cache. Time-based ISR, on-demand revalidation and Cache Components are unsupported; keep existing static pages when addressing a packaging error.
+Pages and route responses prerendered during the build use an immutable cache carried with that deployment. Ordinary request-time rendering and route handlers remain available. A new deployment refreshes the cache. Time-based ISR and on-demand revalidation are unsupported; keep existing static pages when addressing a packaging error.
+
+## Cache Components
+
+Next.js 16 Cache Components (`cacheComponents: true`, also with `partialPrefetching: true`, the `create-next-app` 16.4 default) build and run. A page's prerendered static shell comes from the deployment's cache and its Suspense holes render for each request. `"use cache"` and the `next/cache` functions `cacheLife`, `cacheTag`, `io`, `navigation`, `prefetch`, `refresh` and `unstable_noStore` (imported or re-exported by name) are admitted.
+
+- The cache is read-only: request-time `"use cache"` values are never stored, so a later request computes them again. A cached function must depend on request data only through its arguments.
+- A `"use cache"` value in a static shell would stay frozen until the next deployment, and every built-in `cacheLife` profile revalidates. The build refuses it unless it uses `cacheLife({ revalidate: Infinity, expire: Infinity })`; otherwise call the cached function inside a Suspense boundary after reading request data, for example `await connection()`.
+- `revalidateTag`, `revalidatePath`, `updateTag`, `unstable_expireTag`, `unstable_expirePath`, `unstable_cache` and other `next/cache` uses stay refused.
+- Each dynamic page needs a static shell: read `params` inside a Suspense boundary, without `ensureStatic` and without a root layout inside a dynamic segment. With `partialPrefetching: true`, dynamic pages must not use `generateStaticParams`.
+
+A refused build ends with one `ohmyho.st packaging:` line that names the fix; apply it, then deploy the new commit.
 
 The private cache defaults to **32 MiB**. With CLI/MCP **0.1.28 or later**, add `build.ssg_cache_max_mib` to `ohmyhost.yaml` to select an integer from **1 to 64**. Keep your existing build settings, for example:
 
