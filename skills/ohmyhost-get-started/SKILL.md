@@ -155,7 +155,7 @@ A customer can authorize Cloudflare before the website is live. Follow the domai
 
 ## Prepare a Next.js application
 
-For Next.js, run the portable-app inspection before deployment. Its supported versions match the pinned OpenNext adapter; update package.json and its lockfile when inspection reports an unsupported version. Runtime data files need Next's normal file tracing. MDX that compiles JavaScript at request time must instead compile to static ES modules during the build; the portable-app Skill describes that conversion. Verify every content route the app uses before calling a deployment complete.
+For Next.js, run the portable-app inspection before deployment. Supported versions follow security floors (15.5.27 on Next.js 15, 16.3.8 from Next.js 16 on) with no upper bound; when inspection reports an unsupported version, update package.json and its lockfile to the reported `minimum` or a later stable release. Next.js 15 builds stop about 21 October 2026, when the pinned OpenNext starts refusing Next.js 15 as an unsupported major, so use Next.js 16 for new work. Runtime data files need Next's normal file tracing. MDX that compiles JavaScript at request time must instead compile to static ES modules during the build; the portable-app Skill describes that conversion. Verify every content route the app uses before calling a deployment complete.
 
 Next.js pages rendered during the build use a private, immutable cache. Its capacity defaults to
 32 MiB; CLI/MCP 0.1.28 or later accept optional `build.ssg_cache_max_mib` in `ohmyhost.yaml`, an

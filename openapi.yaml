@@ -2501,7 +2501,10 @@ paths:
         Prod, except that a project with shared data and a database only reaches Prod through
         promotion. Managed mail requires a confirmed Paid service period; it is checked again before
         build reservation. Selecting the managed Better Auth bridge does not require managed mail
-        or Paid access. An old sender configuration is not Paid authority.
+        or Paid access. An old sender configuration is not Paid authority. A commit the platform
+        does not admit answers 409 with a nonretryable problem code; for
+        framework_conversion_required, detail is a fixed catalog sentence that names the file, the
+        rule and the required change whenever the refusal is typed.
       parameters:
         - $ref: "#/components/parameters/RequestId"
         - $ref: "#/components/parameters/ProjectId"
@@ -2531,6 +2534,8 @@ paths:
           $ref: "#/components/responses/Problem"
         "404":
           $ref: "#/components/responses/ResourceNotFound"
+        "409":
+          $ref: "#/components/responses/Problem"
         "429":
           $ref: "#/components/responses/Problem"
         "503":
@@ -7059,6 +7064,14 @@ components:
           type: string
           minLength: 1
           maxLength: 500
+        detail:
+          type: string
+          minLength: 1
+          maxLength: 2000
+          description:
+            Present only on auto_deploy_plan_rejected when planning the pushed commit returned a
+            typed refusal. It is the same fixed catalog sentence that the planning 409 problem
+            returns as detail, naming the file, the rule and the required change.
     AuditEvent:
       type: object
       additionalProperties: false

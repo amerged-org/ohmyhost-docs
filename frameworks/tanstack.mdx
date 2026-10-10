@@ -7,7 +7,7 @@ Use the [Vite guide](/frameworks/vite) when the project uses TanStack Router or 
 
 Run `ohmyhost init --dry-run --json`. The result identifies the actual framework/runtime, package manager and required capabilities. Resolve concrete unsupported behavior; do not choose a runtime or authentication system from a package name alone.
 
-TanStack Start supports the admitted 1.168.26–1.168.49 window. Import `tanstackStart` from `@tanstack/react-start/plugin/vite`. Static mode needs `prerender.enabled: true` and no Cloudflare plugin; edge mode calls `cloudflare({ viteEnvironment: { name: "ssr" } })` before `tanstackStart()`. Use `vite build` with at most one admitted `tsc` stage before or after it. Next/TanStack unknown paths return 404.
+TanStack Start needs at least its security floor `1.168.60`, with no upper bound, and Vite at least `5.4.6`; the version that the committed lockfile resolves decides. Import `tanstackStart` from `@tanstack/react-start/plugin/vite`. Static mode needs `prerender.enabled: true` and no Cloudflare plugin; edge mode calls `cloudflare({ viteEnvironment: { name: "ssr" } })` before `tanstackStart()`. Use `vite build` with at most one admitted `tsc` stage before or after it. Next/TanStack unknown paths return 404.
 
 SSR script/style tags receive the request nonce automatically. Attributes, event handlers and later unnonced tags remain blocked. External browser resources/CORS/frames/workers need exact [declarations](/browser-security); server HTML can opt into media/microphone.
 

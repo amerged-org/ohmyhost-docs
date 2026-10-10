@@ -5,8 +5,8 @@ Use this reference when a detected Supabase capability needs a replacement. Keep
 ## Portable target
 
 - The repository pins exactly one `npm`, `pnpm`, `yarn`, or `bun` version and commits exactly one matching frozen lockfile.
-- Vite, TanStack Start, and Next.js remain framework-native. The service-owned build overlay pins OpenNext `1.20.7` and Wrangler `4.125.0`; customer source never commits those dependencies, generated configuration, `OHMYHOST_BASE_PATH`, or provider bindings.
-- Preserve the compatibility result from init: `verified` is exact-fixture-proven, `experimental` is admitted with the same artifact validation, and `unsupported` stops.
+- Vite, TanStack Start, and Next.js remain framework-native. The service-owned build overlay pins OpenNext `1.20.9` and Wrangler `4.125.0`; customer source never commits those dependencies, generated configuration, `OHMYHOST_BASE_PATH`, or provider bindings.
+- Read `compatibility.frameworks[].status` from init: `admitted` meets the security floor, `pending` is a range the build checks after installing it, and `unsupported` stops until the package is at its `minimum` or a later stable release.
 
 ## Database and Auth
 

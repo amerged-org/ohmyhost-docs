@@ -3,7 +3,7 @@ title: "Host a Vite or React app"
 description: "Deploy a public frontend or a Vite app with its supported server companion."
 ---
 
-A public Vite application can deploy with hosting alone. Run `ohmyhost init --dry-run --json`, keep a pinned package manager and its matching lockfile, and follow the returned requirements.
+A public Vite application can deploy with hosting alone. Run `ohmyhost init --dry-run --json`, keep a pinned package manager and its matching lockfile, and follow the returned requirements. Vite needs at least its security floor `5.4.6`, with no upper bound; the version that the committed lockfile resolves decides.
 
 With or without a companion, a path matching no built file returns index.html with HTTP 200, so nested client-route reloads work. Render not-found in your client router. Keep Vite base unset or `/`; an application does not need a server merely for client routing.
 
