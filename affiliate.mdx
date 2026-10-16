@@ -1,0 +1,51 @@
+---
+title: "Become an affiliate"
+description: "Get your ohmyho.st affiliate code and referral link. Earn 1,000 credits per paying referral and 25% more monthly credits by showing the flag."
+---
+
+Every ohmyho.st workspace already has an affiliate link through the referral program. Ask your agent for yours, then share it. No separate enrollment or paid subscription is required, and getting the link does not grant an extra signup bonus.
+
+## Earn credits
+
+- **Refer a paying customer: 1,000 credits.** A new user whose first workspace is created through your referral link, or through your flag while it still shows, starts with 1,000 credits and thirty days of Paid. That workspace's first payment gives your workspace 1,000 credits, plus thirty days of Paid unless a Stripe subscription or an unbounded grant already covers it. Referral credits never expire. Your existing Stripe billing period stays unchanged.
+- **Show the flag: 25% more monthly credits.** While at least one project shows the opt-in "Powered by ohmyho.st" flag, each Paid period actually paid through Stripe adds 250 credits once per workspace: 1,250 instead of 1,000. These credits expire with that billing period. Granted and referral Paid days add no flag bonus; showing more flags does not multiply it. A flagged project's custom hostname costs no credits on any plan, and the flag also permits that project to use its own domain on Free.
+
+A direct signup or invalid referral starts Free with 200 credits per UTC month, without a referral reward. A referral brings someone to their own first workspace; it does not invite them into yours. Additional workspaces do not earn another signup reward. Read the [credit rules](/pricing) and [Terms](https://ohmyho.st/terms).
+
+## Ask your agent for your code
+
+Copy this prompt into your agent:
+
+```text
+Read https://docs.ohmyho.st/affiliate and follow the ohmyho.st get-started Skill. Sign me up as an affiliate using the existing referral program. Reuse my login or guide me through signup, verify my account and workspace, then retrieve my referral link. Finish by showing my workspace, affiliate code and full referral link. Do not create an app, deploy anything or start a paid subscription.
+```
+
+Your agent follows the sign-in and workspace-selection instructions in the [get-started Skill](https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md), then the [usage and budgets Skill](https://ohmyho.st/skills/ohmyhost-usage-and-budgets/SKILL.md) for referral and flag credits. It stops before project creation or deployment.
+
+For agents:
+
+1. Reuse the current authenticated connection and verify the intended identity with MCP `identity_get` or `ohmyhost whoami --json`. If sign-in or signup is needed, follow the get-started Skill and verify its result. Use the selected workspace; if several are available and none is selected, ask which one to use. Do not create another workspace when one already exists.
+2. Read that workspace's link with MCP `referral_link_get` and its `organization_id`, or run:
+
+   ```sh
+   ohmyhost referral link --organization "$ORGANIZATION_ID" --json
+   ```
+
+3. Read the actual `referral_url` in the successful response. The **affiliate code** is its `r` query parameter; copy that value unchanged. Do not construct a code or URL from the workspace ID. If access or retrieval fails, explain the returned problem and the required next step instead of claiming a code is ready.
+4. Finish with the verified **workspace name**, **affiliate code** and **full referral link**. There is no separate affiliate-enrollment action. You can also copy the link from **Refer and earn** in the portal account menu.
+
+## Optionally show the flag
+
+Getting your affiliate link does not switch on a flag. With the project owner's explicit choice, follow [Show the ohmyho.st flag](/domains) to enable it for an existing project. Read the current state first:
+
+```sh
+ohmyhost project flag status --project "$PROJECT_ID" --json
+```
+
+After the owner chooses to show it, use `powered_by_flag_set` or:
+
+```sh
+ohmyhost project flag set --project "$PROJECT_ID" --enabled true --idempotency-key "$FLAG_REQUEST_KEY" --json
+```
+
+MCP `powered_by_flag_get` reads the same state. Reuse the same key and value after an uncertain response; a new switch needs a new key. Verify the flag on the project's Prod site in a browser after about thirty seconds. Its link counts as a referral while the flag shows. On Free, hiding it is refused while the project's custom domain depends on it; remove that domain or upgrade first.
