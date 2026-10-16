@@ -124,7 +124,7 @@ and follow the returned schema rather than guessing arguments.
 - `source_publish_complete` — Complete a local pending source publication after polling its operation.
 - `source_upload` — Observe the exact managed snapshot upload after an uncertain response.
 - `database_compute_get` — Read current managed database size, memory, region and compute state without running SQL or waking the database.
-- `database_compute_set` — Select standard or performance compute for an existing database: Free 0.25 CU/1 GB/60-second idle suspension, Paid 0.5 CU/2 GB/60-second idle suspension.
+- `database_compute_set` — Select standard or performance compute for an existing database: Free 0.25 CU/1 GB, Paid 0.5 CU/2 GB.
 - `project_context_get` — Read fresh project status, DNS/mail next actions, authorized usage and bounded shared notes.
 - `project_notes_set` — Save shared project to-dos, at most 250 lines / 16384 UTF-8 bytes.
 - `domain_cloudflare_authorize` — Check domain_cloudflare_status first and reuse a valid matching grant.
@@ -160,7 +160,7 @@ and follow the returned schema rather than guessing arguments.
 - `token_create` — Create your own non-expiring API token after interactive login and save it to the selected private env file.
 - `tokens_list` — List your token metadata after interactive login.
 - `token_revoke` — Revoke one of your own API tokens after explicit confirmation and interactive login.
-- `identity_get` — Get the ohmyho.st customer/agent identity this call acts as: user, organization and, in context, the saved login or OHMYHOST_TOKEN that supplied it.
+- `identity_get` — Get the ohmyho.st customer/agent identity this call acts as: user and account email, scoped organization IDs and names and, in context, the saved login or OHMYHOST_TOKEN that supplied it.
 - `project_handle_check` — Check whether a project address is free before offering it to the customer.
 - `project_handle_set` — Move a project to an address the customer chose, after project_handle_check said it is free.
 - `project_data_plan` — Owner only: plan a Dev/Prod data assignment change and review the data, files, deployments and database logins it keeps or removes.

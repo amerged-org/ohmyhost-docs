@@ -578,7 +578,7 @@
     },
     {
       "name": "database_compute_set",
-      "description": "Select standard or performance compute for an existing database: Free 0.25 CU/1 GB/60-second idle suspension, Paid 0.5 CU/2 GB/60-second idle suspension. First read database_compute_get and explain actual size, metered compute cost, possible brief connection interruption and that shared data changes both Dev and Prod. Require the user's decision before confirm=true. SQL data is preserved. Poll the returned operation every 60 seconds; never submit a second change while it runs. Performance requires active Paid access and selects 1 CU/4 GB/300-second idle suspension at 2.5x Paid-standard compute credits per equal active minute; the longer idle window also consumes more active time. This affects only database compute. Read organization_credits_get for the published rate and active meter first. A successful choice is remembered per physical database; automatic Free downgrades preserve it, and an explicit standard choice clears it. Mixed/uncertain transition hours waive the premium; never multiply raw CU usage again.",
+      "description": "Select standard or performance compute for an existing database: Free 0.25 CU/1 GB, Paid 0.5 CU/2 GB. All profiles use provider-default idle suspension (suspend_timeout_seconds=0). First read database_compute_get and explain actual size, metered compute cost, possible brief connection interruption and that shared data changes both Dev and Prod. Require the user's decision before confirm=true. SQL data is preserved. Poll the returned operation every 60 seconds; never submit a second change while it runs. Performance requires active Paid access and selects 1 CU/4 GB at 2.5x Paid-standard compute credits per equal active minute. This affects only database compute. Read organization_credits_get for the published rate and active meter first. A successful choice is remembered per physical database; automatic Free downgrades preserve it, and an explicit standard choice clears it. Mixed/uncertain transition hours waive the premium; never multiply raw CU usage again.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1964,7 +1964,7 @@
     },
     {
       "name": "identity_get",
-      "description": "Get the ohmyho.st customer/agent identity this call acts as: user, organization and, in context, the saved login or OHMYHOST_TOKEN that supplied it. Compare it with the user and organization the customer named before any change. This does not authenticate the hosted application's end users or provision a customer AuthKit tenant; application authentication is the customer's chosen integration.",
+      "description": "Get the ohmyho.st customer/agent identity this call acts as: user and account email, scoped organization IDs and names and, in context, the saved login or OHMYHOST_TOKEN that supplied it. Compare it with the user and organization the customer named before any change. This does not authenticate the hosted application's end users or provision a customer AuthKit tenant; application authentication is the customer's chosen integration.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",

@@ -626,8 +626,9 @@ paths:
       operationId: getCurrentIdentity
       summary: Get the current authenticated identity
       description:
-        Returns the stable ohmyhost actor and internal organization identifiers derived from
-        the bearer credential.
+        Returns the stable ohmyhost actor, the current user's or API-key owner's email, and the
+        credential's organization scope with current display names. Machine-to-machine credentials
+        have a null email. Organizations match organization_ids in the same order.
       parameters:
         - $ref: "#/components/parameters/RequestId"
       responses:
@@ -6434,21 +6435,46 @@ components:
         as_of: { type: string, format: date-time }
     CurrentIdentity:
       type: object
-      description: Minimal customer-visible identity and organization scope for authenticated agent clients.
+      description: Customer-visible current account and credential organization scope for authenticated agent clients.
       additionalProperties: false
       required:
         - actor_id
+        - email
         - organization_ids
+        - organizations
       properties:
         actor_id:
           type: string
           minLength: 1
           maxLength: 256
+        email:
+          type: [string, "null"]
+          format: email
+          minLength: 3
+          maxLength: 254
+          pattern: '^(?!.*[\p{Cc}\p{Cf}\p{Zl}\p{Zp}])[^\s@]+@[^\s@.]+(?:\.[^\s@.]+)+$'
+          description: Email of the current user or user API-key owner; null for machine-to-machine credentials.
         organization_ids:
           type: array
           uniqueItems: true
           items:
             $ref: "#/components/schemas/Ulid"
+        organizations:
+          type: array
+          description: Current names for exactly the organization_ids scope, in the same order.
+          items:
+            type: object
+            additionalProperties: false
+            required: [id, name]
+            properties:
+              id:
+                $ref: "#/components/schemas/Ulid"
+              name:
+                type: string
+                minLength: 1
+                maxLength: 128
+                pattern: '^(?![\s\S]*[\u0000-\u001F\u007F])\S(?:[\s\S]*\S)?(?![\s\S])'
+                description: Current organization display name without surrounding whitespace or ASCII control characters.
     Project:
       type: object
       additionalProperties: false

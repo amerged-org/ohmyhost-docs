@@ -16,6 +16,10 @@ curl --fail-with-body https://app.ohmyho.st/v1/projects \
 
 The response lists projects available to that token's organization. Use the returned IDs for later requests. Empty results mean no visible projects, not a failed authentication.
 
+## Read the current account
+
+`GET /v1/me` returns `actor_id`, the current user's or user API-token owner's `email`, `organization_ids` and `organizations` containing each scoped workspace's `id` and current `name`. Machine-to-machine credentials return a null email. The two organization lists have the same scope and order. Use the IDs in requests and the names and email to [check the intended account](/login-tokens#check-the-current-account).
+
 ## Requests that change state
 
 Use the exact method, schema and permissions in the endpoint reference. Supply `Idempotency-Key` where required and retain it with the original request. After an uncertain response, replay the same key and payload; a new key can create new work.

@@ -174,6 +174,11 @@ exact rules.
 
 ## Step 1 — determine the state before doing anything
 
+Use CLI and local MCP version 0.1.34 or newer together. `ohmyhost whoami` and MCP
+`identity_get` return the current account's email and the credential's organizations with IDs and
+current names. Compare that email and workspace with the account the customer intended before
+changing resources. Service credentials have `email: null`.
+
 If the customer's prompt names an account ("Use my ohmyho.st account user … in organization …"),
 read "Several accounts on one computer" first. Use that login's `--profile-name` on authenticated
 checks when needed. Then run these checks:

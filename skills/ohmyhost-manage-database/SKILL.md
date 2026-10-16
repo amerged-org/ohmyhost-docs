@@ -9,11 +9,11 @@ Read `project_context_get` and `database_compute_get` for the selected Dev or Pr
 
 | Profile          | Compute | RAM  | Sleep after idle |
 | ---------------- | ------- | ---- | ---------------- |
-| Free standard    | 0.25 CU | 1 GB | 1 minute         |
-| Paid standard    | 0.5 CU  | 2 GB | 1 minute         |
-| Paid performance | 1 CU    | 4 GB | 5 minutes        |
+| Free standard    | 0.25 CU | 1 GB | Provider default |
+| Paid standard    | 0.5 CU  | 2 GB | Provider default |
+| Paid performance | 1 CU    | 4 GB | Provider default |
 
-Performance costs 2.5 times Paid-standard database compute credits for the same active duration. Its longer idle window can add active time. Storage and retained history are billed separately. Avoid periodic SQL health checks that keep idle compute awake; explain the first-query cold start when discussing savings.
+Performance costs 2.5 times Paid-standard database compute credits for the same active duration. All profiles request the provider-default idle suspension (`suspend_timeout_seconds=0`), which is compatible with Neon Free. Storage and retained history are billed separately. Avoid periodic SQL health checks that keep idle compute awake; explain the first-query cold start when discussing savings.
 
 For a customer-requested resize, use `database_compute_set` with the explicit environment, `standard` or `performance`, confirmation and one idempotency key. Preserve existing authorization; explain any new cost or shared-environment effect before applying it. Poll its operation, then read actual compute again. A successful submission is not proof that resizing finished. Do not reset the database to resize it.
 

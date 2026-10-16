@@ -9,6 +9,8 @@ description: "Read the current client contract and published service updates."
 
 ## Account workflows
 
+Client release 0.1.34 adds the current account email and workspace names beside their IDs to `GET /v1/me`, CLI `whoami` and local/remote MCP `identity_get`. User API tokens report their owner's email; machine-to-machine credentials report null. Upgrade CLI and MCP together with the current release when checking the signed-in account. [Current account details](/login-tokens#check-the-current-account).
+
 One computer can keep several saved logins, each bound to one user/organization. Select --profile-name, MCP `profile_name` or `OHMYHOST_PROFILE`; the first legacy-profile upgrade needs network access. After another login is saved, ambiguity needs an explicit choice. organization use binds only an unbound login; use login --organization ID for another workspace. [Several accounts](/login-tokens#several-accounts-on-one-computer).
 
 The portal provides projects, profile, Billing, Usage and user API Tokens. New keys remain valid until revoked; existing keys keep their recorded expiry. Granted Paid features are separate from Stripe subscriptions and monthly credit grants.

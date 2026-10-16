@@ -19,6 +19,14 @@ A native chat uses its authenticated remote MCP connection and managed OAuth. Ap
 
 This access is separate from the local CLI device sign-in and a user API token. A connected chat needs no local CLI installation or copied device token. Keep private application credentials in the [portal input flow](/secrets#connected-chat-input), outside chat and tool arguments. The non-expiring API token policy does not change browser, CLI or OAuth session lifetimes.
 
+## Check the current account
+
+Ask your agent which account is signed in. Both local and remote MCP expose `identity_get`; the CLI uses `ohmyhost whoami --json`, and the REST API uses `GET /v1/me`.
+
+The identity data includes the stable `actor_id`, the current account's `email`, `organization_ids` and `organizations` with each workspace's `id` and current `name`. The CLI returns these fields under `identity`. With a user API token, `email` identifies the token's owner. Machine-to-machine credentials return `email: null`. The organization names describe only the credential's existing scope, in the same order as `organization_ids`.
+
+Compare the email and workspace name with the account you intend to use before changing a project. Keep the returned IDs for API requests; names can change and do not grant access. [Select a saved account](#several-accounts-on-one-computer).
+
 ## Sign in interactively
 
 ```sh
