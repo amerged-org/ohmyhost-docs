@@ -36,6 +36,7 @@
             "pages": [
               "sources",
               "github",
+              "frameworks/astro",
               "frameworks/nextjs",
               "frameworks/vite",
               "frameworks/tanstack",

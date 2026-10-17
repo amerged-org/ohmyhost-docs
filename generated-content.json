@@ -1,7 +1,7 @@
 {
-  "source_commit": "d0f9b3469f5af47509b8afcc3bda453bdd70ee42",
+  "source_commit": "de8edb493e58a228c333009ee64c9bda80c5043c",
   "source_dirty": false,
-  "release": "0.1.34",
+  "release": "0.1.35",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -301,7 +301,7 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/SKILL.md",
-      "sha256": "e0aa214318bbac985effa1f4ac08fe9d29a457eaa45a10b79951147da81c39c3"
+      "sha256": "e3b9fa5bc709893675859f9b492d1d4147d7206594e5ea836824f08a7a32aafb"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/cli-deploy.md",
@@ -397,11 +397,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "5f4b5e2502f38721c539aab0681c9ef732eafe61b98cf72d9d2a3048b7409d39"
+      "sha256": "c613ef05a58a83c8ca9ce0d0cd3f0d5af52f3b7cc0215f2c90024914bedf80a7"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "f80e8bef5440cd68ff997a321ecad2552fb859bc8fc46342fef9f2b38f350523"
+      "sha256": "cfbb3d6fd9384a37914c27719c1938f9889c30a8ada4cad32a041004161a9bf6"
     },
     {
       "path": "snippets/skill-catalog.mdx",

@@ -1,0 +1,58 @@
+---
+title: "Host an Astro site or SSR application"
+description: "Deploy static Astro pages or request-rendered Astro routes on ohmyho.st Workers."
+---
+
+Astro supports two hosting modes: build every page into static files, or render selected routes at request time with the official Cloudflare adapter. Start with `ohmyhost init --dry-run --json` in the application repository. Keep one exact package-manager version and its matching lockfile.
+
+The initial verified fixture combination is Astro `7.4.0` with `@astrojs/cloudflare` `14.4.0` for SSR. The shared security-minimum policy checks declared and frozen installed versions. A successful build alone does not establish that every Astro integration works; verify the routes and interactions your application uses.
+
+## Static Astro
+
+Keep `scripts.build` as `astro build`, use the standard `src/` and `dist/` directories, and omit a server adapter:
+
+```js
+import { defineConfig } from 'astro/config';
+export default defineConfig({ output: 'static' });
+```
+
+Set `runtime.mode: static` and `build.output: dist` in `ohmyhost.yaml`. Static hosting can serve prerendered pages, JSON endpoints, feeds and client islands. It does not run request-time database, auth, mail, file or scheduled handlers. Select edge mode when the application needs those server capabilities.
+
+Build-time filesystem reads and precompiled MDX are ordinary static build work. Never put runtime credentials in generated public files or browser variables.
+
+## SSR and mixed rendering
+
+Install the official Cloudflare adapter through the package manager and keep its matching lockfile. Use the application configuration below; the platform supplies the deployment configuration itself:
+
+```js
+import { defineConfig } from 'astro/config';
+import cloudflare from '@astrojs/cloudflare';
+
+export default defineConfig({
+  output: 'server',
+  adapter: cloudflare({ imageService: 'passthrough' }),
+  session: false,
+});
+```
+
+Set `runtime.mode: edge` and `build.output: dist/client` in `ohmyhost.yaml`. The build emits public files separately from its server modules. Keep the standard directories; do not add a customer Wrangler deployment, change `srcDir`, `outDir`, the server entrypoint or the root base merely to host the application.
+
+Use `export const prerender = true` for pages and endpoints that should be produced at build time. Other pages, middleware and Astro API endpoints run in Workers. Framework components such as React can render on the server; hydrate browser islands only where interaction needs them.
+
+Server imports belong in Astro frontmatter or normal JavaScript/TypeScript modules so source inspection can follow the runtime import graph. Dynamic imports, `import.meta` and `require()` inside Astro templates, including script attributes and bodies, are refused with a diagnostic naming the file. Keep dynamic browser imports in an ordinary browser module imported statically by the template script. Static browser ESM imports retain their normal build behavior.
+
+## Bindings and integrations
+
+Hosted server code obtains supported runtime bindings from `cloudflare:workers`. Use the existing [private application database client](/database), [file client](/files), [mail](/email) and [runtime secrets](/secrets) only when their capabilities are declared. Keep the application's chosen authentication provider and verify its actual callback, protected-route and logout flow.
+
+Native Cloudflare KV sessions, provider cache, Cloudflare Images and additional customer-defined Cloudflare resources are outside this first Astro integration. Keep `session: false` and `imageService: 'passthrough'`; an undeclared resource is refused rather than silently provisioned. Serve existing images or prepare them at build time. Do not replace an application feature with a mock to make a deployment pass.
+
+SSR runs in `workerd`, not a full Node server. A dependency that needs a native addon, a database socket or a non-functional Node module must be replaced with a compatible application integration. Build-time Node code and request-time Worker code have different constraints.
+
+## Verify before publishing
+
+Deploy the exact source version to Dev through the [normal workflow](/quickstart). Check the home page, every content route, direct reloads, an unknown URL, static files and any feeds or sitemap. For SSR, change request input and verify that the response changes, exercise middleware and API routes, and click every hydrated island under the hosted content-security policy.
+
+Check private integrations with real application operations where used. Then promote the verified Dev artifact to Prod and repeat the important paths on the public hostname. Keep the previous deployment available through the normal rollback workflow.
+
+[Astro hosting](https://ohmyho.st/frameworks/astro) · [Portable application Skill](https://ohmyho.st/skills/ohmyhost-build-portable-app/SKILL.md) · [Cloudflare adapter](https://docs.astro.build/en/guides/integrations-guide/cloudflare/)
