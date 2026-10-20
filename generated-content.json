@@ -1,7 +1,7 @@
 {
-  "source_commit": "de8edb493e58a228c333009ee64c9bda80c5043c",
+  "source_commit": "e92c060dcf62ba8f86e4d9ef11d00d0264c7d1e2",
   "source_dirty": false,
-  "release": "0.1.35",
+  "release": "0.1.36",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -381,11 +381,11 @@
     },
     {
       "path": "openapi.yaml",
-      "sha256": "d8f25a42fff2dce263cc5a057bad3905a6a6f0b0c6339f7d8b67b1810710578c"
+      "sha256": "d07ebd074bb4e2003434d73fb7adba503a94ea6d7c8d9ccff8a3bc74bcdeced9"
     },
     {
       "path": "openapi.json",
-      "sha256": "d069888c00173aaa157f21031d73b7f3f918c62fd7e965957fab2ab1fe45b89d"
+      "sha256": "7a81db3395d1cbaa65455e5c304e7360197783cb3eb27149a3f208895e60f218"
     },
     {
       "path": "mcp-tools.json",
@@ -397,11 +397,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "c613ef05a58a83c8ca9ce0d0cd3f0d5af52f3b7cc0215f2c90024914bedf80a7"
+      "sha256": "2e117ae789b62c4a0cd4dcd01ece7113a5fa07f5ed13dfc4a32b78eec2ddc889"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "cfbb3d6fd9384a37914c27719c1938f9889c30a8ada4cad32a041004161a9bf6"
+      "sha256": "6c7282b4a744ef34978e5595dc9d26bee4db3de2c6eed1fa2b247dc04e35d00a"
     },
     {
       "path": "snippets/skill-catalog.mdx",
