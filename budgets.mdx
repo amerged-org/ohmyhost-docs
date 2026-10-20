@@ -1,7 +1,19 @@
 ---
 title: "Project spending limits"
-description: "Set a UTC-month credit limit and choose Continue or Stop."
+description: "Track a monthly project budget. Keep running by default, or explicitly choose Stop at limit."
 ---
+
+Project budgets are optional. **By default, reaching a project budget does not pause the app.** A project without a budget uses **Continue**, and setting a budget through CLI or MCP also defaults to **Continue**. To pause the app at the threshold, the workspace Owner must explicitly select **Stop at limit**.
+
+All projects still draw from the shared workspace credit balance. A project budget does not reserve a separate wallet or add credits.
+
+| Configuration                                     | What happens at the project threshold                                                            |
+| ------------------------------------------------- | ------------------------------------------------------------------------------------------------ |
+| No project budget                                 | There is no project threshold; the project uses the workspace balance.                           |
+| **Continue** / **Keep running**                   | Usage is reported against the budget, but the project keeps running and using workspace credits. |
+| **Stop** / **Stop at limit**, explicitly selected | New billable work can be rejected and Dev and Prod can pause as described below.                 |
+
+## Read or set a budget
 
 Read the current budget before changing it:
 
@@ -9,19 +21,40 @@ Read the current budget before changing it:
 ohmyhost budget get --project "$PROJECT_ID" --json
 ```
 
-Set a limit, or explicitly remove it:
+Set a tracking budget while keeping the project running:
 
 ```sh
-ohmyhost budget set --project "$PROJECT_ID" --credits 1000 --mode stop --idempotency-key "$BUDGET_REQUEST_KEY" --json
+ohmyhost budget set --project "$PROJECT_ID" --credits 1000 --mode continue --idempotency-key "$BUDGET_REQUEST_KEY" --json
+```
+
+Omitting `--mode` also selects `continue`. MCP `project_budget_set` has the same default; the REST budget endpoint requires an explicit `mode`.
+
+## Opt in to stopping at the limit
+
+Only choose this when you want the project to pause instead of continuing to use workspace credits:
+
+```sh
+ohmyhost budget set --project "$PROJECT_ID" --credits 1000 --mode stop --idempotency-key "$STOP_BUDGET_REQUEST_KEY" --json
+```
+
+In **Stop** mode, a new billable operation is rejected with `project_budget_exceeded` if measured usage, open reservations and its new reservation would exceed the budget. When measured usage plus open reservations reach the limit, Dev and Prod answer HTTP 402 `Project execution paused`.
+
+Raise or remove the limit, switch to **Continue**, or wait for the next UTC month; serving resumes within about five minutes once admission allows it again. Existing work and delayed measurements may settle later, so **Stop is not a guarantee that final costs cannot exceed the limit**.
+
+## Remove a budget
+
+```sh
 ohmyhost budget set --project "$PROJECT_ID" --credits none --idempotency-key "$UNLIMITED_REQUEST_KEY" --json
 ```
 
-These are alternatives; run the one matching your decision. Without `--mode`, a limit is advisory (`continue`); pass `--mode stop` to stop billable work at the limit. `--credits none` cannot be combined with `--mode stop`. Each intentional change gets its own retained key; repeat an uncertain request with the original arguments/key.
-
-The limit uses a UTC calendar month. **Stop** rejects new billable work with `project_budget_exceeded` and pauses the app when measured usage plus reservations reach the limit: Dev and Prod answer HTTP 402 `Project execution paused`. Raise or remove the limit, switch to **Continue**, or wait for the next UTC month; serving resumes within about five minutes. **Continue** keeps the app and work running after the threshold. Existing work and delayed measurements may settle later, so final costs can exceed the limit.
+Removing a budget restores **Continue**. `--credits none` cannot be combined with `--mode stop`. Each intentional change gets its own retained key; repeat an uncertain request with the original arguments/key. Budgets use UTC calendar months, and changing a budget does not reset measured usage.
 
 ## Use the portal
 
 Open the [portal](https://app.ohmyho.st/) and press **$** on the project card to open **Usage & limits**. Enter a monthly limit in credits, choose **Stop at limit** or **Keep running** and save; an empty limit removes it. Only the workspace Owner sees these controls. Read the result back; the portal uses the same endpoint and authorization as CLI/MCP.
+
+## Workspace credits running out
+
+An exhausted workspace balance is separate from a project budget. New builds still need enough available credits; existing services have the [seven-day credit grace period](/pricing#read-charges-correctly). **Continue** does not make hosting unlimited or bypass credit exhaustion. An explicitly enabled **Stop** budget can pause the project before that grace period ends.
 
 [Measured usage](/usage) · [Usage and budgets Skill](https://ohmyho.st/skills/ohmyhost-usage-and-budgets/SKILL.md).

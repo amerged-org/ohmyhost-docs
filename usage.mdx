@@ -21,6 +21,6 @@ Performance database pricing changes the database-compute rate. Do not multiply 
 
 Monthly Free and Paid credits expire on the date shown in Billing and are spent before top-ups. Paid-only top-ups and recharges carry over during uninterrupted Paid membership; their remaining balance expires on downgrade to Free and cannot return after a later upgrade. An unpaid Stripe renewal keeps Paid features and top-ups for up to fourteen days after period end, with no new Paid or Free monthly allowance; cancellation ends Paid at the paid period end. `paid_until` remains the real invoice period end during renewal grace, so use the account's effective plan/source. Signup/referral grants keep their recorded terms. In-flight reservations appear as `reserved_micros` in `credits account` and `credits balance`; the portal does not show them.
 
-Some measurements arrive later than the original operation. A low current total is not a guarantee that all running work has settled. [Project budgets](/budgets) control the intended monthly limit and its Continue/Stop behavior.
+Some measurements arrive later than the original operation. A low current total is not a guarantee that all running work has settled. Optional [project budgets](/budgets) default to **Continue**: the project keeps running after the tracking threshold. A project pauses at its budget only when the workspace Owner explicitly selects **Stop**.
 
 [Billing and recharge](/billing) · [Database profiles](/database).
