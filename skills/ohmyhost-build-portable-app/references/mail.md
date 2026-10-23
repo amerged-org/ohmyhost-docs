@@ -48,6 +48,46 @@ with `endpoint: env.OHMYHOST_MAIL_GATEWAY_URL`, `key: env.OHMYHOST_MAIL_KEY`,
 framework context or Worker env. Invalid configuration answers `gateway_configuration_invalid`
 with the failing option; do not fall back to public fetch or place the key in the browser.
 
+## Shared sender settings
+
+Before creating another provider domain, inspect authorized workspace senders through
+`workspace_mail_domains_list` / `ohmyhost mail workspace list`. Reuse requires the same authorized
+workspace and the same **verified registrable main domain** for sender and application: apps at
+`example.com` or `sign.example.com` may use `mail.example.com`; an app at `different.com` may not.
+A verified apex sender is allowed. Technical OMH hostnames, workspace membership and an
+unverified intended hostname do not satisfy this constraint.
+
+For a new project, declare and verify the intended hostname through the project-bound TXT
+challenge before attaching mail. Follow [domain and mail setup](../../ohmyhost-domains-and-mail/SKILL.md#reuse-a-workspace-sender)
+for manual DNS or the separately consented Cloudflare challenge. This proof works before the
+first deployment without moving web traffic. Then `mail_binding_set` /
+`ohmyhost mail binding set` attaches the verified sender using the target Prod environment ID,
+its current revision (0 initially), exact `sender_addresses`, `default_from` and optional
+`default_reply_to`. `mail_binding_get` / `ohmyhost mail binding get` reads non-secret settings.
+The application keeps its own environment key and per-project billing/budget attribution.
+
+Keep the public TXT challenge in DNS. Pending challenges last 24 hours; verified proof lasts
+30 days. Existing mail maintenance automatically reads eligible still-unexpired proofs near
+expiry, without changing DNS or impersonating the original user. A successful current-state
+check renews validity; a failed/uncertain check leaves expiry unchanged. Expired proofs are never
+revived automatically. Repair the TXT and use the ordinary authorized identity verification
+with the same current revision and a new key for a new renewal, then read the sender binding
+and explicitly save its settings if suspended. Re-declare only an expired pending challenge or
+an intentionally changed hostname; re-declaration advances revision and suspends sharing.
+
+Up to 32 exact sender addresses may be configured on the resource's exact domain. Adding
+`contact`, `contracts` or another accepted local part makes no new DNS/provider record. The
+prefix is a sending identity, not a mailbox. Explicit message `from` must be in this list; omitted
+`from` uses `default_from`. Explicit `replyTo` overrides `default_reply_to` and may name an
+existing external mailbox, so preserve a contact form's visitor Reply-To. Defaults and effective
+payload are pinned to the original durable send claim after uncertainty. Existing migrated
+bindings retain their whole-domain sender policy and `no-reply@` default until explicitly edited.
+
+A shared sender grants no receiving, sibling-message, attachment, secret or DNS-administration
+access. Receiving remains with one original Prod webhook. Detach only the selected project
+through `mail_binding_detach` / `ohmyhost mail binding detach`. Retire a workspace resource only
+after all send/inbound references are gone; project deletion must not delete a sibling's sender.
+
 ## Application handler
 
 - Read the raw request body with an explicit size limit; call `verifyMailWebhook` from
@@ -86,8 +126,9 @@ so duplicate event IDs must not repeat effects.
 Each delivery or webhook test has a fifteen-second request timeout and follows no redirect.
 The registered HTTPS URL must itself return 2xx after durable storage.
 
-`send()` takes one `to` address. `from` defaults to `no-reply@<configured-domain>` and must use
-the exact configured domain with a local part of letters, digits and `._%+-`; another sender
+`send()` takes one `to` address. `from` uses the binding's default when omitted (legacy bindings
+use `no-reply@<configured-domain>`), must use its exact domain with a local part of letters, digits
+and `._%+-`, and must satisfy any configured exact sender list; another sender
 answers `gateway_request_invalid` (400, not retryable). `to` and `replyTo` follow the provider's
 address rule, including apostrophes, trailing underscores and mixed case. Subject is one line,
 at most 200 characters; required text is at most 64 KiB and optional HTML at most 128 KiB.

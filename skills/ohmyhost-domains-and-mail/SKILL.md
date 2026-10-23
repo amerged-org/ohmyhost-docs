@@ -33,7 +33,79 @@ Once the final hostname is ready, update the application's trusted public origin
 
 ## Sending and receiving email
 
-Ask for the exact mail domain and sender address, and whether the customer wants sending only or also receiving. Recommend a subdomain when existing company inboxes use the root domain. Use `mail_setup` and `mail_status` with the project's Prod environment ID: one mail domain serves Dev and Prod, and each environment keeps its own application key. `mail_domain_set` and `mail_domain_status` are older names for the same calls. The domain is ready only after its DNS records verify; a website domain is not required. DNS records include the exact MX priority. Authorized Cloudflare DNS is automatic, otherwise return the records for manual setup. Do not replace existing mailbox routing without the customer's explicit selection.
+Ask for the exact mail domain and sender address, and whether the customer wants sending only or also receiving. Recommend a subdomain when existing company inboxes use the root domain. Use `mail_setup` and `mail_status` with the project's Prod environment ID: one mail domain serves Dev and Prod, and each environment keeps its own application key. `mail_domain_set` and `mail_domain_status` are older names for the same calls. The domain is ready only after its DNS records verify. Original-project setup does not require a website domain; cross-project reuse additionally requires the verified matching application identity described below. DNS records include the exact MX priority. Authorized Cloudflare DNS is automatic, otherwise return the records for manual setup. Do not replace existing mailbox routing without the customer's explicit selection.
+
+### Reuse a workspace sender
+
+Use `workspace_mail_domains_list` / `ohmyhost mail workspace list`, then
+`workspace_mail_domain_get` / `ohmyhost mail workspace status` to select the exact authorized
+resource. A sender can be reused only by a project in the same workspace whose current verified
+application identity has the same registrable main domain. `example.com` and `sign.example.com`
+may use `mail.example.com`; `different.com` may not. An apex sender is eligible too. Public and
+private suffix rules apply. A technical `check.omh.st` address or matching unverified declaration
+is not customer-domain authority. Never fix a conflict by deleting the original project's sender.
+
+A fresh app proves its intended hostname before the mail-gated deployment:
+
+1. `application_domain_identity_declare` / `ohmyhost mail identity declare` records the intended
+   hostname and returns an exact project/revision-bound TXT challenge; read it with
+   `application_domain_identity_get` / `ohmyhost mail identity get`.
+2. Return the exact challenge records for manual DNS, or use
+   `application_domain_identity_authorize` / `ohmyhost mail identity authorize`, followed by
+   `application_domain_identity_authorization_status` / `ohmyhost mail identity authorization-status`.
+   This separately consented request manages only the challenge. It does not route website traffic.
+3. `application_domain_identity_verify` / `ohmyhost mail identity verify` checks current TXT and
+   records bounded proof. Pass the current `expected_revision`. Read actual status/expiry; stale,
+   revoked or expired proof cannot authorize sharing. The pending challenge lasts 24 hours and a
+   verified proof lasts 30 days. Leave the TXT challenge in place. Existing mail maintenance
+   automatically rechecks eligible still-unexpired proofs during their last seven days, at most
+   once per project per day, in bounded batches. It only reads the stored public TXT and extends
+   validity after current ownership/lifecycle, proof, binding and resource checks; it writes no
+   DNS and does not reuse the original human's session or broaden a client grant. Do not create
+   a separate renewal automation or request new Cloudflare consent for that public read.
+   Missing/uncertain DNS leaves the original expiry unchanged. An expired proof is never revived
+   automatically: use currently authorized `verify` with the same current revision/TXT and a new
+   key for that intentional renewal. Read the binding afterward and explicitly save its current
+   sender settings if it is suspended. A pending challenge that expires needs a new declaration
+   and challenge. Re-declaring deliberately advances revision and suspends dependent bindings;
+   do not re-declare for ordinary renewal. Dev inherits this logical Production identity.
+4. `mail_binding_set` / `ohmyhost mail binding set` explicitly attaches the selected domain to the
+   target Prod environment, with `sender_addresses`, `default_from`, optional `default_reply_to`,
+   the current binding revision (0 on first attach) and a retained idempotency key. Read with
+   `mail_binding_get` / `ohmyhost mail binding get` before edits. The binding requires both target
+   project edit and selected domain use authority. Remote project consent alone is insufficient.
+5. Deploy and verify the mail-enabled app, then activate its website hostname through the ordinary
+   domain flow. Intended-identity proof changes no routing, DNS A/AAAA/CNAME, certificate or MX.
+
+Reusing an already verified sender changes no sender DNS, makes no new provider domain/key and
+needs no new sender-domain Cloudflare consent. New resource creation uses
+`workspace_mail_domain_create` / `ohmyhost mail workspace create`. Separately scoped sender DNS
+consent uses `workspace_mail_domain_dns_authorize` / `ohmyhost mail workspace dns-authorize` and
+`workspace_mail_domain_dns_status` / `ohmyhost mail workspace dns-status`; manual records remain
+supported. Do not copy the original project's encrypted DNS grant or broaden its purpose.
+
+Revoke only the selected DNS-management grant with `workspace_mail_domain_dns_revoke` /
+`ohmyhost mail workspace dns-revoke` or `application_domain_identity_authorization_revoke` /
+`ohmyhost mail identity authorization-revoke`, using its current revision, confirmation and the
+original request key after uncertainty. This stops DNS management; it does not retire the sender,
+remove the application proof or move website traffic. Proof expiry/revocation and send binding
+admission remain independent.
+
+Each binding allows up to 32 exact addresses on the sender's exact domain; `default_from` must be
+one of them. Prefixes such as `contact`, `contracts` and `no-reply` need no individual DNS record
+or provider registration. Explicit per-message `from` overrides its default but must be allowed.
+`replyTo` overrides `default_reply_to`, may name an external existing mailbox, and preserves a
+contact form's visitor Reply-To. No prefix creates a mailbox or forwarding. Defaults are pinned
+when a send is claimed; changing settings must not change an uncertain same-key send.
+
+`mail_binding_detach` / `ohmyhost mail binding detach` (confirmation and current revision) stops
+only that project's sending. Project deletion/transfer must preserve siblings' resource custody.
+Receiving stays with the exclusive original Prod webhook and is never shared with a new sender.
+Use `workspace_mail_domain_retire` / `ohmyhost mail workspace retire` only for an unused resource,
+with current revision and confirmation; active send/inbound references conflict. The unused
+resource is retained until this explicit retirement. `application_domain_identity_revoke` /
+`ohmyhost mail identity revoke` invalidates proof and dependent admission, without retargeting or
+deleting the website. Retain each original idempotency key after uncertainty.
 
 For receiving, follow [the application mail workflow](../ohmyhost-build-portable-app/references/mail.md). The customer must supply an HTTPS webhook served by the Prod application. Help build the route in their own ohmyho.st project and store the mail in their database. `mail_webhook_set` returns the server-only signing secret; install it through application secrets, deploy signature verification, then call `mail_webhook_verify`. Receipt is not enabled without a verified endpoint. Handle signed `email.webhook_test` separately from actual email.
 
@@ -41,9 +113,9 @@ One initial delivery and at most three retries share a hard 72-hour window from 
 
 For sending, follow [the runtime mail contract](../ohmyhost-build-portable-app/references/mail.md) through private `OHMYHOST_MAIL_GATEWAY`, the project ID and environment-specific key. The deployment source must set `mail.enabled: true`; domain verification alone does not install a binding, and rollback/promotion of undeclared source removes it. Select an authorized sender on the configured domain; optional Reply-To may direct replies to an existing mailbox. Keep provider credentials out of the application. Preserve the original message and idempotency key after uncertainty.
 
-To stop receiving, `mail_webhook_disable` removes the webhook and makes stored message content inaccessible. When the customer no longer wants mail at all, `mail_domain_delete` (with confirmation and the Prod environment ID) stops sending and receiving at once and removes the provider domain and key; DNS stays unchanged, so give the customer the returned `dns_records` to remove, and set `mail.enabled` to false in an app that still declares it. Setup answering `mail_capacity_unavailable` is blocked at the mail provider: the setup is stored but its provider domain does not exist yet, so report the request ID through feedback and follow `mail_status`; it continues once capacity exists. While a previous mail domain is still being removed, setup answers `mail_domain_conflict`; repeat the deletion first. `domain_paid_delete` removes only the named hostname and its owned DNS records after explicit confirmation; unrelated MX records stay.
+To stop receiving, `mail_webhook_disable` removes the webhook and makes stored message content inaccessible. When the customer no longer wants mail at all, legacy `mail_domain_delete` (with confirmation and the Prod environment ID) stops an unshared original domain's sending and receiving at once and removes the provider domain and key; shared resources conflict before effects and require explicit binding detach or unused workspace retirement; DNS stays unchanged, so give the customer the returned `dns_records` to remove, and set `mail.enabled` to false in an app that still declares it. Setup answering `mail_capacity_unavailable` is blocked at the mail provider: the setup is stored but its provider domain does not exist yet, so report the request ID through feedback and follow `mail_status`; it continues once capacity exists. While a previous mail domain is still being removed, setup answers `mail_domain_conflict`; repeat the deletion first. `domain_paid_delete` removes only the named hostname and its owned DNS records after explicit confirmation; unrelated MX records stay.
 
-`mail_setup` reports DNS `configured`, `action_required` or `conflict`. It never overwrites conflicting customer records: correct only the named records and retry the same request. `mail_domain_conflict` also covers another configured domain, another project's claim or pending deletion. Read status, finish deletion before replacing a sender domain, and explain that sending stops until the replacement verifies.
+`mail_setup` reports DNS `configured`, `action_required` or `conflict`. It never overwrites conflicting customer records: correct only the named records and retry the same request. `mail_domain_conflict` also covers another configured domain, an existing workspace claim requiring explicit attachment, a stale revision or pending deletion. Read status, finish deletion before replacing a sender domain, and explain that sending stops until the replacement verifies.
 
 ## Waiting and resuming
 

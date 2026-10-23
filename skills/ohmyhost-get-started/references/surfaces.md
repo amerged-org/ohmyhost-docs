@@ -98,6 +98,23 @@ and follow the returned schema rather than guessing arguments.
 - `ohmyhost function runs` — ohmyhost function runs --project ULID --environment ENVIRONMENT_ULID [--limit 1-100] --json
 - `ohmyhost secret set` — printf '%s' "$SECRET_VALUE" | ohmyhost secret set NAME --project ULID --environment ENVIRONMENT_ULID --idempotency-key KEY [--profile-user USER_ID --profile-organization ULID | --token-user USER_ID --token-organization ULID] --stdin [--wait] --json (with --profile-user and --profile-organization the saved login that runs it must belong to that user and organization; with --token-user and --token-organization it runs only with an OHMYHOST_TOKEN of that user and organization, never with a saved login)
 - `ohmyhost secret delete` — ohmyhost secret delete NAME --project ULID --environment ENVIRONMENT_ULID --idempotency-key KEY [--wait] --json
+- `ohmyhost mail workspace list` — ohmyhost mail workspace list --organization ULID --json
+- `ohmyhost mail workspace create` — ohmyhost mail workspace create --organization ULID --domain DOMAIN --sending true --idempotency-key KEY --json
+- `ohmyhost mail workspace status` — ohmyhost mail workspace status --organization ULID --mail-domain ULID --json
+- `ohmyhost mail workspace retire` — ohmyhost mail workspace retire --organization ULID --mail-domain ULID --expected-revision N --idempotency-key KEY --yes --json
+- `ohmyhost mail workspace dns-authorize` — ohmyhost mail workspace dns-authorize --organization ULID --mail-domain ULID --expected-revision N --zone DOMAIN --idempotency-key KEY --json
+- `ohmyhost mail workspace dns-revoke` — ohmyhost mail workspace dns-revoke --organization ULID --mail-domain ULID --expected-revision N --idempotency-key KEY --yes --json
+- `ohmyhost mail workspace dns-status` — ohmyhost mail workspace dns-status --organization ULID --mail-domain ULID --json
+- `ohmyhost mail binding get` — ohmyhost mail binding get --project ULID --environment PROD_ULID --json
+- `ohmyhost mail binding set` — ohmyhost mail binding set --project ULID --environment PROD_ULID --mail-domain ULID --sending true --sender-addresses contact@mail.example.com,contracts@mail.example.com --default-from contracts@mail.example.com [--reply-to owner@example.com] --expected-revision N --idempotency-key KEY --json
+- `ohmyhost mail binding detach` — ohmyhost mail binding detach --project ULID --environment PROD_ULID --expected-revision N --idempotency-key KEY --yes --json
+- `ohmyhost mail identity get` — ohmyhost mail identity get --project ULID --json
+- `ohmyhost mail identity declare` — ohmyhost mail identity declare --project ULID --hostname sign.example.com --idempotency-key KEY --json
+- `ohmyhost mail identity verify` — ohmyhost mail identity verify --project ULID --expected-revision N --idempotency-key KEY --json
+- `ohmyhost mail identity revoke` — ohmyhost mail identity revoke --project ULID --expected-revision N --idempotency-key KEY --yes --json
+- `ohmyhost mail identity authorize` — ohmyhost mail identity authorize --project ULID --expected-revision N --zone example.com --idempotency-key KEY --json
+- `ohmyhost mail identity authorization-revoke` — ohmyhost mail identity authorization-revoke --project ULID --expected-revision N --idempotency-key KEY --yes --json
+- `ohmyhost mail identity authorization-status` — ohmyhost mail identity authorization-status --project ULID --json
 - `ohmyhost mail setup` — ohmyhost mail setup --project ULID --environment ULID --domain DOMAIN --sending true --receiving false --idempotency-key KEY --json
 - `ohmyhost mail status` — ohmyhost mail status --project ULID --environment ULID --json
 - `ohmyhost mail webhook set` — ohmyhost mail webhook set --project ULID --environment ULID --url HTTPS_URL --idempotency-key KEY --json
@@ -191,6 +208,23 @@ and follow the returned schema rather than guessing arguments.
 - `operation_logs` — Read available operation events for at most ten seconds, stopping earlier at max_events or a terminal event.
 - `function_runs_list` — List the newest scheduled function runs (functions.crons) of an environment: one run per due UTC minute with state, attempt, the status the scheduled handler returned and timing.
 - `operation_reconcile` — Start an explicitly confirmed provider reconciliation attempt
+- `workspace_mail_domain_dns_revoke` — Revoke the selected workspace sender DNS grant at its current revision with explicit confirmation.
+- `application_domain_identity_authorization_revoke` — Revoke the current application identity DNS grant with explicit confirmation.
+- `workspace_mail_domains_list` — List only workspace sender domains this account and connected client may read.
+- `workspace_mail_domain_create` — Create one workspace-owned transactional sender domain.
+- `workspace_mail_domain_get` — Read sender verification, lifecycle, revision and DNS records for one authorized workspace resource.
+- `workspace_mail_domain_retire` — Retire an explicitly selected workspace sender only after every send and inbound reference is detached and provider effects settle.
+- `workspace_mail_domain_dns_authorize` — Request human Cloudflare consent for this selected workspace sender, zone and revision.
+- `workspace_mail_domain_dns_status` — Read exact workspace sender DNS authorization status.
+- `mail_binding_get` — Read the Prod sender binding and per-project From addresses, default From and default Reply-To.
+- `mail_binding_set` — Attach a verified workspace sender or update its project settings.
+- `mail_binding_detach` — Detach only this project send binding with current revision and explicit confirmation.
+- `application_domain_identity_get` — Read the project intended application hostname, current revision and ownership proof.
+- `application_domain_identity_declare` — Declare the intended customer application hostname before deployment.
+- `application_domain_identity_verify` — Verify the exact current project and hostname TXT challenge independently of deployment.
+- `application_domain_identity_revoke` — Revoke only the selected current application-domain proof with explicit confirmation.
+- `application_domain_identity_authorize` — Request exact-purpose Cloudflare consent to write this project hostname ownership challenge at the current revision.
+- `application_domain_identity_authorization_status` — Read the selected project application-domain identity DNS authorization status.
 - `mail_setup` — Configure the customer's one production mail domain using the project Prod environment ID, only when the customer wants mail or the app declares mail.enabled; hosting needs no mail domain and none is registered automatically.
 - `mail_status` — Read sending and receiving readiness and exact DNS records for the project’s one production mail domain.
 - `mail_webhook_set` — Set the required HTTPS endpoint on the project's Prod application using its Prod environment ID.

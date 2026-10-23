@@ -7,6 +7,6 @@ The API, CLI and MCP return `mail_domain_required` with HTTP 409. Repeating the 
 
 ## What to do
 
-This app declares mail.enabled. Configure the project's own sender domain with 'ohmyhost mail setup' using its Prod environment ID, or set mail.enabled to false if the app sends no mail, then plan again.
+This app declares mail.enabled. Configure a sender with 'ohmyhost mail setup' or explicitly attach an authorized workspace sender using the project's Prod environment ID. Reuse first requires proof of the intended application hostname with the same registrable main domain; declare and verify that identity before mail-gated deployment. Then plan again.
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

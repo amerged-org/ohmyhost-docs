@@ -79,6 +79,23 @@
 | `operation_logs` | `operation_id` | Read |
 | `function_runs_list` | `project_id`, `environment_id` | Read |
 | `operation_reconcile` | `operation_id`, `idempotency_key`, `confirmed` | Change or prepare a change |
+| `workspace_mail_domain_dns_revoke` | `organization_id`, `mail_domain_id`, `expected_revision`, `idempotency_key`, `confirmed` | Change or prepare a change |
+| `application_domain_identity_authorization_revoke` | `project_id`, `expected_revision`, `idempotency_key`, `confirmed` | Change or prepare a change |
+| `workspace_mail_domains_list` | `organization_id` | Read |
+| `workspace_mail_domain_create` | `organization_id`, `domain`, `sending`, `idempotency_key` | Change or prepare a change |
+| `workspace_mail_domain_get` | `organization_id`, `mail_domain_id` | Read |
+| `workspace_mail_domain_retire` | `organization_id`, `mail_domain_id`, `expected_revision`, `idempotency_key`, `confirmed` | Change or prepare a change |
+| `workspace_mail_domain_dns_authorize` | `organization_id`, `mail_domain_id`, `expected_revision`, `zone`, `idempotency_key` | Change or prepare a change |
+| `workspace_mail_domain_dns_status` | `organization_id`, `mail_domain_id` | Read |
+| `mail_binding_get` | `project_id`, `environment_id` | Read |
+| `mail_binding_set` | `project_id`, `environment_id`, `mail_domain_id`, `sending`, `sender_addresses`, `default_from`, `default_reply_to`, `expected_revision`, `idempotency_key` | Change or prepare a change |
+| `mail_binding_detach` | `project_id`, `environment_id`, `expected_revision`, `idempotency_key`, `confirmed` | Change or prepare a change |
+| `application_domain_identity_get` | `project_id` | Read |
+| `application_domain_identity_declare` | `project_id`, `hostname`, `idempotency_key` | Change or prepare a change |
+| `application_domain_identity_verify` | `project_id`, `expected_revision`, `idempotency_key` | Change or prepare a change |
+| `application_domain_identity_revoke` | `project_id`, `expected_revision`, `idempotency_key`, `confirmed` | Change or prepare a change |
+| `application_domain_identity_authorize` | `project_id`, `expected_revision`, `zone`, `idempotency_key` | Change or prepare a change |
+| `application_domain_identity_authorization_status` | `project_id` | Read |
 | `mail_setup` | `project_id`, `environment_id`, `domain`, `sending`, `receiving`, `idempotency_key` | Change or prepare a change |
 | `mail_status` | `project_id`, `environment_id` | Read |
 | `mail_webhook_set` | `project_id`, `environment_id`, `url`, `idempotency_key` | Change or prepare a change |

@@ -12,6 +12,759 @@ servers:
 security:
   - BearerAuth: []
 paths:
+  /v1/organizations/{organization_id}/mail-domains:
+    get:
+      operationId: listWorkspaceMailDomains
+      summary: List authorized workspace sending domains
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceMailDomainPage"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    post:
+      operationId: createWorkspaceMailDomain
+      summary: Create a workspace sending domain
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateWorkspaceMailDomainRequest"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceMailDomain"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/organizations/{organization_id}/mail-domains/{mail_domain_id}:
+    get:
+      operationId: getWorkspaceMailDomain
+      summary: Read one authorized workspace sending domain
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - name: mail_domain_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceMailDomain"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    delete:
+      operationId: retireWorkspaceMailDomain
+      summary: Retire an unused workspace mail domain
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - name: mail_domain_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MailRevisionRequest"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/WorkspaceMailDomain"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/organizations/{organization_id}/mail-domains/{mail_domain_id}/dns-authorization:
+    post:
+      operationId: authorizeWorkspaceMailDomainDns
+      summary: Authorize exact sender-domain DNS management
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - name: mail_domain_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SharedMailDnsAuthorizationRequest"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudflareDnsAuthorization"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    get:
+      operationId: getWorkspaceMailDomainDnsAuthorization
+      summary: Read sender-domain DNS authorization
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - name: mail_domain_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudflareDnsAuthorizationStatus"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    delete:
+      operationId: revokeWorkspaceMailDomainDnsAuthorization
+      summary: Revoke workspace mail DNS management without changing sending
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - name: mail_domain_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MailRevisionRequest"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudflareDnsAuthorizationStatus"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/environments/{environment_id}/mail-domain-binding:
+    get:
+      operationId: getProjectMailDomainBinding
+      summary: Read project sender settings
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - name: environment_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectMailDomainBinding"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    put:
+      operationId: putProjectMailDomainBinding
+      summary: Attach or update a same-main-domain sender
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - name: environment_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ProjectMailDomainBindingRequest"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectMailDomainBinding"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    delete:
+      operationId: detachProjectMailDomainBinding
+      summary: Detach only the selected project sender
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - name: environment_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MailRevisionRequest"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ProjectMailDomainBinding"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/application-domain-identity:
+    get:
+      operationId: getApplicationDomainIdentity
+      summary: Read the intended application domain proof
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationDomainIdentity"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    put:
+      operationId: declareApplicationDomainIdentity
+      summary: Declare an intended application domain without switching traffic
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/ApplicationDomainIdentityRequest"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationDomainIdentity"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    delete:
+      operationId: revokeApplicationDomainIdentity
+      summary: Revoke application domain proof and dependent shared sends
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MailRevisionRequest"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationDomainIdentity"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/application-domain-identity/verify:
+    post:
+      operationId: verifyApplicationDomainIdentity
+      summary: Verify the current application DNS challenge
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MailRevisionRequest"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApplicationDomainIdentity"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/application-domain-identity/dns-authorization:
+    post:
+      operationId: authorizeApplicationDomainIdentityDns
+      summary: Authorize only the frozen application TXT challenge
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SharedMailDnsAuthorizationRequest"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudflareDnsAuthorization"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    get:
+      operationId: getApplicationDomainIdentityDnsAuthorization
+      summary: Read application proof DNS authorization
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudflareDnsAuthorizationStatus"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    delete:
+      operationId: revokeApplicationDomainIdentityDnsAuthorization
+      summary: Revoke application proof DNS management without switching traffic
+      description: Explicit workspace sender authority and target project authority are checked
+        independently. Shared sending requires current verified application identity with the same
+        registrable main domain. Receiving and mailbox routing remain separate.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: project_id
+          in: path
+          required: true
+          schema:
+            $ref: "#/components/schemas/Ulid"
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MailRevisionRequest"
+      responses:
+        "200":
+          description: Authorized exact resource result.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CloudflareDnsAuthorizationStatus"
+        "400":
+          $ref: "#/components/responses/Problem"
+        "401":
+          $ref: "#/components/responses/Problem"
+        "402":
+          $ref: "#/components/responses/Problem"
+        "403":
+          $ref: "#/components/responses/Problem"
+        "404":
+          $ref: "#/components/responses/Problem"
+        "409":
+          $ref: "#/components/responses/Problem"
+        "429":
+          $ref: "#/components/responses/Problem"
+        "503":
+          $ref: "#/components/responses/Problem"
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
   /v1/me/profile:
     get:
       operationId: getAccountProfile
@@ -4063,6 +4816,254 @@ components:
         organization and restricted to their enabled product permissions. Session-only onboarding
         and session revocation require an interactive access JWT. No cookie session is assumed.
   schemas:
+    WorkspaceMailDomain:
+      type: object
+      additionalProperties: false
+      required:
+        - domain_id
+        - organization_id
+        - domain
+        - registrable_domain
+        - revision
+        - status
+        - sending
+        - receiving
+        - configured_at
+        - observed_at
+        - dns_records
+        - bindings_count
+      properties:
+        domain_id:
+          $ref: "#/components/schemas/Ulid"
+        organization_id:
+          $ref: "#/components/schemas/Ulid"
+        domain: &a1
+          type: string
+          minLength: 4
+          maxLength: 253
+          pattern: ^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z]{2,63}$
+        registrable_domain: *a1
+        revision: &a5
+          type: integer
+          minimum: 1
+        status:
+          type: string
+          enum:
+            - active
+            - retiring
+            - retired
+        sending: &a2
+          type: string
+          enum:
+            - disabled
+            - pending
+            - ready
+            - failed
+        receiving: *a2
+        configured_at: &a3
+          type: string
+          format: date-time
+        observed_at: &a8
+          oneOf:
+            - *a3
+            - type: "null"
+        dns_records:
+          type: array
+          items:
+            $ref: "#/components/schemas/ManagedMailDnsRecord"
+        bindings_count: &a4
+          type: integer
+          minimum: 0
+    WorkspaceMailDomainPage:
+      type: object
+      additionalProperties: false
+      required:
+        - items
+      properties:
+        items:
+          type: array
+          items:
+            $ref: "#/components/schemas/WorkspaceMailDomain"
+          maxItems: 100
+    CreateWorkspaceMailDomainRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - domain
+        - sending
+      properties:
+        domain: *a1
+        sending:
+          type: boolean
+          const: true
+    MailRevisionRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - expected_revision
+      properties:
+        expected_revision: *a4
+    SharedMailDnsAuthorizationRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - expected_revision
+        - zone
+      properties:
+        expected_revision: *a5
+        zone: *a1
+    ProjectMailDomainBindingRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - mail_domain_id
+        - sending
+        - sender_addresses
+        - default_from
+        - default_reply_to
+        - expected_revision
+      properties:
+        mail_domain_id:
+          $ref: "#/components/schemas/Ulid"
+        sending:
+          type: boolean
+        sender_addresses:
+          type: array
+          minItems: 1
+          maxItems: 32
+          uniqueItems: true
+          items: &a6
+            type: string
+            minLength: 3
+            maxLength: 254
+        default_from: *a6
+        default_reply_to: &a7
+          oneOf:
+            - *a6
+            - type: "null"
+        expected_revision: *a4
+    ApplicationDomainIdentitySummary:
+      type: object
+      additionalProperties: false
+      required:
+        - hostname
+        - registrable_domain
+        - revision
+        - status
+      properties:
+        hostname: *a1
+        registrable_domain: *a1
+        revision: *a5
+        status:
+          type: string
+          enum:
+            - pending
+            - verified
+            - expired
+            - revoked
+    ProjectMailDomainBinding:
+      type: object
+      additionalProperties: false
+      required:
+        - mail_domain_id
+        - organization_id
+        - project_id
+        - environment_id
+        - revision
+        - sending
+        - sender_addresses
+        - default_from
+        - default_reply_to
+        - legacy
+        - status
+        - application_domain_identity
+      properties:
+        mail_domain_id:
+          $ref: "#/components/schemas/Ulid"
+        organization_id:
+          $ref: "#/components/schemas/Ulid"
+        project_id:
+          $ref: "#/components/schemas/Ulid"
+        environment_id:
+          $ref: "#/components/schemas/Ulid"
+        revision: *a5
+        sending:
+          type: boolean
+        sender_addresses:
+          type: array
+          maxItems: 32
+          uniqueItems: true
+          items: *a6
+        default_from: *a7
+        default_reply_to: *a7
+        legacy:
+          type: boolean
+        status:
+          type: string
+          enum:
+            - active
+            - detached
+            - suspended
+        application_domain_identity:
+          oneOf:
+            - $ref: "#/components/schemas/ApplicationDomainIdentitySummary"
+            - type: "null"
+    ApplicationDomainIdentityRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - hostname
+      properties:
+        hostname: *a1
+    ApplicationDomainIdentity:
+      type: object
+      additionalProperties: false
+      required:
+        - organization_id
+        - project_id
+        - hostname
+        - registrable_domain
+        - status
+        - revision
+        - challenge
+        - verified_at
+        - expires_at
+      properties:
+        organization_id:
+          $ref: "#/components/schemas/Ulid"
+        project_id:
+          $ref: "#/components/schemas/Ulid"
+        hostname: *a1
+        registrable_domain: *a1
+        status:
+          type: string
+          enum:
+            - pending
+            - verified
+            - expired
+            - revoked
+        revision: *a5
+        challenge:
+          type: object
+          additionalProperties: false
+          required:
+            - type
+            - name
+            - value
+          properties:
+            type:
+              type: string
+              const: TXT
+            name:
+              type: string
+              minLength: 4
+              maxLength: 253
+            value:
+              type: string
+              minLength: 16
+              maxLength: 255
+        verified_at: *a8
+        expires_at: *a3
     ManagedMailDomainRequest:
       type: object
       additionalProperties: false
@@ -4588,7 +5589,7 @@ components:
         rates:
           type: array
           minItems: 1
-          maxItems: 32
+          maxItems: 50
           items:
             type: object
             additionalProperties: false
@@ -5631,7 +6632,7 @@ components:
           pattern: ^\s*(?:SELECT|WITH)\b
         parameters:
           type: array
-          maxItems: 32
+          maxItems: 50
           items:
             oneOf:
               - type: string
@@ -7215,7 +8216,7 @@ components:
             - isolated
         effects: &a1
           type: array
-          maxItems: 32
+          maxItems: 50
           items:
             type: string
             minLength: 1

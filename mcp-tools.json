@@ -3126,6 +3126,764 @@
       }
     },
     {
+      "name": "workspace_mail_domain_dns_revoke",
+      "description": "Revoke the selected workspace sender DNS grant at its current revision with explicit confirmation. This does not retire the sender or remove existing DNS records.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "organization_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "mail_domain_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "organization_id",
+          "mail_domain_id",
+          "expected_revision",
+          "idempotency_key",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "application_domain_identity_authorization_revoke",
+      "description": "Revoke the current application identity DNS grant with explicit confirmation. The application hostname and its verified proof remain unchanged; no website routing or DNS records are removed.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "expected_revision",
+          "idempotency_key",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "workspace_mail_domains_list",
+      "description": "List only workspace sender domains this account and connected client may read. Project edit consent alone grants no sender-domain access.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "organization_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "organization_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "workspace_mail_domain_create",
+      "description": "Create one workspace-owned transactional sender domain. Requires explicit workspace mail administration. This creates no mailbox and preserves existing MX records.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "organization_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "domain": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 253
+          },
+          "sending": {
+            "type": "boolean",
+            "const": true
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "organization_id",
+          "domain",
+          "sending",
+          "idempotency_key"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "workspace_mail_domain_get",
+      "description": "Read sender verification, lifecycle, revision and DNS records for one authorized workspace resource.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "organization_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "mail_domain_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "organization_id",
+          "mail_domain_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "workspace_mail_domain_retire",
+      "description": "Retire an explicitly selected workspace sender only after every send and inbound reference is detached and provider effects settle. Requires current revision and explicit confirmation. Retain the same request key after uncertainty.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "organization_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "mail_domain_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "organization_id",
+          "mail_domain_id",
+          "expected_revision",
+          "idempotency_key",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "workspace_mail_domain_dns_authorize",
+      "description": "Request human Cloudflare consent for this selected workspace sender, zone and revision. No provider credentials are accepted. Open the returned link for the human; never approve it automatically.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "organization_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "mail_domain_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "zone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 253
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "organization_id",
+          "mail_domain_id",
+          "expected_revision",
+          "zone",
+          "idempotency_key"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "workspace_mail_domain_dns_status",
+      "description": "Read exact workspace sender DNS authorization status. An existing verified resource needs no new DNS grant merely to attach a same-domain project.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "organization_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "mail_domain_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "organization_id",
+          "mail_domain_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "mail_binding_get",
+      "description": "Read the Prod sender binding and per-project From addresses, default From and default Reply-To. Dev uses this logical project sender identity.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "mail_binding_set",
+      "description": "Attach a verified workspace sender or update its project settings. Requires target project edit and explicit sender use permission. The verified application and sender must share the registrable main domain. Set exact From addresses; no per-prefix DNS is needed. Reply-To may name an external existing mailbox and a per-message value overrides the default. Attaching changes no sender DNS and grants no receiving access.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "mail_domain_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "sending": {
+            "type": "boolean"
+          },
+          "sender_addresses": {
+            "minItems": 1,
+            "maxItems": 32,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "maxLength": 320,
+              "format": "email",
+              "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+            }
+          },
+          "default_from": {
+            "type": "string",
+            "maxLength": 320,
+            "format": "email",
+            "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "default_reply_to": {
+            "anyOf": [
+              {
+                "type": "string",
+                "maxLength": 320,
+                "format": "email",
+                "pattern": "^(?!\\.)(?!.*\\.\\.)([A-Za-z0-9_'+\\-\\.]*)[A-Za-z0-9_+-]@([A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "mail_domain_id",
+          "sending",
+          "sender_addresses",
+          "default_from",
+          "default_reply_to",
+          "expected_revision",
+          "idempotency_key"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "mail_binding_detach",
+      "description": "Detach only this project send binding with current revision and explicit confirmation. Sibling senders, provider verification and the exclusive inbound owner remain intact.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "expected_revision",
+          "idempotency_key",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "application_domain_identity_get",
+      "description": "Read the project intended application hostname, current revision and ownership proof. An awaiting deployment declaration or technical OMH hostname alone is not verified customer-domain identity.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "application_domain_identity_declare",
+      "description": "Declare the intended customer application hostname before deployment. Returns a project-bound TXT ownership challenge. This does not route website traffic or prove ownership; verify the challenge before attaching a shared sender.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "hostname": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 253
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "hostname",
+          "idempotency_key"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "application_domain_identity_verify",
+      "description": "Verify the exact current project and hostname TXT challenge independently of deployment. Read the resulting proof before attaching a same-main-domain workspace sender.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "expected_revision",
+          "idempotency_key"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "application_domain_identity_revoke",
+      "description": "Revoke only the selected current application-domain proof with explicit confirmation. This does not delete or retarget the website. Sender reuse requires a current eligible identity.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "expected_revision",
+          "idempotency_key",
+          "confirmed"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "application_domain_identity_authorize",
+      "description": "Request exact-purpose Cloudflare consent to write this project hostname ownership challenge at the current revision. Open the private authorization URL for the human; never approve it automatically. Manual DNS remains available.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "expected_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "zone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 253
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "expected_revision",
+          "zone",
+          "idempotency_key"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "application_domain_identity_authorization_status",
+      "description": "Read the selected project application-domain identity DNS authorization status. Zone visibility or consent alone is not ownership proof; run verification.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
       "name": "mail_setup",
       "description": "Configure the customer's one production mail domain using the project Prod environment ID, only when the customer wants mail or the app declares mail.enabled; hosting needs no mail domain and none is registered automatically. The Dev and Prod application URLs do not create separate mail domains. Ask whether they want sending and receiving. Configure sending first; receiving requires mail_webhook_set, application signature verification and mail_webhook_verify. Preserve existing mailbox MX records. No Resend account or key is needed.",
       "inputSchema": {
