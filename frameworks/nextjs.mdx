@@ -7,9 +7,11 @@ Run `ohmyhost init --dry-run --json` in the Next.js project. Keep an exact packa
 
 ## Supported versions and build
 
-Next.js needs at least its security floor, with no upper bound: `15.5.27` on 15.x and `16.3.8` from 16 on. Prereleases and older majors are refused. The version that the committed `package-lock.json` or `pnpm-lock.yaml` resolves decides; otherwise the exact version or `^`/`~` range in `package.json` does, and a range spanning the floor stays `pending` until the build checks the installed version. A newer release passes this check but must still build: OpenNext refuses a Next.js major it does not support yet. Next.js 15 builds stop about 21 October 2026, so use Next.js 16 for new work. Pin exact `react` and `react-dom` versions and commit the matching package-manager lockfile.
+Next.js requires stable `16.4.1` or later. Every Next.js 15 release, Next.js 16.4.0 and older, and prereleases are refused. The security floor is enforced on new plans and builds in Dev and Prod; existing deployments need a rebuild to adopt an updated application dependency.
 
-Keep `scripts.build` as `next build`. The service supplies OpenNext `1.20.9` and adds `--webpack` for Next.js 16 and later; Next.js 15 uses its normal build without that flag. Next.js 16 also accepts `next build --webpack`. A committed `open-next.config.ts` is ignored because the service writes its own OpenNext configuration. Use one default-exported `next.config.js`, `.mjs` or `.ts`; do not set `output: standalone`, `output: export` or a non-root `basePath` or `assetPrefix`.
+The version resolved by the committed `package-lock.json` or `pnpm-lock.yaml` decides; otherwise the exact version or `^`/`~` range in `package.json` does, and a range spanning the floor stays `pending` until the build checks the installed version. There is no upper version bound in that security check, but a newer release must still build: OpenNext refuses a Next.js major it does not support yet. Pin exact `react` and `react-dom` versions and commit the matching package-manager lockfile.
+
+Keep `scripts.build` as `next build`. The service supplies OpenNext `1.20.9` and adds `--webpack`; `next build --webpack` is also accepted. A committed `open-next.config.ts` is ignored because the service writes its own OpenNext configuration. Use one default-exported `next.config.js`, `.mjs` or `.ts`; do not set `output: standalone`, `output: export` or a non-root `basePath` or `assetPrefix`.
 
 The Webpack build ignores Turbopack rules. `create-next-app` 16.4 with Tailwind CSS, its `--yes` default, loads Tailwind only through the Turbopack rule `@tailwindcss/turbopack`, so planning refuses it as `next_tailwind_turbopack_only` until the application root has a PostCSS configuration that Webpack reads. Add `postcss.config.mjs` with `export default { plugins: { "@tailwindcss/postcss": {} } }`, remove the Turbopack rule, and use the package manager to add `@tailwindcss/postcss` at the same version as `tailwindcss` and remove `@tailwindcss/turbopack`, so the lockfile records both. An app created with `--no-tailwind` needs no change.
 
@@ -96,9 +98,10 @@ import type { ThemeProviderProps } from "next-themes";
 export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   const [documentNonce] = useState<string | undefined>(() => {
     if (typeof document === "undefined") return undefined;
-    return document.head.querySelector<HTMLMetaElement>(
-      'meta[property="csp-nonce"]',
-    )?.content || undefined;
+    return (
+      document.head.querySelector<HTMLMetaElement>('meta[property="csp-nonce"]')
+        ?.content || undefined
+    );
   });
 
   return (

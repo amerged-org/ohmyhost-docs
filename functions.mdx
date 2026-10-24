@@ -16,7 +16,9 @@ export default {
 };
 ```
 
-`fetch` is required even for a schedules-only app and answers every request of the environment. The module receives the same bindings as a framework app: the application database, files, mail, [runtime secrets](/secrets) and the declared egress origins. Server fetch reaches only `runtime.egress.allow`: at most thirteen exact public HTTPS origins, no path, trailing slash, credentials, port, IP literal or local name. Undeclared is 403 Egress denied; a redirect or unreachable upstream is 502 Egress upstream unavailable (304 preserved). There is no build.command or build.output; `ohmyhost init --dry-run --json` reports a missing module as a blocker.
+`fetch` is required even for a schedules-only app and answers every request of the environment. The module receives the same runtime values as a framework app: its application database binding, enabled mail/file gateway URLs and keys, [runtime secrets](/secrets) and declared egress policy. Mail and files use `(request) => fetch(request)` to their injected gateway URLs; only database calls use `OHMYHOST_DATABASE`. The platform allows gateway and signed R2 origins automatically, without a customer allow-list entry. See [Files](/files) and [Email](/email).
+
+Other server fetches reach `runtime.egress.allow`: at most thirteen exact public HTTPS customer origins, no path, trailing slash, credentials, port, IP literal or local name. Undeclared is 403 Egress denied; a redirect or unreachable upstream is 502 Egress upstream unavailable (304 preserved). There is no build.command or build.output; `ohmyhost init --dry-run --json` reports a missing module as a blocker.
 
 ## Returning HTML
 

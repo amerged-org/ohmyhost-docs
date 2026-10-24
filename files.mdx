@@ -7,26 +7,36 @@ Declare private storage only when the application needs it. `storage.jurisdictio
 
 ## Use the private runtime client
 
-Import `createPrivateStorageClient` from `@ohmyhost/customer-runtime/storage` and configure it from the hosted environment:
+Import `createPrivateStorageClient` from `@ohmyhost/customer-runtime/storage` in server code. A storage-enabled deployment provides four runtime values: `OHMYHOST_STORAGE_GATEWAY_URL`, `OHMYHOST_STORAGE_KEY`, `OHMYHOST_PROJECT_ID` and `OHMYHOST_ENVIRONMENT_ID`. Resolve them from your hosted framework request context or Worker `env`:
 
 ```ts
+import { createPrivateStorageClient } from "@ohmyhost/customer-runtime/storage";
+
 const files = createPrivateStorageClient({
   endpoint: env.OHMYHOST_STORAGE_GATEWAY_URL,
   key: env.OHMYHOST_STORAGE_KEY,
   projectId: env.OHMYHOST_PROJECT_ID,
   environmentId: env.OHMYHOST_ENVIRONMENT_ID,
-  fetch: (request) => env.OHMYHOST_STORAGE_GATEWAY.fetch(request),
+  fetch: (request) => fetch(request),
   capabilityFetch: (request) => fetch(request),
 });
 ```
 
-The gateway URL supplies the request origin for its private Service Binding; it is not a public endpoint to fetch directly. The platform supplies the binding and storage key. There is no raw `FILES` bucket or customer-managed R2 credential to copy into the app.
+Global `fetch` reaches the injected gateway URL through the platform's egress policy, which forwards supported POST routes to the private gateway. The gateway and signed R2 origins are allowed automatically, never belong in `runtime.egress.allow`, and do not count against its thirteen customer origins. Customer gateway service bindings are unsupported; a legacy binding may remain attached until a later platform release removes it. There is no raw `FILES` bucket or customer-managed R2 credential to copy into the app. Database access keeps its separate `OHMYHOST_DATABASE` binding.
+
+Run the current CLI's `ohmyhost init --dry-run --json` after adapting the code. `gateway_binding_unsupported` identifies source still referring to a legacy mail/storage gateway binding. `storage_client_missing` means storage is declared but no application source constructs `createPrivateStorageClient`; use the values and transport above. These are local inspection blockers; fixing configuration alone does not implement an upload.
+
+The client is server-only. Invalid/missing options produce non-retryable `gateway_configuration_invalid`, naming the option without exposing its value. `timeoutMilliseconds` defaults to 10,000 and accepts integers from 100 to 30,000; it bounds response headers. Keep gateway keys and signed URLs out of browser code. Do not call files or mail from the deployment health route: that probe has no egress policy.
+
+Gateway 403 `gateway_not_enabled` means enable storage and redeploy; 403 `gateway_route_denied` means use the current client's supported route, method and query. Both are final for that request and are not fixed by changing the egress allow-list. Retry 429 `gateway_rate_limited` and 503 `gateway_unavailable` after a delay with the original idempotency keys. A malformed or non-JSON response is `gateway_response_invalid`, with the received status and no raw upstream text. Report persistent gateway faults through [feedback](/feedback).
 
 Use `upload`, or `reserveUpload` followed by its signed PUT and `completeUpload`. A pending completion still needs observation. Repeat `upload()` after uncertain completion with the same bytes, `objectKey` and `idempotencyKey`: the create-only PUT's 412 completes the existing reservation. Signed upload rejection is retryable only for 5xx or 429; durable multi-object workflows persist transfer IDs before PUT and reconcile `completeUpload(transferId)`. `createSignedRead` provides a short-lived read capability; confirmed `deleteObject` completion releases stored quota. Keep signed URLs and keys out of source, logs and project notes.
 
 Files are create-once logical names per immutable data identity. Shared Dev/Prod use one namespace; isolated data uses separate namespaces. Deleting an object or letting a reservation expire never permits reuse in the same identity. A [Dev reset](/environments#change-data-assignments) assigns a fresh empty namespace, where the same logical name is reusable. Assignment changes keep existing physical locators without copying/moving blobs.
 
-The physical bucket quota is 1 GiB including open reservations; `storage_quota_exceeded` needs cleanup or a smaller upload. Object keys are 1–512 UTF-8 bytes, slash-separated segments of 1–128 letters/digits/._- starting and ending with a letter/digit. Idempotency keys use 1–128 letters/digits/._:-, and `contentType` is lowercase type/subtype with no parameters. Bad input is `gateway_request_invalid`; reused names or conflicting idempotency requests are `storage_conflict`. Expired uploads need both a new `objectKey` and `idempotencyKey`. Signed PUT/GET capabilities last at most five minutes; mint reads per response, not long-lived cache entries. Delete-pending waits until `retryAt` before the same delete key is retried. A `data_change_in_progress` response means wait for that operation; `storage_binding_data_changed` needs redeployment of that environment.
+The physical bucket quota is 1 GiB including open reservations; `storage_quota_exceeded` needs cleanup or a smaller upload. Object keys are 1–512 UTF-8 bytes, slash-separated segments of 1–128 letters/digits/._- starting and ending with a letter/digit. Idempotency keys use 1–128 letters/digits/._:-, and `contentType` is lowercase type/subtype with no parameters. Bad input is `gateway_request_invalid`; reused names or conflicting idempotency requests are `storage_conflict`. Expired uploads need both a new `objectKey` and `idempotencyKey`. Signed PUT/GET capabilities last at most five minutes; mint reads per response, not long-lived cache entries. Delete-pending waits until `retryAt` before the same delete key is retried. A `data_change_in_progress` response means wait for that operation. `storage_binding_data_changed` means the environment's data area changed during this request: read the current state and issue a new request.
+
+After an isolate or reset, redeploy the affected environment before relying on its files. Until then an older deployment follows the environment's current file area while its database calls already fail because their data identity is pinned.
 
 ## Read or delete several objects
 

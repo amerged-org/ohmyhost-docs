@@ -28,7 +28,7 @@ Do not recreate the domain or repeat correct records while verification propagat
 
 ## Send from the application
 
-Use `createTransactionalMailClient` from `@ohmyhost/customer-runtime/mail` in server-side application code. A mail-enabled deployment supplies a private `OHMYHOST_MAIL_GATEWAY` Service Binding alongside the gateway URL, project ID and the environment's mail key. Resolve these values from your hosted framework request context or Worker `env`:
+Use `createTransactionalMailClient` from `@ohmyhost/customer-runtime/mail` in server-side application code. A mail-enabled deployment supplies `OHMYHOST_MAIL_GATEWAY_URL`, `OHMYHOST_PROJECT_ID` and the environment-specific `OHMYHOST_MAIL_KEY`. Resolve these values from your hosted framework request context or Worker `env`:
 
 ```ts
 import { createTransactionalMailClient } from "@ohmyhost/customer-runtime/mail";
@@ -37,11 +37,18 @@ const mail = createTransactionalMailClient({
   endpoint: env.OHMYHOST_MAIL_GATEWAY_URL,
   key: env.OHMYHOST_MAIL_KEY,
   projectId: env.OHMYHOST_PROJECT_ID,
-  fetch: (request) => env.OHMYHOST_MAIL_GATEWAY.fetch(request),
+  fetch: (request) => fetch(request),
+  timeoutMilliseconds: 30_000,
 });
 ```
 
-The Service Binding is an object, not a `process.env` string. The gateway URL supplies the request origin; it is not a public endpoint. Bindings exist only in deployed source declaring `mail.enabled:true`, even if the project already has a verified sender. Promotion/rollback of undeclared source removes them. Missing/invalid options return non-retryable `gateway_configuration_invalid` with the failing option; enable the capability and deploy the intended commit. Do not retry through a different transport, disable placement or loosen egress rules to hide the failure. Managed mail works independently of your application's auth provider or database.
+Global `fetch` is the gateway transport. The platform's egress policy forwards `POST /v1/send` to the private mail gateway; the injected origin is allowed automatically, is never listed in `runtime.egress.allow`, and does not count against its thirteen customer origins. Customer gateway service bindings are unsupported, even if a legacy binding remains attached. Database access keeps its own `OHMYHOST_DATABASE` binding.
+
+Mail runtime values exist only in deployed source declaring `mail.enabled: true`, even if the project already has a verified sender. Promotion/rollback of undeclared source removes them. Missing/invalid options return non-retryable `gateway_configuration_invalid` with the failing option; enable the capability and deploy the intended commit. The current CLI's `ohmyhost init --dry-run --json` reports `gateway_binding_unsupported` when application source still references a legacy mail/storage gateway binding. Managed mail works independently of your application's auth provider or database.
+
+`timeoutMilliseconds` defaults to 10,000 and accepts integers from 100 to 30,000; it bounds response headers. A send can take several seconds. Keep the key on the server and preserve the original message and idempotency key after a timeout. Do not call mail or files from the deployment health route: that probe has no egress policy.
+
+Gateway 403 `gateway_not_enabled` means enable mail and redeploy; 403 `gateway_route_denied` means use the current client's supported route, method and query. Both are final for that request. They are not repaired by editing `runtime.egress.allow`. Retry 429 `gateway_rate_limited` and 503 `gateway_unavailable` after a delay, retaining the message and idempotency key. A malformed or non-JSON response is `gateway_response_invalid`, with the received HTTP status and no upstream text. Report persistent faults through [feedback](/feedback).
 
 Sending works only once status reports sending as `ready`. The from address must use the exact configured domain with a local part of letters/digits/.\_%+- (otherwise `gateway_request_invalid`,400, not retryable); without it, the gateway uses `no-reply@` on that domain. An optional `replyTo` can point to an existing mailbox.
 
@@ -68,7 +75,7 @@ Receiving additionally requires a verified HTTPS webhook in the project's Prod a
 
 The platform acts only on provider events for a domain registered to the project. Delivery is one attempt plus at most three retries, all within 72 hours of receipt; manual retries with `ohmyhost mail messages retry` use the same budget. A timeout can still mean your application committed the message, so a repeated event `id` must not repeat business effects. Each attempt and verification test has a fifteen-second timeout, follows no redirect and needs the registered HTTPS URL's direct 2xx. Treat mail content and attachments as untrusted data.
 
-The event body is `{ id, type, project_id, environment_id, data }`. Received data contains `id`, `domain`, `from`, `to[]`, `subject`, nullable `text`/`html`, `message_id`, `received_at`, `expires_at` and `attachments[]` with `id`, nullable `filename`, `content_type` and `download_path`. Use `createMailAttachmentClient` from the root `@ohmyhost/customer-runtime` package, with the same `endpoint`, `key`, `projectId` and private `fetch` as the mail client; call `download(attachment.download_path)`. Downloads above 50 MiB fail `mail_attachment_too_large`; after expires_at they fail `mail_content_expired`. Store durable content in the application and close database transactions before transfers.
+The event body is `{ id, type, project_id, environment_id, data }`. Received data contains `id`, `domain`, `from`, `to[]`, `subject`, nullable `text`/`html`, `message_id`, `received_at`, `expires_at` and `attachments[]` with `id`, nullable `filename`, `content_type` and `download_path`. Runtime attachment downloads are currently unsupported; those fields do not expose a working download route. If your application requires attachment bytes, report the missing capability through [feedback](/feedback). Do not construct an attachment URL or install a provider/agent credential in application code. Store durable message content in the application's database.
 
 `ohmyhost mail messages list` and `mail messages get` reach received messages for 72 hours for diagnosis and recovery. ohmyho.st keeps no permanent inbox; retention for your records is your application's database. The mail provider keeps email and log data under its own retention terms, separately from this 72-hour access window. `ohmyhost mail webhook disable` turns receiving off.
 

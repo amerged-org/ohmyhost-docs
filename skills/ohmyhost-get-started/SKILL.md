@@ -155,7 +155,7 @@ A customer can authorize Cloudflare before the website is live. Follow the domai
 
 ## Prepare a Next.js application
 
-For Next.js, run the portable-app inspection before deployment. Supported versions follow security floors (15.5.27 on Next.js 15, 16.3.8 from Next.js 16 on) with no upper bound; when inspection reports an unsupported version, update package.json and its lockfile to the reported `minimum` or a later stable release. Next.js 15 builds stop about 21 October 2026, when the pinned OpenNext starts refusing Next.js 15 as an unsupported major, so use Next.js 16 for new work. A `create-next-app` 16.4 app with Tailwind CSS, its `--yes` default, loads Tailwind only through a Turbopack rule that the Webpack build here ignores; planning refuses it as `next_tailwind_turbopack_only` until the application root has a PostCSS configuration, as that refusal describes. Runtime data files need Next's normal file tracing. MDX that compiles JavaScript at request time must instead compile to static ES modules during the build; the portable-app Skill describes that conversion. Verify every content route the app uses before calling a deployment complete.
+For Next.js, run the portable-app inspection before deployment. Supported versions start at the security floor 16.4.1, with no upper bound. Since the Next.js security advisories of 22 October 2026, planning and the build refuse Next.js 16.4.0 and older 16.x releases and every Next.js 15 release. A deployment that is already live keeps running, but it stays exposed to those advisories until you rebuild it on a fixed release. When inspection reports an unsupported version, update package.json and its lockfile to the reported `minimum` or a later stable release, then commit and plan the new commit. Next.js 15 builds stopped on 21 October 2026, when the pinned OpenNext started refusing Next.js 15 as an unsupported major, so a Next.js 15 app moves to Next.js 16.4.1 or later; use Next.js 16 for new work. A `create-next-app` 16.4 app with Tailwind CSS, its `--yes` default, loads Tailwind only through a Turbopack rule that the Webpack build here ignores; planning refuses it as `next_tailwind_turbopack_only` until the application root has a PostCSS configuration, as that refusal describes. Runtime data files need Next's normal file tracing. MDX that compiles JavaScript at request time must instead compile to static ES modules during the build; the portable-app Skill describes that conversion. Verify every content route the app uses before calling a deployment complete.
 
 Next.js pages rendered during the build use a private, immutable cache. Its capacity defaults to
 32 MiB; CLI/MCP 0.1.28 or later accept optional `build.ssg_cache_max_mib` in `ohmyhost.yaml`, an
@@ -174,7 +174,7 @@ exact rules.
 
 ## Step 1 — determine the state before doing anything
 
-Use CLI and local MCP version 0.1.34 or newer together. `ohmyhost whoami` and MCP
+Use CLI and local MCP version 0.1.38 or newer together. `ohmyhost whoami` and MCP
 `identity_get` return the current account's email and the credential's organizations with IDs and
 current names. Compare that email and workspace with the account the customer intended before
 changing resources. Service credentials have `email: null`.
@@ -284,7 +284,7 @@ Compare the installed versions with <https://ohmyho.st/client-release.json>: `oh
 names the CLI, and `npm ls --global --depth=0` lists both packages (`ohmyhost-mcp` has no
 `--version` flag; it starts the server). When either is missing or older, install both from the
 source already in use: the current archive URLs from that guide, or npm
-(`npm install --global @amerged/ohmyhost-cli @amerged/ohmyhost-mcp`). Both provide the same
+(`npm install --global @amerged/ohmyhost-cli@0.1.38 @amerged/ohmyhost-mcp@0.1.38`). Both provide the same
 `ohmyhost` and `ohmyhost-mcp` commands, so uninstall one pair before switching to the other.
 An older client lacks commands and rejects newer server responses with `response_contract_invalid`;
 an older MCP server reports the same case as `client_request_failed` although connection and login

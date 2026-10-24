@@ -1,6 +1,6 @@
 ---
 name: ohmyhost-troubleshoot-deployment
-description: Diagnose a failed or stalled ohmyho.st deployment, an app URL returning 402, 403, 404, 429, 502 or 503 from ohmyho.st, or a cron that did not run. Resume eligible operations, report a product bug or feature request, and follow replies. Use for queued, publishing, mail-wait, build, health-check and runtime errors; a failed operation names its deployment_id for deployment_logs. Not for starting a new release.
+description: Diagnose a failed or stalled ohmyho.st deployment, an app URL returning 402, 403, 404, 429, 502 or 503 from ohmyho.st, a cron that did not run, or mail/file client errors gateway_unavailable, gateway_timeout, gateway_route_denied or gateway_not_enabled. Resume eligible operations, report a product bug or feature request, and follow replies. Use for queued, publishing, mail-wait, build, health-check and runtime errors; a failed operation names its deployment_id for deployment_logs. Not for starting a new release.
 ---
 
 # Diagnose a deployment
@@ -56,6 +56,17 @@ after a redirect needs the final URL and its allowed origin; redirects are not f
 retry before changing source. Browser requests use `runtime.browser` declarations separately
 from server egress. These browser declarations apply to the current Next.js, Vite and TanStack
 Start web stacks; declare only the origins and capabilities the customer's app needs.
+
+Mail and files use `(request) => fetch(request)` with the injected gateway URL and environment
+key; their origins are added by the platform. A gateway 403 or 503 is not repaired by editing
+`runtime.egress.allow`. For `gateway_not_enabled`, enable the capability in `ohmyhost.yaml`
+and redeploy; for `gateway_route_denied`, use the current client's supported route and method.
+Wait after `gateway_rate_limited` (429); mail and storage share a project-keyed limit of
+1,200 calls a minute per Cloudflare location, with approximate enforcement. Retry `gateway_unavailable` (503) with the original idempotency
+keys; report persistent faults through `feedback_submit`. With status `null`, `gateway_unavailable`
+means the supplied fetch threw before a response was received. `gateway_timeout` means its
+configured wait expired. Keep raw upstream text and runtime keys out of reports. The database
+continues to use its separate `OHMYHOST_DATABASE` service binding.
 
 A video that will not play or a denied microphone is not a platform bug: add the media opt-in from the portable-app Skill's [runtime contracts](../ohmyhost-build-portable-app/references/stack-contracts.md) and redeploy.
 

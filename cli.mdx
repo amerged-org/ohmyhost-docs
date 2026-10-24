@@ -41,6 +41,10 @@ ohmyhost project list --json
 
 `ORGANIZATION_ID` comes from `whoami`. Create a unique `PROJECT_REQUEST_KEY` once and retain it for retries. `PROJECT_OPERATION_ID` is the creation response's `operation.id`. After success, select the created project's ID from the list as `PROJECT_ID`.
 
+Init's runtime contract lists the actual values the enabled capabilities need, deduplicating shared names. [Storage](/files) needs `OHMYHOST_STORAGE_GATEWAY_URL`, `OHMYHOST_STORAGE_KEY`, `OHMYHOST_PROJECT_ID` and `OHMYHOST_ENVIRONMENT_ID`; [mail](/email) needs `OHMYHOST_MAIL_GATEWAY_URL`, `OHMYHOST_MAIL_KEY` and `OHMYHOST_PROJECT_ID`. Both clients use `(request) => fetch(request)` in server code. The database keeps its `OHMYHOST_DATABASE` binding.
+
+`gateway_binding_unsupported` identifies source still referencing a legacy mail/storage gateway binding; replace that transport with the injected URL, runtime key and global fetch. `storage_client_missing` means storage is declared but the application does not construct `createPrivateStorageClient`. These are local init checks, not evidence that a real upload or send has succeeded. Use the current CLI so its guidance matches the deployed runtime, then verify the application's actual flow.
+
 ## Connect and deploy
 
 Read the saved source first and keep its binding:
