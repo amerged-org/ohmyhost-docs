@@ -174,9 +174,9 @@ exact rules.
 
 ## Step 1 — determine the state before doing anything
 
-Use CLI and local MCP version 0.1.38 or newer together. `ohmyhost whoami` and MCP
-`identity_get` return the current account's email and the credential's organizations with IDs and
-current names. Compare that email and workspace with the account the customer intended before
+Use CLI and local MCP version 0.1.39 or newer together; the native `psql` access transport needs
+0.1.39. `ohmyhost whoami` and MCP `identity_get` return the current account's email and the
+credential's organizations with IDs and current names. Compare that email and workspace with the account the customer intended before
 changing resources. Service credentials have `email: null`.
 
 If the customer's prompt names an account ("Use my ohmyho.st account user … in organization …"),
@@ -284,7 +284,7 @@ Compare the installed versions with <https://ohmyho.st/client-release.json>: `oh
 names the CLI, and `npm ls --global --depth=0` lists both packages (`ohmyhost-mcp` has no
 `--version` flag; it starts the server). When either is missing or older, install both from the
 source already in use: the current archive URLs from that guide, or npm
-(`npm install --global @amerged/ohmyhost-cli@0.1.38 @amerged/ohmyhost-mcp@0.1.38`). Both provide the same
+(`npm install --global @amerged/ohmyhost-cli@0.1.40 @amerged/ohmyhost-mcp@0.1.40`). Both provide the same
 `ohmyhost` and `ohmyhost-mcp` commands, so uninstall one pair before switching to the other.
 An older client lacks commands and rejects newer server responses with `response_contract_invalid`;
 an older MCP server reports the same case as `client_request_failed` although connection and login
