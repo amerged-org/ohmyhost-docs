@@ -3,7 +3,7 @@ title: "Private application files"
 description: "Upload, inspect, read and clean up files through the managed storage client."
 ---
 
-Declare private storage only when the application needs it. `storage.jurisdiction` must equal the immutable project region; offline init defaults to us unless --region eu is supplied and preserves existing config. Run `ohmyhost init --dry-run --json` after adding the capability; the inspection reports a missing runtime client instead of treating configuration alone as a working upload.
+Declare private storage only when the application needs it. `storage.jurisdiction` must match an existing R2 bucket or reservation's recorded jurisdiction. Database and operator project-region migrations preserve that location; keep the existing storage configuration even if the project's current region differs. For new storage without a recorded bucket or reservation, use the project region. Read the `Storage jurisdiction` line from `ohmyhost project context --project "$PROJECT_ID" --json` before changing configuration. If it says `unavailable`, report the request through [feedback](/feedback) instead of guessing. Offline init defaults to `us` unless `--region eu` is supplied and preserves existing config. Run `ohmyhost init --dry-run --json` after adding the capability; the inspection reports a missing runtime client instead of treating configuration alone as a working upload.
 
 ## Use the private runtime client
 

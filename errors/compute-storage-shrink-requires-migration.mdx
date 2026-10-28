@@ -1,0 +1,12 @@
+---
+title: "Compute storage shrink requires migration"
+description: "What the `compute_storage_shrink_requires_migration` error means and what to do next."
+---
+
+The API, CLI and MCP return `compute_storage_shrink_requires_migration` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+This size includes less storage than the current volume. Keep the current database and plan an explicit data migration to a fresh smaller volume; do not retry the resize or delete data automatically.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

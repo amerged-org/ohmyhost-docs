@@ -13,9 +13,9 @@ Use `UTC_MONTH` in `YYYY-MM` format. `credits account` reports the effective Fre
 
 ## What contributes to consumption
 
-Builds, active database compute, storage and supported service operations are measured through their actual meters. [Published credit prices](/pricing) list each quantity and rate. Quiet databases can suspend compute, while retained storage/history and deployed scripts still cost credits. A query may wake a suspended database. Shared Dev/Prod use one data area; isolated areas are metered separately. [Change data assignments](/environments#change-data-assignments) explains the four confirmed actions without copying data or changing rates.
+Builds, active database compute, storage and supported service operations are measured through their actual meters. [Published credit prices](/pricing) list each quantity and rate. Quiet databases sleep and stop active-RAM charges, and database disk and seven-day backups are included; customer files and retained deployed scripts still cost credits at their own rates. A query may wake a suspended database. Shared Dev/Prod use one data area; isolated areas are metered separately. [Change data assignments](/environments#change-data-assignments) explains the four confirmed actions without copying data or changing rates.
 
-Performance database pricing changes the database-compute rate. Do not multiply the complete bill or already valued usage again.
+Database usage is selected RAM multiplied by active time. Do not multiply the complete bill or already valued usage again.
 
 ## Read the balance correctly
 
@@ -23,4 +23,4 @@ Monthly Free and Paid credits expire on the date shown in Billing and are spent 
 
 Some measurements arrive later than the original operation. A low current total is not a guarantee that all running work has settled. Optional [project budgets](/budgets) default to **Continue**: the project keeps running after the tracking threshold. A project pauses at its budget only when the workspace Owner explicitly selects **Stop**.
 
-[Billing and recharge](/billing) · [Database profiles](/database).
+[Billing and recharge](/billing) · [Database sizes](/database).

@@ -73,23 +73,31 @@ await db.transaction().execute(async (trx) => {
 
 `AppDatabase`, table names and values are your application's types/data. The adapter implements BEGIN/COMMIT or ROLLBACK through the held-connection API and releases that scope; the same limits apply. Library tests cover that protocol, but do not establish real hosted RPC/PostgreSQL behavior or signup/mail. Verify the application on its deployed private binding. It is not a Drizzle support claim or a pg-proxy transaction substitute. Keep network calls outside the transaction.
 
-## Compute profiles
+## Database sizes
 
-| Profile          | Compute | Memory | Idle suspension |
-| ---------------- | ------- | ------ | --------------- |
-| Free standard    | 0.25 CU | 1 GB   | 60 seconds      |
-| Paid standard    | 0.5 CU  | 2 GB   | 60 seconds      |
-| Paid performance | 1 CU    | 4 GB   | 300 seconds     |
+| RAM     | Included total disk | Credits per active hour | Access       |
+| ------- | ------------------- | ----------------------: | ------------ |
+| 256 MiB | 500 MiB             |                      10 | Free or Paid |
+| 512 MiB | 1 GiB               |                      20 | Paid         |
+| 1 GiB   | 2 GiB               |                      40 | Paid         |
+| 2 GiB   | 4 GiB               |                      80 | Paid         |
+| 4 GiB   | 8 GiB               |                     160 | Paid         |
 
-Performance costs 2.5 times Paid standard database-compute credits for equal active duration. Its longer idle window can also add active minutes. Storage and retained history consume credits independently of suspended compute.
+Active time is prorated at the selected RAM size. Total disk includes PostgreSQL files, WAL and filesystem overhead, so application records have less than the nominal space. Seven-day operational backups are included, also while asleep. There are no separate database CPU, network, connection, disk or backup charges. Application Worker usage and customer files retain their separate rates.
 
-## Change the profile
+Databases sleep after 300 idle seconds. Sleeping has no active-RAM charge; the next query wakes the database and can take longer. Avoid periodic SQL health queries. `provisioning` means initial creation, `cold` means an existing sleeping database, and `warm` means running. Shared Dev/Prod uses one physical database; isolated databases are billed independently.
+
+New managed PGCF databases follow the project's selected US or EU region. Existing projects moved to US with their owner's authorization use US databases. `database compute get` reports the actual database region. Existing R2 file and backup locations remain recorded through an authorized database or project-region migration; read storage jurisdiction separately through project context.
+
+## Change the size
 
 ```sh
-ohmyhost database compute set --project "$PROJECT_ID" --environment dev --profile performance --idempotency-key "$COMPUTE_REQUEST_KEY" --yes --json
+ohmyhost database compute set --project "$PROJECT_ID" --environment dev --memory-mib 512 --idempotency-key "$COMPUTE_REQUEST_KEY" --yes --json
 ```
 
-Explain the price and possible brief connection interruption first. Use `--profile standard` to return to standard, and choose `prod` only when that is the intended target. Poll the returned operation, then read actual compute again. Resizing preserves SQL data. A shared placement affects both logical environments.
+Choose 256, 512, 1024, 2048 or 4096 MiB. MCP uses `database_compute_set` with `memory_mib` and `confirm: true`; REST uses `memory_mib`. Explain the price and possible brief connection interruption first. Choose `prod` only when intended; shared data changes both environments. Keep one idempotency key, poll the original operation, and read actual compute after it succeeds.
+
+An increase preserves SQL data. In-place volume shrink is refused; choosing a smaller disk requires a separate authorized data migration. Never reset data to satisfy a resize, and do not assume loss of Paid access permits shrinking an existing volume. Larger sizes require Paid. The old `profile` input is transitional legacy-provider support; use the explicit RAM selection for PGCF.
 
 ## Query Dev or Prod
 
@@ -133,20 +141,20 @@ Retain the exact request and key after a lost response. Repeating a key that alr
 
 ## Connect with psql or a SQL client
 
-For interactive work you can issue a direct PostgreSQL login for your own project database. Each credential is time-bound, revocable and returned **exactly once**:
+For interactive work you can issue a temporary PostgreSQL login for your own project database. Each credential is time-bound, revocable and returned **exactly once**:
 
 ```sh
 ohmyhost database access create --project "$PROJECT_ID" --environment dev --mode read --ttl 1h --label laptop --yes --json
 ```
 
-The response contains `connection_uri` and `psql_command` one single time; they are never retrievable again. Use them immediately, and never store a connection string or password in files, notes, source or commit messages. Later reads show metadata only:
+The credential `connection_uri` is returned once and is never retrievable again. Keep it and its password out of command arguments, files, notes, source and logs. PGCF also returns `provider: "pgcf"`, `transport: "wss"` and `websocket_url`: its PostgreSQL URI is a credential carrier, not a public TCP endpoint for an arbitrary SQL client. The returned `psql_command` is the secret-free CLI helper below, which creates its own access. Later reads show metadata only:
 
 ```sh
 ohmyhost database access list --project "$PROJECT_ID" --json
 ohmyhost database access revoke --project "$PROJECT_ID" --access "$ACCESS_ID" --yes --json
 ```
 
-To open a session without handling the URI yourself, let the CLI start your local `psql`. It issues the credential, passes the password to `psql` through its private environment and revokes the credential when you exit:
+To open a session without handling the URI yourself, let the CLI start your local `psql`. It issues the credential, opens a local loopback bridge over verified WSS, passes the password to `psql` through its private environment, and closes the bridge and revokes the credential when you exit:
 
 ```sh
 ohmyhost database psql --project "$PROJECT_ID" --environment dev --mode write
@@ -159,7 +167,7 @@ MCP exposes `database_access_create` (`mode: "write"` requires `confirmed: true`
 | Mode               | `read` (default, read-only session) or `write` (the application's own INSERT/UPDATE/DELETE rights) |
 | Lifetime           | `--ttl` 5 minutes to 24 hours, one hour by default                                                 |
 | Active credentials | at most three per project environment                                                              |
-| Database           | `neondb`, TLS required (`sslmode=require`)                                                         |
+| Database           | PGCF: the exact 20-character database identity in the credential, over verified WSS. `neondb` with `sslmode=require` applies only to a legacy transitional Neon credential |
 
 No mode can change schema or roles: schema changes remain versioned [GitHub migrations](/migrations), and application row-level security applies to these sessions exactly as it does to `database query` and `database write`. After expiry PostgreSQL refuses new logins and the platform ends remaining sessions and removes the role within 15 minutes. An open session wakes compute and is metered like any other database use, under the same credit grace and project Stop budgets. Revoke as soon as you are finished instead of waiting for expiry.
 

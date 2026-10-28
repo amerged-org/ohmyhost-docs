@@ -29,3 +29,7 @@ A completed ZIP is retained seven days. Its authorized signed download URL lasts
 Your chosen automation tool can download the completed encrypted ZIP and upload it to your own Google Drive, S3 or R2. Those are customer automation destinations, not built-in scheduled exports. A restore is a separate deliberate action into a selected database; never overwrite production data merely to test an export.
 
 [Export Skill](https://ohmyho.st/skills/ohmyhost-export-database/SKILL.md) · [Project context](/project-context).
+
+## Included database backups
+
+Each managed database size includes seven days of operational backups in Cloudflare R2, separately from the on-demand SQL export described above. These backups do not create a customer-selected bucket destination or an automatic downloadable ZIP. SQL exports still require the user-held password and their own request; their retention and limits remain as stated above.

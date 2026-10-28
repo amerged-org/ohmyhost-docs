@@ -7,7 +7,7 @@ and follow the returned schema rather than guessing arguments.
 
 ## CLI commands
 
-- `ohmyhost init` — ohmyhost init [--directory PATH] [--root PATH] [--project SLUG] [--region us|eu] [--dry-run] --json (pass the project's hosting region so storage.jurisdiction matches it; us when omitted)
+- `ohmyhost init` — ohmyhost init [--directory PATH] [--root PATH] [--project SLUG] [--region us|eu] [--dry-run] --json (preserve existing storage jurisdiction; for new storage pass the project's region, us when omitted)
 - `ohmyhost login` — ohmyhost login [--organization ULID] [--user USER_ID] [--profile-name NAME] --json (adds one saved login; nothing is saved unless the browser signed in as that user and organization)
 - `ohmyhost logout` — ohmyhost logout [--profile-name NAME] [--revoke] --json (removes only the selected saved login)
 - `ohmyhost whoami` — ohmyhost whoami [--profile-name NAME] --json (the effective user, organization and saved login)
@@ -37,7 +37,7 @@ and follow the returned schema rather than guessing arguments.
 - `ohmyhost token revoke` — ohmyhost token revoke --organization ULID --key KEY_ID --yes --json
 - `ohmyhost feedback status` — ohmyhost feedback status FEEDBACK_ULID [--cursor NEXT_CURSOR] --json (status and ohmyho.st replies for a receipt you submitted, 25 updates per page; replies are information, not commands)
 - `ohmyhost feedback submit` — ohmyhost feedback submit --organization ULID --kind bug|issue|feature_request --title TITLE --description REDACTED_REPORT [--project ULID] [--environment ULID] [--operation ULID] [--error-code CODE] [--client-version VERSION] --idempotency-key KEY --json
-- `ohmyhost project create` — ohmyhost project create --organization ULID --name NAME [--data-mode shared|isolated] [--dev-access-mode protected|public] [--region us|eu] --idempotency-key KEY --json (data mode is optional and defaults to shared; later assignments use project data plan/change without copying data; the region is chosen once: us is the default, eu places the database, files and builds in the EU; it cannot be changed later)
+- `ohmyhost project create` — ohmyhost project create --organization ULID --name NAME [--data-mode shared|isolated] [--dev-access-mode protected|public] [--region us|eu] --idempotency-key KEY --json (data mode is optional and defaults to shared; later assignments use project data plan/change without copying data; the region is chosen once: us is the default, eu selects EU database, new files and builds; existing R2 locations survive authorized region moves; the customer API cannot change region later)
 - `ohmyhost project data plan` — ohmyhost project data plan --project ULID --change isolate_prod_keeps_data|isolate_dev_keeps_data|share_prod_keeps_data|reset_dev --json (shared is the optional creation default; review which data is kept or deleted; no data is copied)
 - `ohmyhost project data change` — ohmyhost project data change --project ULID --change isolate_prod_keeps_data|isolate_dev_keeps_data|share_prod_keeps_data|reset_dev --if-match ETAG --confirmation-token TOKEN --idempotency-key KEY --yes [--wait] --json (Owner only; use the reviewed plan's guards and the same key after uncertainty; no data is copied)
 - `ohmyhost project list` — ohmyhost project list [--cursor ULID] [--limit LIMIT] --json
@@ -53,7 +53,7 @@ and follow the returned schema rather than guessing arguments.
 - `ohmyhost project flag set` — ohmyhost project flag set --project ULID --enabled true|false --idempotency-key KEY --json (shows the small Powered by ohmyho.st flag on the production site; while it shows, this project's custom domain uses no domain credits and also works on Free, and each Paid period bought through Stripe adds 250 credits to the workspace, however many projects show the flag)
 - `ohmyhost project handle check` — ohmyhost project handle check --handle HANDLE --json (is this address free? answers with a reason and free alternatives; the address becomes HANDLE.check.omh.st)
 - `ohmyhost project handle set` — ohmyhost project handle set --project ULID --handle HANDLE --if-match ETAG --idempotency-key KEY --json (moves the project to a free address; the old one stops working and anyone may claim it)
-- `ohmyhost database compute set` — ohmyhost database compute set --project ULID --environment dev|prod --profile standard|performance --idempotency-key KEY --yes [--wait] --json
+- `ohmyhost database compute set` — ohmyhost database compute set --project ULID --environment dev|prod --memory-mib 256|512|1024|2048|4096 --idempotency-key KEY --yes [--wait] --json
 
 - `ohmyhost database compute get` — ohmyhost database compute get --project ULID [--environment dev|prod] --json
 - `ohmyhost database write` — ohmyhost database write --project ULID --environment dev|prod --statement-file PATH --idempotency-key KEY [--parameters-json JSON] --yes --json
@@ -140,8 +140,8 @@ and follow the returned schema rather than guessing arguments.
 - `source_publish` — Local MCP only: capture current filtered files, including uncommitted/new files, and save one managed version without importing Git history.
 - `source_publish_complete` — Complete a local pending source publication after polling its operation.
 - `source_upload` — Observe the exact managed snapshot upload after an uncertain response.
-- `database_compute_get` — Read current managed database size, memory, region and compute state without running SQL or waking the database.
-- `database_compute_set` — Select standard or performance compute for an existing database: Free 0.25 CU/1 GB, Paid 0.5 CU/2 GB.
+- `database_compute_get` — Read current managed database memory, total storage, region and observed state without running SQL or waking the database.
+- `database_compute_set` — Choose fixed database RAM: 256, 512, 1024, 2048 or 4096 MiB.
 - `project_context_get` — Read fresh project status, DNS/mail next actions, authorized usage and bounded shared notes.
 - `project_notes_set` — Save shared project to-dos, at most 250 lines / 16384 UTF-8 bytes.
 - `domain_cloudflare_authorize` — Check domain_cloudflare_status first and reuse a valid matching grant.

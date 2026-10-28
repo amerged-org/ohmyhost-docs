@@ -110,8 +110,7 @@ not exercise object serialization or prove that the application's database repos
 
 ## What it costs
 
-The database sleeps when idle and bills by active compute. A query wakes it. Do not add a periodic
-health query that keeps it awake; it turns an idle project into a billed one.
+The database sleeps after 300 idle seconds and bills by selected RAM and active time, prorated. A query wakes it. Included total disk and seven-day backups have no separate database charge; neither do database CPU, network or connections. Read [the database Skill](../../ohmyhost-manage-database/SKILL.md) for sizes and prices. Do not add a periodic health query that keeps a database awake.
 
 Dev and Prod may share one data area or use two isolated areas. A data assignment change never
 copies records or sessions; read [the database Skill](../../ohmyhost-manage-database/SKILL.md)

@@ -5728,8 +5728,8 @@
     "/v1/projects/{project_id}/database/compute": {
       "post": {
         "operationId": "changeDatabaseCompute",
-        "summary": "Select standard or Paid performance database compute",
-        "description": "Requires project-write access and explicit confirmation. Reads the organization plan at acceptance (Free 0.25 CU/1 GB/60 idle seconds or Paid 0.5 CU/2 GB/60 idle seconds). Changes the existing database in place without copying or resetting data. Shared Dev/Prod data changes both environments. A brief connection interruption is possible. Poll the returned operation every 60 seconds; do not submit a second change while it runs. Completion requires actual provider settings and settled operations. Actual CU consumption remains metered. Performance requires effective Paid access and an active rate; it selects fixed 1 CU/4 GB/300 idle seconds at 2.5 times Paid-standard database compute credits per equal active minute. Only database compute changes price. Raw CU-second measurements are preserved; mixed or uncertain transition hours waive the premium. Returning to standard restores the effective plan size.",
+        "summary": "Select database memory and included storage",
+        "description": "Requires project-write access and explicit confirmation. Select 256, 512, 1024, 2048 or 4096 MiB RAM; Free permits only 256 MiB. Included total storage is respectively 500, 1024, 2048, 4096 or 8192 MiB, including PostgreSQL and WAL. Seven-day backups are included. Each 256 MiB costs 10 credits per active hour, prorated by time; sleeping costs no active RAM credits. Shared Dev/Prod data changes both environments. A smaller volume requires a separate data migration and is refused here. A brief connection interruption is possible. Poll the original operation until observed completion. The legacy profile input is accepted only for databases still on the transitional provider; it does not imply PGCF autoscaling.",
         "parameters": [
           {
             "$ref": "#/components/parameters/ProjectId"
@@ -5750,8 +5750,19 @@
                 "additionalProperties": false,
                 "required": [
                   "environment",
-                  "profile",
                   "confirm"
+                ],
+                "oneOf": [
+                  {
+                    "required": [
+                      "memory_mib"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "profile"
+                    ]
+                  }
                 ],
                 "properties": {
                   "environment": {
@@ -5766,6 +5777,16 @@
                     "enum": [
                       "standard",
                       "performance"
+                    ]
+                  },
+                  "memory_mib": {
+                    "type": "integer",
+                    "enum": [
+                      256,
+                      512,
+                      1024,
+                      2048,
+                      4096
                     ]
                   },
                   "confirm": {
@@ -9609,9 +9630,12 @@
                   "pattern": "^[1-9][0-9]{0,18}$"
                 },
                 "provider_cost_micros": {
-                  "type": "string",
+                  "type": [
+                    "string",
+                    "null"
+                  ],
                   "pattern": "^(0|[1-9][0-9]{0,18})$",
-                  "description": "Provider list-cost basis for units_per_charge, in USD micro-units (1000000 equals 1 USD), before shared allowances and discounts."
+                  "description": "Provider list-cost basis for units_per_charge, in USD micro-units (1000000 equals 1 USD), before shared allowances and discounts. Null for the PGCF RAM tariff means node infrastructure costs are tracked separately and are not allocated to this customer rate; null never means zero cost."
                 },
                 "credit_micros": {
                   "$ref": "#/components/schemas/CreditMicros"
@@ -11744,7 +11768,20 @@
           },
           "database": {
             "type": "string",
-            "const": "neondb"
+            "description": "neondb for a transitional Neon credential; the exact 20-character PGCF database identity for WSS."
+          },
+          "provider": {
+            "type": "string",
+            "const": "pgcf"
+          },
+          "transport": {
+            "type": "string",
+            "const": "wss"
+          },
+          "websocket_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Verified WSS origin ending in / and matching host. The local bridge adds /v2 and the bound database and user; no public PostgreSQL TCP endpoint."
           },
           "label": {
             "type": [
@@ -11791,29 +11828,202 @@
               null
             ]
           }
-        }
-      },
-      "ProjectDatabaseAccessCredential": {
-        "allOf": [
+        },
+        "oneOf": [
           {
-            "$ref": "#/components/schemas/ProjectDatabaseAccess"
+            "properties": {
+              "database": {
+                "const": "neondb"
+              }
+            },
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "provider"
+                  ]
+                },
+                {
+                  "required": [
+                    "transport"
+                  ]
+                },
+                {
+                  "required": [
+                    "websocket_url"
+                  ]
+                }
+              ]
+            }
           },
           {
-            "type": "object",
-            "additionalProperties": false,
             "required": [
-              "connection_uri",
-              "psql_command"
+              "provider",
+              "transport",
+              "websocket_url"
             ],
             "properties": {
-              "connection_uri": {
-                "type": "string",
-                "format": "uri",
-                "description": "Returned exactly once. Use it immediately and never store it in files, notes or source."
-              },
-              "psql_command": {
-                "type": "string",
-                "description": "The same credential as a ready psql invocation."
+              "database": {
+                "pattern": "^[a-z][a-z0-9]{19}$"
+              }
+            }
+          }
+        ]
+      },
+      "ProjectDatabaseAccessCredential": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "connection_uri",
+          "psql_command",
+          "access_id",
+          "environment",
+          "mode",
+          "role_name",
+          "host",
+          "database",
+          "label",
+          "state",
+          "issued_at",
+          "expires_at",
+          "revoked_at",
+          "revocation_reason"
+        ],
+        "properties": {
+          "access_id": {
+            "$ref": "#/components/schemas/Ulid"
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "prod"
+            ]
+          },
+          "mode": {
+            "type": "string",
+            "enum": [
+              "read",
+              "write"
+            ]
+          },
+          "role_name": {
+            "type": "string",
+            "pattern": "^ohmyho_da_[0-7][0-9a-hjkmnp-tv-z]{25}_[0-9a-z]{8}$"
+          },
+          "host": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 253
+          },
+          "database": {
+            "type": "string",
+            "description": "neondb for a transitional Neon credential; the exact 20-character PGCF database identity for WSS."
+          },
+          "provider": {
+            "type": "string",
+            "const": "pgcf"
+          },
+          "transport": {
+            "type": "string",
+            "const": "wss"
+          },
+          "websocket_url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Verified WSS origin ending in / and matching host. The local bridge adds /v2 and the bound database and user; no public PostgreSQL TCP endpoint."
+          },
+          "label": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "minLength": 1,
+            "maxLength": 64
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "active",
+              "expired",
+              "revoked"
+            ]
+          },
+          "issued_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expires_at": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "revoked_at": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          },
+          "revocation_reason": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "principal",
+              "expired",
+              "budget",
+              "creation_failed",
+              "data_change",
+              null
+            ]
+          },
+          "connection_uri": {
+            "type": "string",
+            "format": "uri",
+            "description": "Returned once as credential material. For PGCF this identifies a WSS transport, never direct public TCP. Never place it in command arguments, files, notes or source."
+          },
+          "psql_command": {
+            "type": "string",
+            "description": "For PGCF, a secret-free ohmyhost database psql invocation that obtains and revokes its own session credential. Transitional Neon responses retain their original direct invocation."
+          }
+        },
+        "oneOf": [
+          {
+            "properties": {
+              "database": {
+                "const": "neondb"
+              }
+            },
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "provider"
+                  ]
+                },
+                {
+                  "required": [
+                    "transport"
+                  ]
+                },
+                {
+                  "required": [
+                    "websocket_url"
+                  ]
+                }
+              ]
+            }
+          },
+          {
+            "required": [
+              "provider",
+              "transport",
+              "websocket_url"
+            ],
+            "properties": {
+              "database": {
+                "pattern": "^[a-z][a-z0-9]{19}$"
               }
             }
           }
@@ -12453,7 +12663,7 @@
           "eu"
         ],
         "default": "us",
-        "description": "Chosen when the project is created and immutable afterwards. us (default) places the project's database, files, build sandbox and build objects in the US; eu places them in the EU. Prices are identical. ohmyhost.yaml storage.jurisdiction must equal this value."
+        "description": "Chosen at project creation and immutable through customer operations. us (default) or eu places new build resources and, when no storage is already assigned, new file buckets. Existing buckets, source repositories and historical artifacts retain their recorded locations independently of a platform-authorized project-region migration. New PGCF application databases follow the selected project region; existing owner-authorized migrations target US1. Read database compute for the actual database region. storage.jurisdiction must match the project's recorded storage location, or this region when no storage custody exists. Project context reports the authoritative storage jurisdiction. Prices are identical in both project regions."
       },
       "FeedbackSubmission": {
         "type": "object",
@@ -13278,6 +13488,8 @@
               "paid_plan_required",
               "project_budget_exceeded",
               "compute_performance_paid_required",
+              "compute_paid_required",
+              "compute_storage_shrink_requires_migration",
               "compute_performance_unavailable",
               "database_write_pending",
               "database_access_limit",
@@ -13608,6 +13820,9 @@
                 "type": "null"
               },
               {
+                "$ref": "#/components/schemas/FixedDatabaseCompute"
+              },
+              {
                 "type": "object",
                 "additionalProperties": false,
                 "required": [
@@ -13673,6 +13888,118 @@
                   }
                 }
               }
+            ]
+          }
+        }
+      },
+      "FixedDatabaseCompute": {
+        "type": "object",
+        "additionalProperties": false,
+        "description": "Fixed resources; storage includes engine and WAL overhead. First provisioning is distinct from a sleeping database.",
+        "required": [
+          "provider",
+          "size_class_id",
+          "memory_mib",
+          "cpu_millicores",
+          "storage_mib",
+          "max_connections",
+          "suspend_timeout_seconds",
+          "state",
+          "pending_state",
+          "disabled",
+          "region"
+        ],
+        "properties": {
+          "provider": {
+            "type": "string",
+            "const": "pgcf"
+          },
+          "size_class_id": {
+            "type": "string",
+            "enum": [
+              "r256-s500m",
+              "r512-s1g",
+              "r1024-s2g",
+              "r2048-s4g",
+              "r4096-s8g"
+            ]
+          },
+          "memory_mib": {
+            "type": "integer",
+            "enum": [
+              256,
+              512,
+              1024,
+              2048,
+              4096
+            ]
+          },
+          "cpu_millicores": {
+            "type": "integer",
+            "enum": [
+              250,
+              500,
+              1000,
+              2000
+            ]
+          },
+          "storage_mib": {
+            "type": "integer",
+            "enum": [
+              500,
+              1024,
+              2048,
+              4096,
+              8192
+            ]
+          },
+          "max_connections": {
+            "type": "integer",
+            "enum": [
+              20,
+              40,
+              80,
+              160,
+              200
+            ]
+          },
+          "suspend_timeout_seconds": {
+            "type": "integer",
+            "minimum": 60,
+            "maximum": 900
+          },
+          "state": {
+            "type": "string",
+            "enum": [
+              "provisioning",
+              "cold",
+              "warm",
+              "suspended",
+              "error"
+            ]
+          },
+          "pending_state": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "provisioning",
+              "cold",
+              "warm",
+              "suspended",
+              "error",
+              null
+            ]
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "region": {
+            "type": "string",
+            "enum": [
+              "us",
+              "eu"
             ]
           }
         }

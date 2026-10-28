@@ -7,15 +7,19 @@ description: Read or update authorized ohmyho.st project data, open time-bound p
 
 Read `project_context_get` and `database_compute_get` for the selected Dev or Prod environment. The compute tool reads metadata without waking the database; use its observation rather than inferring size from the plan.
 
-| Profile          | Compute | RAM  | Sleep after idle |
-| ---------------- | ------- | ---- | ---------------- |
-| Free standard    | 0.25 CU | 1 GB | Provider default |
-| Paid standard    | 0.5 CU  | 2 GB | Provider default |
-| Paid performance | 1 CU    | 4 GB | Provider default |
+| RAM     | Included total disk | Credits per active hour | Access       |
+| ------- | ------------------- | ----------------------- | ------------ |
+| 256 MiB | 500 MiB             | 10                      | Free or Paid |
+| 512 MiB | 1 GiB               | 20                      | Paid         |
+| 1 GiB   | 2 GiB               | 40                      | Paid         |
+| 2 GiB   | 4 GiB               | 80                      | Paid         |
+| 4 GiB   | 8 GiB               | 160                     | Paid         |
 
-Performance costs 2.5 times Paid-standard database compute credits for the same active duration. All profiles request the provider-default idle suspension (`suspend_timeout_seconds=0`), which is compatible with Neon Free. Storage and retained history are billed separately. Avoid periodic SQL health checks that keep idle compute awake; explain the first-query cold start when discussing savings.
+Active time is prorated at the selected RAM size. Included disk is the whole PostgreSQL volume, including PostgreSQL files and WAL; it is not a promise of that much application-row space. Seven-day database backups are included. Database CPU, network, connections, disk and backups have no separate charges. Application Worker usage and customer file storage keep their own rates. Idle databases sleep after 300 seconds; sleeping has no active-RAM charge. Avoid periodic SQL health checks that keep a database awake and explain the first-query cold start. `provisioning` means initial creation; `cold` means an existing sleeping database.
 
-For a customer-requested resize, use `database_compute_set` with the explicit environment, `standard` or `performance`, confirmation and one idempotency key. Preserve existing authorization; explain any new cost or shared-environment effect before applying it. Poll its operation, then read actual compute again. A successful submission is not proof that resizing finished. Do not reset the database to resize it.
+For a customer-requested resize, use `database_compute_set` with the explicit environment and `memory_mib` of 256, 512, 1024, 2048 or 4096, confirmation and one idempotency key. The CLI uses `--memory-mib`. Preserve existing authorization; explain the cost, possible connection interruption and shared-environment effect. Poll the original operation, then read actual compute again. A successful submission is not proof that resizing finished. In-place disk shrink is refused; a smaller volume requires a separate authorized data migration. Do not reset a database or silently migrate it to satisfy a size request. Larger sizes require Paid, and loss of Paid access never authorizes discarding data to shrink a volume.
+
+Read the database's actual `region` from `database_compute_get`. New PGCF databases follow the project's selected US or EU region. Existing projects moved to US with their owner's authorization use US databases. An authorized database or project-region migration preserves recorded R2 bucket and object locations; inspect storage jurisdiction independently through project context.
 
 ## Read and update data
 
@@ -60,7 +64,7 @@ If the customer explicitly requests copying selected records, use their reviewed
 
 ## Time-bound PostgreSQL access
 
-`database_access_create` / `ohmyhost database access create` issues a `read` or confirmed `write` login for 5 minutes to 24 hours, with at most three active per logical environment. It returns the URI/password once for the customer's SQL client; keep them out of arguments/source/logs and revoke through `database_access_revoke` when finished. The shortcut `ohmyhost database psql --project ULID --environment dev|prod --mode read|write` creates its own temporary credential, passes the password in the subprocess environment and revokes it on exit. These roles cannot change schema, and application RLS still applies. Hosted code continues to use `OHMYHOST_DATABASE`.
+`database_access_create` / `ohmyhost database access create` issues a `read` or confirmed `write` login for 5 minutes to 24 hours, with at most three active per logical environment. It returns the credential URI once; keep it out of arguments/source/logs and revoke through `database_access_revoke` when finished. PGCF access declares `transport: "wss"` and `websocket_url`; its PostgreSQL URI is a credential carrier, not a public TCP endpoint for an arbitrary SQL client. Use `ohmyhost database psql --project ULID --environment dev|prod --mode read|write`: it creates its own temporary credential, opens a local loopback bridge over verified WSS, gives the password to local `psql` through its private environment, and closes the bridge and revokes access on exit. PGCF's returned `psql_command` is this secret-free helper command. These roles cannot change schema, and application RLS still applies. Hosted code continues to use `OHMYHOST_DATABASE`.
 
 ## Schema and promotion
 

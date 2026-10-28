@@ -1,0 +1,12 @@
+---
+title: "Compute paid required"
+description: "What the `compute_paid_required` error means and what to do next."
+---
+
+The API, CLI and MCP return `compute_paid_required` with HTTP 403. Repeating the same request unchanged does not help.
+
+## What to do
+
+Database sizes above 256 MiB require active Paid access. Read the account status; keep the existing database until the owner chooses an eligible size or Paid access.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

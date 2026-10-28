@@ -24,7 +24,7 @@ The Owner can change the mode with `ohmyhost project dev-access mode --project "
 
 New projects choose US or EU. An explicit choice wins over any browser-location suggestion; with neither, the agent asks once and sends the chosen region explicitly. An existing project's region is preserved. The API default remains US, and the agent's own server IP is not the customer's location.
 
-The choice places the project's database, files and builds, with the application next to its database. It cannot be changed later and consumption prices are identical. Transactional mail is processed in the US by the platform's mail provider, whatever the project's region. `storage.jurisdiction` must match the project's region.
+For new projects, the choice places the PGCF database, new files and builds in the selected region. Existing projects moved to US with their owner's authorization use US databases. Read `database compute get` for the actual database region. Existing R2 object locations are retained through a database migration. The customer API cannot change the region later and consumption prices are identical. Transactional mail is processed in the US by the platform's mail provider, whatever the project's region. `storage.jurisdiction` must match the recorded R2 bucket or reservation jurisdiction; preserve it through an operator project-region migration. Only a project without recorded storage uses its current project region for a new bucket.
 
 ## Read the actual environment
 
@@ -102,4 +102,4 @@ ohmyhost delete --project "$PROJECT_ID" --if-match "$RESOURCE_ETAG" --confirmati
 
 Use the exact plan guards within ten minutes. Deletion removes both environments, all current and historical data identities, files, deployments, schedules, stored SQL exports and the platform-owned mail/DNS resources. Both addresses stop serving. It cannot be undone: download a [SQL export](/backups) first if needed, and remember it contains no files. MCP uses `delete_plan` and `delete_execute`. Keep the original key after uncertainty; a terminal failure needs its stated action and a fresh reviewed plan once no operation is running.
 
-[Schema migrations](/migrations) · [Database profiles](/database) · [Dev access](/cli#verify-progress-and-the-application).
+[Schema migrations](/migrations) · [Database sizes](/database) · [Dev access](/cli#verify-progress-and-the-application).

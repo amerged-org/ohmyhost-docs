@@ -1,0 +1,85 @@
+---
+title: "Share a mail sender"
+description: "Reuse a verified workspace sender with eligible projects, verify application identity and manage sender permissions."
+---
+
+A workspace can reuse a verified mail sender across eligible projects. Each project needs Paid access, an authorized sender binding and a verified application identity with the same registrable main domain as the sender. For example, `sign.example.com` can use `mail.example.com`; `different.com` cannot. Public and private suffix rules apply, so separate tenants under `github.io` do not share a main domain.
+
+The sender is a workspace resource. Dev and Prod use the project's binding, addressed by its Prod environment ID. They keep separate mail keys and usage attribution. Sharing a sender gives no access to another project's messages, files or credentials; incoming mail stays with its exclusive Prod webhook.
+
+## Select or create the sender
+
+Discover existing resources before creating one:
+
+```sh
+ohmyhost mail workspace list --organization "$ORGANIZATION_ID" --json
+ohmyhost mail workspace status --organization "$ORGANIZATION_ID" --mail-domain "$MAIL_DOMAIN_ID" --json
+```
+
+A new resource uses `ohmyhost mail workspace create --organization "$ORGANIZATION_ID" --domain mail.example.com --sending true --idempotency-key "$CREATE_KEY" --json`. Publish exactly its returned DNS records and preserve existing mailbox MX records. Creation alone does not establish readiness.
+
+For scoped Cloudflare DNS management, use `ohmyhost mail workspace dns-authorize` with the organization, mail-domain ID, current `--expected-revision`, owning `--zone` and an idempotency key. Open the returned private consent URL, then read `ohmyhost mail workspace dns-status`. This grant handles the selected sender's DNS; it does not activate a website hostname.
+
+Keep the same request and idempotency key after an uncertain response. Follow the returned status and retry interval rather than recreating a domain.
+
+## Prove the application's hostname
+
+A new application can prove its intended hostname before it is deployed or receives web traffic:
+
+```sh
+ohmyhost mail identity declare --project "$PROJECT_ID" --hostname sign.example.com --idempotency-key "$DECLARE_KEY" --json
+ohmyhost mail identity get --project "$PROJECT_ID" --json
+```
+
+Publish the exact returned TXT challenge at its returned DNS name. Optional `ohmyhost mail identity authorize` takes the project, current `--expected-revision`, owning `--zone` and an idempotency key. Complete the private Cloudflare consent and read `ohmyhost mail identity authorization-status`; this grants only management of the identity proof's DNS.
+
+```sh
+ohmyhost mail identity verify --project "$PROJECT_ID" --expected-revision "$IDENTITY_REVISION" --idempotency-key "$VERIFY_KEY" --json
+```
+
+Read the actual verification and expiry. A pending challenge expires after 24 hours; verified proof lasts 30 days. Renew by verifying the same current revision and TXT record. Expired pending challenges require a new declaration. Re-declaring changes the revision and suspends dependent bindings; use verification for ordinary renewal. An expired or revoked proof blocks shared sending until current proof is valid again. A preview address under `check.omh.st` and an unverified website declaration do not qualify.
+
+## Attach and configure the sender
+
+Read the binding before editing it. For its first creation, `--expected-revision` is zero; subsequent changes use the current revision:
+
+```sh
+ohmyhost mail binding get --project "$PROJECT_ID" --environment "$PROD_ENVIRONMENT_ID" --json
+ohmyhost mail binding set --project "$PROJECT_ID" --environment "$PROD_ENVIRONMENT_ID" --mail-domain "$MAIL_DOMAIN_ID" --sending true --sender-addresses contact@mail.example.com,contracts@mail.example.com --default-from contracts@mail.example.com --reply-to owner@example.com --expected-revision "$BINDING_REVISION" --idempotency-key "$BINDING_KEY" --json
+```
+
+The exact sender-address list contains at most 32 addresses on the verified sender domain; the default From address must be in that list. These are sending identities, not mailboxes. An explicit application From must also be allowed. An omitted From uses the default; an explicit Reply-To overrides the binding's default and may name an existing mailbox elsewhere. Changing the binding does not change a message already claimed under an earlier idempotency key.
+
+A binding to a verified sender creates no additional provider domain and requires no new sender-DNS grant. Declare and verify application identity, attach the sender, deploy source with `mail.enabled: true`, and verify a real application send. [Activate the website hostname](/domains) separately after the application works. DNS consent, sender readiness and web routing are separate outcomes.
+
+## Revoke or detach deliberately
+
+To stop one project using the sender, read the current binding revision and run:
+
+```sh
+ohmyhost mail binding detach --project "$PROJECT_ID" --environment "$PROD_ENVIRONMENT_ID" --expected-revision "$BINDING_REVISION" --idempotency-key "$DETACH_KEY" --yes --json
+```
+
+Other projects keep their bindings. Disable `mail.enabled` in source when this application no longer needs managed mail. Retire an unused workspace resource with `ohmyhost mail workspace retire`, its organization, mail-domain ID, current revision, idempotency key and `--yes`; retirement is refused while sending or receiving references remain.
+
+To withdraw the application's identity proof:
+
+```sh
+ohmyhost mail identity revoke --project "$PROJECT_ID" --expected-revision "$IDENTITY_REVISION" --idempotency-key "$REVOKE_KEY" --yes --json
+```
+
+This stops dependent shared-sender admission. It does not activate, delete or reroute the website hostname. To remove only a DNS-management grant, use `ohmyhost mail identity authorization-revoke` or `ohmyhost mail workspace dns-revoke`, with the selected resource, current revision, idempotency key and `--yes`. Revoking DNS consent does not itself retire a sender or revoke independently verified application proof.
+
+## MCP and API access
+
+Remote MCP needs selected sender-domain read/use/admin consent in addition to the target project grant. Access to a project does not automatically grant access to every sender in its workspace.
+
+| Purpose | MCP tools |
+| --- | --- |
+| Sender inventory and lifecycle | `workspace_mail_domains_list`, `workspace_mail_domain_get`, `workspace_mail_domain_create`, `workspace_mail_domain_retire` |
+| Sender DNS grant | `workspace_mail_domain_dns_authorize`, `workspace_mail_domain_dns_status`, `workspace_mail_domain_dns_revoke` |
+| Project binding | `mail_binding_get`, `mail_binding_set`, `mail_binding_detach` |
+| Application identity | `application_domain_identity_declare`, `application_domain_identity_get`, `application_domain_identity_verify`, `application_domain_identity_revoke` |
+| Identity DNS grant | `application_domain_identity_authorize`, `application_domain_identity_authorization_status`, `application_domain_identity_authorization_revoke` |
+
+The [API reference](/api) provides the same operations through the generated SDK. Discover the installed CLI help or MCP schema for exact required arguments. [Transactional email](/email) describes application sending, receiving, delivery outcomes and limits.

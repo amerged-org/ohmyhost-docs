@@ -3,11 +3,11 @@ title: "Transactional email"
 description: "Configure your own sender domain, receive mail through a verified Prod webhook and verify delivery."
 ---
 
-Hosting has no mail prerequisite. Set up managed mail only when you want it or the application actually sends mail through ohmyho.st; a project, Dev environment or unselected auth SDK alone does not select mail. Better Auth works with or without managed mail and can keep your chosen Resend integration or sender. Enable managed mail only for calls you deliberately route through its client. Managed transactional email requires Paid access, which the powered-by flag does not replace, and a mail domain that you choose, configure and verify for the project. The automatic `check.omh.st` address does not enable sending, and ohmyho.st never sends your application's mail from a platform domain instead. Use a subdomain such as `mail.example.com` when your company inboxes already use the root domain. With ohmyho.st Mail, you need no Resend account of your own.
+Hosting has no mail prerequisite. Set up managed mail only when you want it or the application actually sends mail through ohmyho.st; a project, Dev environment or unselected auth SDK alone does not select mail. Better Auth works with or without managed mail and can keep your chosen Resend integration or sender. Enable managed mail only for calls you deliberately route through its client. Managed transactional email requires Paid access, which the powered-by flag does not replace, and a sender domain that you choose, configure and verify in the workspace. The automatic `check.omh.st` address does not enable sending, and ohmyho.st never sends your application's mail from a platform domain instead. Use a subdomain such as `mail.example.com` when your company inboxes already use the root domain. With ohmyho.st Mail, you need no Resend account of your own.
 
 ## Configure the mail domain
 
-A project has one mail domain, configured with its Prod environment ID from `ohmyhost project status`. Dev and Prod both send through that domain, each with its own application mail key; the Dev URL does not create a second mail domain.
+A project uses one sender-domain binding, configured with its Prod environment ID from `ohmyhost project status`. Dev and Prod both send through that domain, each with its own application mail key; the Dev URL does not create a second mail domain. To reuse an authorized workspace sender, follow [Share a mail sender](/shared-mail): verify the application's eligible hostname, then attach the sender instead of creating another domain.
 
 ```sh
 ohmyhost mail setup --project "$PROJECT_ID" --environment "$PROD_ENVIRONMENT_ID" --domain mail.example.com --sending true --receiving false --idempotency-key "$MAIL_REQUEST_KEY" --json
@@ -50,7 +50,7 @@ Mail runtime values exist only in deployed source declaring `mail.enabled: true`
 
 Gateway 403 `gateway_not_enabled` means enable mail and redeploy; 403 `gateway_route_denied` means use the current client's supported route, method and query. Both are final for that request. They are not repaired by editing `runtime.egress.allow`. Retry 429 `gateway_rate_limited` and 503 `gateway_unavailable` after a delay, retaining the message and idempotency key. A malformed or non-JSON response is `gateway_response_invalid`, with the received HTTP status and no upstream text. Report persistent faults through [feedback](/feedback).
 
-Sending works only once status reports sending as `ready`. The from address must use the exact configured domain with a local part of letters/digits/.\_%+- (otherwise `gateway_request_invalid`,400, not retryable); without it, the gateway uses `no-reply@` on that domain. An optional `replyTo` can point to an existing mailbox.
+Sending works only once status reports sending as `ready`. An explicit From must use the exact configured sender domain and an allowed address; otherwise the request fails with `gateway_request_invalid` (400, not retryable). An omitted From uses the binding's default, and an explicit `replyTo` overrides its optional default Reply-To. Reply-To can name an existing mailbox elsewhere. Existing bindings retain their previous whole-domain sender behavior and `no-reply@` default until configured. See [sender settings](/shared-mail#attach-and-configure-the-sender).
 
 `accepted` means the mail provider accepted the message for sending; it does not establish inbox delivery. After `uncertain` or a network error, keep the idempotency key and message unchanged when checking or retrying. Each send has one recipient, a single-line subject up to 200 characters, required text up to 64 KiB and optional HTML up to 128 KiB. Recipients/replyTo accept provider syntax including apostrophes, trailing underscores and mixed case. Invalid input is `gateway_request_invalid`. An uncertain send whose provider call started can recover under the same key within 23 hours; a claim that never reached authorization may remain uncertain, so observe/report that request rather than inventing recovery or another send. A different message under the same key is `mail_send_conflict`.
 
@@ -83,13 +83,13 @@ Sent/received messages are metered at [published rates](/pricing); retries do no
 
 ## Stop using mail
 
-When you no longer want managed mail, retire the domain with the Prod environment ID. Sending and receiving stop at once, and the provider domain and key are removed; the project and its website domain stay:
+For a shared sender, [detach this project's binding](/shared-mail#revoke-or-detach-deliberately); other projects keep their sender. Retire a workspace sender only when no sending or receiving references remain. The following legacy deletion applies to an unshared original project domain: sending and receiving stop, and the provider domain and key are removed; the project and website domain stay:
 
 ```sh
 ohmyhost mail domain delete --project "$PROJECT_ID" --environment "$PROD_ENVIRONMENT_ID" --idempotency-key "$MAIL_DELETE_KEY" --yes --json
 ```
 
-To change sender domain, retire the current domain first, then setup/verify the new one. A different domain, another project claim or a still-removing old domain returns `mail_domain_conflict`; inspect status and finish deletion before retrying. Sending stops until the replacement verifies.
+To change an unshared original sender, retire it before setting up and verifying the replacement. For a workspace sender, use the current binding's explicit detach and attach flow. A different domain or a still-removing old domain returns `mail_domain_conflict`; inspect status and use the matching operation. Legacy deletion of a shared sender conflicts before changes. Sending stops until the replacement is ready.
 
 MCP `mail_domain_delete` needs `confirm: true`. Repeat the same key after an uncertain response. DNS is not changed: remove exactly the returned `dns_records` from your DNS, and set `mail.enabled` to false in an app that still declares it.
 
