@@ -87,6 +87,8 @@ Active time is prorated at the selected RAM size. Total disk includes PostgreSQL
 
 Databases sleep after 300 idle seconds. Sleeping has no active-RAM charge; the next query wakes the database and can take longer. Avoid periodic SQL health queries. `provisioning` means initial creation, `cold` means an existing sleeping database, and `warm` means running. Shared Dev/Prod uses one physical database; isolated databases are billed independently.
 
+Databases run on [PGCF](https://github.com/amerged-org/cloudflare-postgres), the open-source PostgreSQL platform behind ohmyho.st.
+
 New managed PGCF databases follow the project's selected US or EU region. Existing projects moved to US with their owner's authorization use US databases. `database compute get` reports the actual database region. Existing R2 file and backup locations remain recorded through an authorized database or project-region migration; read storage jurisdiction separately through project context.
 
 ## Change the size
@@ -97,7 +99,7 @@ ohmyhost database compute set --project "$PROJECT_ID" --environment dev --memory
 
 Choose 256, 512, 1024, 2048 or 4096 MiB. MCP uses `database_compute_set` with `memory_mib` and `confirm: true`; REST uses `memory_mib`. Explain the price and possible brief connection interruption first. Choose `prod` only when intended; shared data changes both environments. Keep one idempotency key, poll the original operation, and read actual compute after it succeeds.
 
-An increase preserves SQL data. In-place volume shrink is refused; choosing a smaller disk requires a separate authorized data migration. Never reset data to satisfy a resize, and do not assume loss of Paid access permits shrinking an existing volume. Larger sizes require Paid. The old `profile` input is transitional legacy-provider support; use the explicit RAM selection for PGCF.
+An increase preserves SQL data. In-place volume shrink is refused; choosing a smaller disk requires a separate authorized data migration. Never reset data to satisfy a resize, and do not assume loss of Paid access permits shrinking an existing volume. Larger sizes require Paid. Do not send the old `profile` input of the retired previous database provider; select the RAM size explicitly.
 
 ## Query Dev or Prod
 
@@ -147,7 +149,7 @@ For interactive work you can issue a temporary PostgreSQL login for your own pro
 ohmyhost database access create --project "$PROJECT_ID" --environment dev --mode read --ttl 1h --label laptop --yes --json
 ```
 
-The credential `connection_uri` is returned once and is never retrievable again. Keep it and its password out of command arguments, files, notes, source and logs. PGCF also returns `provider: "pgcf"`, `transport: "wss"` and `websocket_url`: its PostgreSQL URI is a credential carrier, not a public TCP endpoint for an arbitrary SQL client. The returned `psql_command` is the secret-free CLI helper below, which creates its own access. Later reads show metadata only:
+The credential `connection_uri` is returned once and is never retrievable again. Keep it and its password out of command arguments, files, notes, source and logs. The credential also carries `provider: "pgcf"`, `transport: "wss"` and `websocket_url`: its PostgreSQL URI is a credential carrier, not a public TCP endpoint for an arbitrary SQL client. The returned `psql_command` is the secret-free CLI helper below, which creates its own access. Later reads show metadata only:
 
 ```sh
 ohmyhost database access list --project "$PROJECT_ID" --json
@@ -167,7 +169,9 @@ MCP exposes `database_access_create` (`mode: "write"` requires `confirmed: true`
 | Mode               | `read` (default, read-only session) or `write` (the application's own INSERT/UPDATE/DELETE rights) |
 | Lifetime           | `--ttl` 5 minutes to 24 hours, one hour by default                                                 |
 | Active credentials | at most three per project environment                                                              |
-| Database           | PGCF: the exact 20-character database identity in the credential, over verified WSS. `neondb` with `sslmode=require` applies only to a legacy transitional Neon credential |
+| Database           | The exact 20-character PGCF database identity in the credential, over verified WSS                 |
+
+Historical entries from before the move to PGCF can still appear in `database access list` as `expired` or `revoked`, with `database: "neondb"`. They cannot be used; every new credential is a PGCF credential over WSS.
 
 No mode can change schema or roles: schema changes remain versioned [GitHub migrations](/migrations), and application row-level security applies to these sessions exactly as it does to `database query` and `database write`. After expiry PostgreSQL refuses new logins and the platform ends remaining sessions and removes the role within 15 minutes. An open session wakes compute and is metered like any other database use, under the same credit grace and project Stop budgets. Revoke as soon as you are finished instead of waiting for expiry.
 

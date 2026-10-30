@@ -1,15 +1,15 @@
 ---
 title: "Understand usage"
-description: "Read measured monthly consumption and the shared organization balance."
+description: "Read the billed usage of the last 14 days and the shared organization balance."
 ---
 
 ```sh
 ohmyhost credits account --organization "$ORGANIZATION_ID" --json
 ohmyhost credits balance --organization "$ORGANIZATION_ID" --json
-ohmyhost credits usage --organization "$ORGANIZATION_ID" --month "$UTC_MONTH" --json
+ohmyhost credits usage --organization "$ORGANIZATION_ID" --json
 ```
 
-Use `UTC_MONTH` in `YYYY-MM` format. `credits account` reports the effective Free/Paid plan, available credit lots and their next expiry. `credits balance` reports reservations, the seven-day credit-grace deadline and active meters with their versioned rate cards; `credits usage` reports measured consumption. Follow the returned cursor to read subsequent pages.
+`credits account` reports the effective Free/Paid plan, the monthly credit with its next expiry, the one-time credit that never expires, reservations and `available_micros`. `credits balance` reports `available_micros`, `reserved_micros`, the seven-day credit-grace deadline and active meters with their versioned rate cards. `credits usage` takes no month or cursor: it reports the billed charges of the last up to 14 UTC days (today included), grouped by day, project and meter, and what each project has used so far in the current UTC month. Older days are not kept, so save a report you need later. MCP `organization_usage_get` takes only the organization. Reading credits and usage needs CLI and MCP 0.1.41 or later: older clients send the removed month and cursor inputs and expect credit totals that no longer exist ([changelog](/changelog)).
 
 ## What contributes to consumption
 
@@ -19,7 +19,9 @@ Database usage is selected RAM multiplied by active time. Do not multiply the co
 
 ## Read the balance correctly
 
-Monthly Free and Paid credits expire on the date shown in Billing and are spent before top-ups. Paid-only top-ups and recharges carry over during uninterrupted Paid membership; their remaining balance expires on downgrade to Free and cannot return after a later upgrade. An unpaid Stripe renewal keeps Paid features and top-ups for up to fourteen days after period end, with no new Paid or Free monthly allowance; cancellation ends Paid at the paid period end. `paid_until` remains the real invoice period end during renewal grace, so use the account's effective plan/source. Signup/referral grants keep their recorded terms. In-flight reservations appear as `reserved_micros` in `credits account` and `credits balance`; the portal does not show them.
+`available_micros` is the monthly credit plus the one-time credit minus reservations. Monthly credits (200 on Free, 1,000 on Paid) expire on the date shown in Billing (`next_expiry`) and are spent before one-time credits. One-time credits never expire: top-ups, auto-recharges, and signup, referral and bonus credits stay until used, also after a downgrade to Free. Only effective Paid workspaces can buy top-ups or enable auto-recharge, but bought credit stays usable after a downgrade. An unpaid Stripe renewal keeps Paid features for up to fourteen days after period end; `paid_until` in `credits account` is the end of the paid coverage and includes those days. Otherwise the workspace returns to Free, and cancellation ends Paid at the paid period end. In-flight reservations appear as `reserved_micros` in `credits account` and `credits balance`; the portal does not show them.
+
+When the credit is used up, services keep running for seven days (`grace_expires_at`); the next monthly renewal ends the exhaustion.
 
 Some measurements arrive later than the original operation. A low current total is not a guarantee that all running work has settled. Optional [project budgets](/budgets) default to **Continue**: the project keeps running after the tracking threshold. A project pauses at its budget only when the workspace Owner explicitly selects **Stop**.
 

@@ -3,9 +3,9 @@ title: "Purchases, invoices and auto-recharge"
 description: "See the real plan and credit buckets, then manage explicitly authorized payments."
 ---
 
-[Billing](https://app.ohmyho.st/billing) shows effective Free/Paid access, monthly credits with their expiry and top-up balances. Monthly subscription credits expire at billing-period end. Only Paid workspaces can buy top-ups or enable auto-recharge. Top-ups have no expiry during uninterrupted Paid membership; remaining top-up/recharge credits expire on the effective return to Free and do not revive after a later upgrade.
+[Billing](https://app.ohmyho.st/billing) shows effective Free/Paid access, the monthly credit with its expiry and the one-time credit. Monthly credits (200 on Free, 1,000 on Paid) expire at the end of their period and are spent first. Only Paid workspaces can buy top-ups or enable auto-recharge. One-time credits (top-ups, recharges, and signup, referral and bonus credits) never expire: they stay usable after a return to Free, although a Free workspace cannot buy more.
 
-A cancelled Stripe subscription ends Paid at its paid period end. An unpaid renewal keeps Paid features and top-ups for up to fourteen days after period end, with no new Paid or Free monthly allowance. Payment within that window continues coverage; otherwise Paid ends and remaining top-ups expire when the window ends. `paid_until` remains the actual paid invoice period end during renewal grace: read the effective plan/source instead of deciding by that timestamp alone.
+A cancelled Stripe subscription ends Paid at its paid period end. An unpaid renewal keeps Paid features for up to fourteen days after period end. Payment within that window continues coverage; otherwise Paid ends when the window ends and the workspace returns to Free with its one-time credit intact. `paid_until` in `ohmyhost credits account` is the end of the paid coverage and includes those fourteen days; read the effective plan/source too.
 
 A new workspace starts Free. A **Granted** badge means Paid features were granted, for example for thirty days through a referral; it does not represent a Stripe subscription or add another monthly Paid allowance. Billing shows a finite grant's end (`paid_until` in `ohmyhost credits account --organization "$ORGANIZATION_ID" --json`). When it ends, the workspace returns to Free: managed mail stops, and a custom domain answers HTTP 402 unless its project shows the ohmyho.st flag. Credit exhaustion and Stop budgets are separate limits.
 
@@ -17,7 +17,7 @@ ohmyhost billing checkout --organization "$ORGANIZATION_ID" --offer paid --idemp
 
 Use `--offer topup --packs N` to buy one to 100 USD 10 packs in one checkout. Each dollar up to USD 100 grants 100 credits; the portion above grants 125 credits per dollar, 25% more ([Credit prices](/pricing)). Open the returned Checkout URL, review the total and complete payment yourself. The command does not pay automatically. Every successful purchase has an invoice; applicable tax is calculated by Stripe Tax.
 
-Follow the returned checkout ID with `billing status`. A top-up adds credits and does not extend a subscription. A purchase is complete only when status shows `payment_confirmed: true`; a Checkout URL or browser return page is not a payment. Then read `ohmyhost credits account --organization "$ORGANIZATION_ID" --json` for the current balance and plan.
+Follow the returned checkout ID with `billing status`. A top-up adds credits that never expire and does not extend a subscription. A purchase is complete only when status shows `payment_confirmed: true`; a Checkout URL or browser return page is not a payment. Then read `ohmyhost credits account --organization "$ORGANIZATION_ID" --json` for the current balance and plan.
 
 ## Auto-recharge
 

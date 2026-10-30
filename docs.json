@@ -162,6 +162,10 @@
           {
             "label": "DPA",
             "href": "https://ohmyho.st/dpa"
+          },
+          {
+            "label": "PostgreSQL platform (PGCF)",
+            "href": "https://github.com/amerged-org/cloudflare-postgres"
           }
         ]
       }

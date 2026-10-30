@@ -3,6 +3,19 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
+## Client release 0.1.41 (October 30, 2026)
+
+**Breaking for clients older than 0.1.41 that read credits or usage.** Update CLI and MCP together before you read either:
+
+```sh
+npm install --global @amerged/ohmyhost-cli@0.1.41 @amerged/ohmyhost-mcp@0.1.41
+```
+
+- **Usage report.** `GET /v1/organizations/{organization_id}/credit-usage`, `ohmyhost credits usage` and MCP `organization_usage_get` return the billed charges of the last up to 14 UTC days grouped by day, project and meter, plus what each project has used so far this UTC month. The `month` and `cursor` inputs are removed (CLI `--month` and `--cursor`, MCP `month` and `cursor`); older days are not kept. [Understand usage](/usage).
+- **Credit account.** `GET /v1/organizations/{organization_id}/credits` and `ohmyhost credits balance` no longer return `spent_micros`, `expired_micros` or `platform_overrun_micros`. `available_micros` is the monthly credit plus the one-time credit minus reservations, next to `reserved_micros`, `grace_started_at`, `grace_expires_at`, `active_meters` and `rate_cards`. In `ohmyhost credits account`, `paid_until` is the end of the paid coverage and includes the fourteen-day renewal grace of a Stripe subscription.
+- **Credits do not expire.** Top-up, auto-recharge, bonus and referral credits never expire, also after a downgrade to Free; before, top-ups ended with the Paid coverage. Monthly credits (200 on Free, 1,000 on Paid) still end with their period and are spent first. Only effective Paid workspaces can buy top-ups or enable auto-recharge. [Credit prices](/pricing) · [Billing](/billing).
+- **Databases run on PGCF.** Customer PostgreSQL databases run on [PGCF](https://github.com/amerged-org/cloudflare-postgres), the open-source PostgreSQL platform behind ohmyho.st; the previous database provider is retired. Every new access credential is a PGCF credential over WSS, and older entries in `database access list` stay `expired` or `revoked`. [Postgres queries, writes and compute](/database).
+
 ## Current clients
 
 [Current release](https://ohmyho.st/client-release.json) identifies the active version and immutable manifest. The manifest lists CLI, MCP, SDK and runtime archives with SHA-256 hashes. Only the current release is served; older release URLs return 404.
