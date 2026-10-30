@@ -24,7 +24,7 @@ and follow the returned schema rather than guessing arguments.
 - `ohmyhost billing checkout` — ohmyhost billing checkout --organization ULID --offer topup|paid [--packs 1] --idempotency-key KEY --json (returns a human payment URL; never auto-pays)
 - `ohmyhost billing status` — ohmyhost billing status --organization ULID --checkout ULID --json
 - `ohmyhost billing portal` — ohmyhost billing portal --organization ULID --json (short-lived human URL; request fresh after expiry)
-- `ohmyhost credits usage` — ohmyhost credits usage --organization ULID --month YYYY-MM [--cursor ULID] --json
+- `ohmyhost credits usage` — ohmyhost credits usage --organization ULID --json (billed usage of the last up to 14 UTC days by day, project and meter, and each project's use this UTC month)
 - `ohmyhost budget get` — ohmyhost budget get --project ULID --json
 - `ohmyhost budget set` — ohmyhost budget set --project ULID --credits NUMBER|none [--mode continue|stop] --idempotency-key KEY --json
 - `ohmyhost organization create` — ohmyhost organization create --name NAME --idempotency-key KEY [--source SOURCE] --json (SOURCE is optional attribution from a link's r value; a login without organization is bound to the new workspace, another login keeps its own)
@@ -157,11 +157,11 @@ and follow the returned schema rather than guessing arguments.
 - `billing_portal_create` — Owner-only: return a short-lived Stripe portal URL to the human for invoices, payment methods or cancellation at period end.
 - `project_export_create` — Owner-only: request an asynchronous password-encrypted SQL ZIP, including at zero credits.
 - `project_export_get` — Owner-only: read the original SQL ZIP export's progress/error and verified download URL.
-- `organization_usage_get` — Read posted UTC-month usage by project, environment and published meter/rate.
-- `organization_account_get` — Owner-only: read the effective Free/Paid plan, its Stripe or granted source, available monthly credits that expire at period end and top-up credits that carry over while Paid but expire on downgrade to Free, reservations and next expiry.
+- `organization_usage_get` — Read the billed usage of the last up to 14 UTC days (today included) grouped by day, project and meter, and what each project has used so far this UTC month.
+- `organization_account_get` — Owner-only: read the effective Free/Paid plan, its Stripe or granted source, the monthly credits that expire at next_expiry, the top-up and bonus credits that never expire, the reservations that hold part of them, and available_micros (monthly plus one-time minus reservations).
 - `referral_link_get` — Read the workspace's referral link to share.
-- `organization_credits_get` — Read the owner's shared organization credit pool, seven-day grace_started_at/grace_expires_at and published rate_cards.
-- `project_budget_get` — Read the owner's project UTC-month budget, measured usage and open reservations.
+- `organization_credits_get` — Read the owner's shared organization credit pool (available_micros is monthly plus one-time credit minus reservations), the seven-day grace_started_at/grace_expires_at that begins when the credit is used up, and published rate_cards.
+- `project_budget_get` — Read the owner's project UTC-month budget, this month's use and open reservations.
 - `project_budget_set` — Set an owner's optional monthly project budget in microcredits (1000000 = one credit).
 - `organization_create` — Create an organization owned by the signed-in user.
 - `organization_list` — List the workspaces the chosen login's user belongs to and which one that login is scoped to.

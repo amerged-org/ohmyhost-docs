@@ -2521,7 +2521,7 @@
       "get": {
         "operationId": "getBillingCheckout",
         "summary": "Observe and reconcile an owner's original checkout",
-        "description": "Reads Stripe and reconciles confirmed credits/refunds idempotently. payment_confirmed describes the original Checkout, not spendable credit or current Paid entitlement. Read organization credits for available funding and the organization account's effective plan for Paid coverage; paid_until is the paid Stripe period end, not the end of renewal grace. No new purchase intent or payment is created; an uncertain original Checkout can resume using its stored identity.",
+        "description": "Reads Stripe and reconciles confirmed credits/refunds idempotently. payment_confirmed describes the original Checkout, not spendable credit or current Paid entitlement. Read organization credits for available funding and the organization account's effective plan for Paid coverage; paid_until is the end of paid coverage, the paid Stripe period end plus its 14-day renewal grace. No new purchase intent or payment is created; an uncertain original Checkout can resume using its stored identity.",
         "parameters": [
           {
             "$ref": "#/components/parameters/RequestId"
@@ -2688,7 +2688,7 @@
       "put": {
         "operationId": "configureBillingRecharge",
         "summary": "Enable or disable explicitly authorized auto-recharge",
-        "description": "Owner-only. An agent must obtain explicit approval for off-session charges and the gross monthly spending cap before enabling. Each refill costs USD 9 before tax for 1000 top-up credits when available credits fall below 100. Active Paid access is required to enable recharge and initiate a payment; remaining refill credits expire on downgrade to Free. A saved Stripe card is required; follow setup_url if returned. Current revision prevents stale edits; retry the original Idempotency-Key and payload after uncertainty. Disable prevents new charge initiation; already initiated payments may complete. No subscription or Paid features are created.",
+        "description": "Owner-only. An agent must obtain explicit approval for off-session charges and the gross monthly spending cap before enabling. Each refill costs USD 9 before tax for 1000 top-up credits when available credits fall below 100. Active Paid access is required to enable recharge and initiate a payment; bought credits never expire, also after a downgrade to Free. A saved Stripe card is required; follow setup_url if returned. Current revision prevents stale edits; retry the original Idempotency-Key and payload after uncertainty. Disable prevents new charge initiation; already initiated payments may complete. No subscription or Paid features are created.",
         "parameters": [
           {
             "$ref": "#/components/parameters/RequestId"
@@ -2790,7 +2790,7 @@
       "get": {
         "operationId": "getOrganizationCredits",
         "summary": "Read the owner's shared organization credit pool",
-        "description": "Returns posted credits and reservations, in microcredits (one credit is 1000000 microcredits). Monthly entitlement posting is idempotent. Only the organization Owner may read this balance. active_meters names the currently billed sources; unreported usage is not included. platform_overrun_micros is recorded platform exposure, not customer debt. Remains available at zero credit.",
+        "description": "Returns the spendable credit and the open reservations, in microcredits (one credit is 1000000 microcredits). available_micros is the monthly credit plus the one-time credit minus the reservations, never below zero. Only the organization Owner may read this balance. active_meters names the currently billed sources; usage that is not billed yet is not included. When the credit is used up, grace_started_at and grace_expires_at name the seven days that keep existing services running. Remains available at zero credit.",
         "parameters": [
           {
             "$ref": "#/components/parameters/RequestId"
@@ -2836,8 +2836,8 @@
     "/v1/organizations/{organization_id}/credit-usage": {
       "get": {
         "operationId": "getOrganizationCreditUsage",
-        "summary": "Read monthly measured usage by project and meter",
-        "description": "Owner-only event-month ledger totals, including signed corrections posted by as_of. Returns up to 20 projects per page in ID order; use next_cursor with the same month. Current unresolved reservations are separate from measured consumption. Null environment_id means project-shared cost, never guessed Dev allocation. Only posted measurements are included; this is not a complete provider invoice or zero-usage guarantee. Billing may arrive later. No credit is granted or charged by this read; it remains usable at zero credits.",
+        "summary": "Read recent measured usage by day, project and meter",
+        "description": "Owner-only. days holds the credit-log charges of the last up to 14 UTC days (today included, oldest first), grouped by day, project and meter. projects holds what each project has used so far in the current UTC month. A null environment_id means a project-shared cost, never a guessed Dev allocation. Only billed usage is included; charges may arrive later, so this is not a complete provider invoice or a zero-usage guarantee. No credit is granted or charged by this read; it remains usable at zero credits.",
         "parameters": [
           {
             "$ref": "#/components/parameters/RequestId"
@@ -2849,27 +2849,11 @@
             "schema": {
               "$ref": "#/components/schemas/Ulid"
             }
-          },
-          {
-            "name": "month",
-            "in": "query",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "pattern": "^20[0-9]{2}-(0[1-9]|1[0-2])$"
-            }
-          },
-          {
-            "name": "cursor",
-            "in": "query",
-            "schema": {
-              "$ref": "#/components/schemas/Ulid"
-            }
           }
         ],
         "responses": {
           "200": {
-            "description": "Current posted usage for the selected UTC month and project page.",
+            "description": "Recent billed usage of the organization.",
             "content": {
               "application/json": {
                 "schema": {
@@ -9388,9 +9372,6 @@
           "as_of",
           "available_micros",
           "reserved_micros",
-          "spent_micros",
-          "expired_micros",
-          "platform_overrun_micros",
           "grace_started_at",
           "grace_expires_at",
           "active_meters",
@@ -9414,22 +9395,13 @@
           "reserved_micros": {
             "$ref": "#/components/schemas/CreditMicros"
           },
-          "spent_micros": {
-            "$ref": "#/components/schemas/CreditMicros"
-          },
-          "expired_micros": {
-            "$ref": "#/components/schemas/CreditMicros"
-          },
-          "platform_overrun_micros": {
-            "$ref": "#/components/schemas/CreditMicros"
-          },
           "grace_started_at": {
             "type": [
               "string",
               "null"
             ],
             "format": "date-time",
-            "description": "First confirmed exhaustion in this continuous period; null while funded."
+            "description": "When the credit was used up; null while funded or after the monthly credit renewed."
           },
           "grace_expires_at": {
             "type": [
@@ -9437,7 +9409,7 @@
               "null"
             ],
             "format": "date-time",
-            "description": "Seven days after first confirmed exhaustion. Existing services and domains are retained during this grace; no automatic data deletion. Explicit project stop budgets are separate."
+            "description": "Seven days after the credit was used up. Existing services and domains are retained during this grace; no automatic data deletion. Explicit project stop budgets are separate."
           },
           "active_meters": {
             "type": "array",
@@ -9466,19 +9438,16 @@
         "additionalProperties": false,
         "required": [
           "organization_id",
-          "month",
           "as_of",
           "unit",
-          "data",
-          "next_cursor"
+          "period",
+          "from",
+          "projects",
+          "days"
         ],
         "properties": {
           "organization_id": {
             "$ref": "#/components/schemas/Ulid"
-          },
-          "month": {
-            "type": "string",
-            "pattern": "^20[0-9]{2}-(0[1-9]|1[0-2])$"
           },
           "as_of": {
             "type": "string",
@@ -9488,84 +9457,113 @@
             "type": "string",
             "const": "microcredits"
           },
-          "next_cursor": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/Ulid"
-              },
-              {
-                "type": "null"
-              }
-            ]
+          "period": {
+            "type": "string",
+            "description": "The UTC month that projects[].used_micros counts.",
+            "pattern": "^20[0-9]{2}-(0[1-9]|1[0-2])$"
           },
-          "data": {
+          "from": {
+            "type": "string",
+            "format": "date-time",
+            "description": "The start of the oldest UTC day in days."
+          },
+          "projects": {
             "type": "array",
-            "maxItems": 20,
+            "maxItems": 1000,
+            "description": "What each project has used so far in period, in ID order; projects without use are left out.",
             "items": {
               "type": "object",
               "additionalProperties": false,
               "required": [
                 "project_id",
-                "reserved_micros",
-                "meters"
+                "used_micros"
               ],
               "properties": {
                 "project_id": {
                   "$ref": "#/components/schemas/Ulid"
                 },
-                "reserved_micros": {
+                "used_micros": {
                   "$ref": "#/components/schemas/UsageTotal"
+                }
+              }
+            }
+          },
+          "days": {
+            "type": "array",
+            "maxItems": 15,
+            "description": "Billed charges of the last up to 14 UTC days, oldest first.",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "day",
+                "projects"
+              ],
+              "properties": {
+                "day": {
+                  "type": "string",
+                  "pattern": "^20[0-9]{2}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$"
                 },
-                "meters": {
+                "projects": {
                   "type": "array",
                   "maxItems": 1000,
                   "items": {
                     "type": "object",
                     "additionalProperties": false,
                     "required": [
-                      "environment_id",
-                      "meter",
-                      "unit",
-                      "rate_card_id",
-                      "quantity",
-                      "charged_micros",
-                      "funded_micros",
-                      "platform_overrun_micros"
+                      "project_id",
+                      "meters"
                     ],
                     "properties": {
-                      "environment_id": {
-                        "oneOf": [
-                          {
-                            "$ref": "#/components/schemas/Ulid"
-                          },
-                          {
-                            "type": "null"
+                      "project_id": {
+                        "$ref": "#/components/schemas/Ulid"
+                      },
+                      "meters": {
+                        "type": "array",
+                        "maxItems": 1000,
+                        "items": {
+                          "type": "object",
+                          "additionalProperties": false,
+                          "required": [
+                            "environment_id",
+                            "meter",
+                            "unit",
+                            "rate_card_id",
+                            "quantity",
+                            "charged_micros"
+                          ],
+                          "properties": {
+                            "environment_id": {
+                              "oneOf": [
+                                {
+                                  "$ref": "#/components/schemas/Ulid"
+                                },
+                                {
+                                  "type": "null"
+                                }
+                              ]
+                            },
+                            "meter": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9_.:/-]{1,128}$"
+                            },
+                            "unit": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9_.:/-]{1,128}$"
+                            },
+                            "rate_card_id": {
+                              "type": "string",
+                              "pattern": "^[A-Za-z0-9_.:/-]{1,128}$"
+                            },
+                            "quantity": {
+                              "type": "string",
+                              "pattern": "^(0|[1-9][0-9]{0,29})(\\.[0-9]{1,12})?$"
+                            },
+                            "charged_micros": {
+                              "$ref": "#/components/schemas/UsageTotal"
+                            }
                           }
-                        ]
-                      },
-                      "meter": {
-                        "type": "string",
-                        "pattern": "^[A-Za-z0-9_.:/-]{1,128}$"
-                      },
-                      "unit": {
-                        "type": "string",
-                        "pattern": "^[A-Za-z0-9_.:/-]{1,128}$"
-                      },
-                      "rate_card_id": {
-                        "type": "string",
-                        "pattern": "^[A-Za-z0-9_.:/-]{1,128}$"
-                      },
-                      "quantity": {
-                        "$ref": "#/components/schemas/UsageTotal"
-                      },
-                      "charged_micros": {
-                        "$ref": "#/components/schemas/UsageTotal"
-                      },
-                      "funded_micros": {
-                        "$ref": "#/components/schemas/UsageTotal"
-                      },
-                      "platform_overrun_micros": {
-                        "$ref": "#/components/schemas/UsageTotal"
+                        }
                       }
                     }
                   }
@@ -9654,6 +9652,7 @@
         ],
         "properties": {
           "amount_micros": {
+            "description": "The monthly budget, at most 9007199254740991 microcredits (about 9 billion credits); null removes it.",
             "oneOf": [
               {
                 "$ref": "#/components/schemas/CreditMicros"
@@ -13072,26 +13071,31 @@
               "null"
             ],
             "format": "date-time",
-            "description": "End of the paid Stripe billing period or the applicable grant; null on Free or for an unbounded grant. During an unpaid renewal the effective Paid plan may remain available for up to 14 days after this Stripe period end, without new monthly credits."
+            "description": "End of the paid coverage: the Stripe billing period plus its 14-day renewal grace, or the end of the grant; null on Free. Paid features stay available until this instant."
           },
           "available_micros": {
-            "$ref": "#/components/schemas/CreditMicros"
+            "$ref": "#/components/schemas/CreditMicros",
+            "description": "Spendable credit: monthly plus one-time credit minus the open reservations, never below zero."
           },
           "monthly_micros": {
-            "$ref": "#/components/schemas/CreditMicros"
+            "$ref": "#/components/schemas/CreditMicros",
+            "description": "The monthly credit, which ends at next_expiry; the Free allowance is 200 credits and the Paid allowance 1000 credits per period."
           },
           "one_time_micros": {
-            "$ref": "#/components/schemas/CreditMicros"
+            "$ref": "#/components/schemas/CreditMicros",
+            "description": "Top-up, bonus and referral credit. It does not expire."
           },
           "reserved_micros": {
-            "$ref": "#/components/schemas/CreditMicros"
+            "$ref": "#/components/schemas/CreditMicros",
+            "description": "Credit held for open builds; it is part of the monthly and one-time credit until the build settles."
           },
           "next_expiry": {
             "type": [
               "string",
               "null"
             ],
-            "format": "date-time"
+            "format": "date-time",
+            "description": "When the monthly credit ends and renews; null when none is left."
           },
           "as_of": {
             "type": "string",
