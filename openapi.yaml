@@ -1503,9 +1503,8 @@ paths:
         Returns a human payment URL, never charges a saved card. Paid is USD 10/month; each
         top-up pack is USD 10 before tax; a purchase grants 100 credits per dollar up to USD 100 and
         125 credits per dollar for the part above, so 10 packs grant 10000 and 20 packs grant 22500
-        credits. Top-ups require active Paid access and have no time limit during uninterrupted Paid
-        membership; remaining top-ups expire when the workspace returns to Free. Monthly Paid
-        credits expire at billing-period end without rollover. Retry the same offer, packs and
+        credits. Top-ups require active Paid access and never expire, also after the workspace returns
+        to Free. Monthly Paid credits expire at billing-period end without rollover. Retry the same offer, packs and
         Idempotency-Key after uncertainty. Browser return is not payment proof; read this checkout
         and the organization balance. A conflicting or existing subscription returns
         billing_purchase_conflict (409); read the original checkout or request an owner billing

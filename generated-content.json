@@ -1,5 +1,5 @@
 {
-  "source_commit": "58615693f3d0473f8bebde85e0c86c7bca33752c",
+  "source_commit": "cbb0be77835f618119898ae3c062b0f532c7e459",
   "source_dirty": false,
   "release": "0.1.41",
   "files": [
@@ -389,11 +389,11 @@
     },
     {
       "path": "openapi.yaml",
-      "sha256": "8c8e32a94150f01c4babbdea9acbc25ad691912065ba29d5779f7914f26ed37f"
+      "sha256": "ddc0e257b52612a86c5bc42a0f3a7b8f5f359d63b89e7e952c1dc019cfd29729"
     },
     {
       "path": "openapi.json",
-      "sha256": "61ca00e15626f1467345faa02f1f4523720de7773cb9dba672ce7edef15a8b69"
+      "sha256": "9d117cfd4257b11e0c1004bafd8f5fbc87f1921d3a97634fe072cdf4107f7498"
     },
     {
       "path": "mcp-tools.json",
