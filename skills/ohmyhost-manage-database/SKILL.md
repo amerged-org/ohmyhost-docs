@@ -66,6 +66,44 @@ If the customer explicitly requests copying selected records, use their reviewed
 
 `database_access_create` / `ohmyhost database access create` issues a `read` or confirmed `write` login for 5 minutes to 24 hours, with at most three active per logical environment. It returns the credential URI once; keep it out of arguments/source/logs and revoke through `database_access_revoke` when finished. PGCF access declares `transport: "wss"` and `websocket_url`; its PostgreSQL URI is a credential carrier, not a public TCP endpoint for an arbitrary SQL client. Use `ohmyhost database psql --project ULID --environment dev|prod --mode read|write`: it creates its own temporary credential, opens a local loopback bridge over verified WSS, gives the password to local `psql` through its private environment, and closes the bridge and revokes access on exit. PGCF's returned `psql_command` is this secret-free helper command. These roles cannot change schema, and application RLS still applies. Hosted code continues to use `OHMYHOST_DATABASE`.
 
+## Database events and schedules
+
+Webhooks send signed notifications about the selected environment's database. Schedules run statements on a timer. Both act only on that environment's single database, and the platform, not the customer, supplies the database and role.
+
+Webhook events are `database.created`, `database.ready`, `database.woke`, `database.slept`, `database.suspended`, `database.resized` and `database.deleted`; wildcards and operation events are not offered. A project holds at most five webhooks per environment. Create one with the explicit environment, an HTTPS URL, a list of event types, one saved `--idempotency-key` and `--yes`:
+
+```sh
+ohmyhost database webhook create --project "$PROJECT_ID" --environment "$PROJECT_ENVIRONMENT" --url "$WEBHOOK_URL" --event-types database.ready,database.slept --idempotency-key "$WEBHOOK_REQUEST_KEY" --yes --json
+```
+
+The `secret` is returned once, in that answer only. Store it in the receiver's own configuration, never in project notes, feedback or chat. Static request headers come from `--headers-file` (a UTF-8 JSON object of at most 8 KiB), never from arguments. Use `database webhook list`, `get`, `deliveries` and `replay --delivery ID --yes` to inspect and redeliver; `database webhook test --webhook ID --yes` sends one test event and may be throttled to one per five seconds.
+
+Verify each delivery before trusting it. The header `PGCF-Signature` is `t=<unix seconds>,v1=<hex>`, where the hex is HMAC-SHA256 of `<t>.<raw body>` keyed with the secret. Reject a timestamp more than five minutes from your clock:
+
+```ts
+import { createHmac, timingSafeEqual } from "node:crypto";
+function verify(secret: string, header: string, rawBody: string, nowSeconds: number): boolean {
+  const m = /^t=(\d{1,12}),v1=([0-9a-f]{64})$/.exec(header);
+  if (!m || Math.abs(nowSeconds - Number(m[1])) > 300) return false;
+  const mac = createHmac("sha256", secret).update(`${m[1]}.${rawBody}`).digest();
+  return timingSafeEqual(mac, Buffer.from(m[2] ?? "", "hex"));
+}
+```
+
+Delivery is at least once. Answer 2xx within five seconds, and deduplicate by the event `id` in the body, because a retry repeats an event you already handled. Retries continue for about 20 hours; a delivery that is exhausted is dead-lettered and can be replayed. Redirects are not followed.
+
+A schedule is set by name (`^[a-z][a-z0-9_-]{0,62}$`) with either `--cron "M H DOM MON DOW"` in UTC or `--every-seconds` (60 to 2,678,400). Its statements come from a UTF-8 JSON array file (`--statements-file`, 1 to 20 strings, at most 64 KiB), and `--timeout-ms` ranges from 1,000 to 30,000 (default 10,000):
+
+```sh
+ohmyhost database schedule set --project "$PROJECT_ID" --environment "$PROJECT_ENVIRONMENT" --name "$SCHEDULE_NAME" --cron "30 3 * * *" --statements-file "$STATEMENTS_FILE" --timeout-ms 10000 --enabled true --yes --json
+```
+
+Each run executes as the environment's runtime role under the application's row-level security, not as an administrator. With forced RLS a statement sees and changes only the rows the application's policies allow the runtime role to see. A cleanup that must reach every row needs a policy that permits the runtime role, otherwise it succeeds on zero rows; check the effect after the first run. Statements are one transaction; do not rely on a run starting at an exact second, because it starts a short, fixed offset after its time. Read `schedule runs` for outcomes (`succeeded`, `failed`, `timed_out`, `rejected`, `outcome_unknown`, `skipped_*`). A run whose outcome is `outcome_unknown` is never sent again, and the next occurrence is a new run, so write idempotent statements, for example `INSERT ... ON CONFLICT DO NOTHING` or a conditional `UPDATE`. `schedule run --name NAME --yes` queues one extra run; a disabled schedule or one already queued refuses it.
+
+Cost follows awake time. A run starts a sleeping database and adds to its active RAM time, and a schedule that runs more often than the idle timeout keeps the database awake. Executions of schedules and webhook attempts are measured per hour and billed as separate execution meters only when the platform publishes their prices. Until then no execution charge is made. A suspended database is not woken by a schedule; resume it first. Dev and Prod in shared mode list the same webhooks and schedules.
+
+MCP offers the reads `database_webhook_list`, `database_webhook_delivery_list`, `database_schedule_list`, `database_schedule_run_list` and `database_execution_usage_get`, and the local server adds `database_webhook_create`, `database_webhook_test`, `database_webhook_delivery_replay`, `database_webhook_delete`, `database_schedule_set`, `database_schedule_delete` and `database_schedule_run_now`. The destructive tools need `confirmed: true`, and `database_schedule_set` runs customer SQL on a timer, so confirm the statements with the owner first.
+
 ## Schema and promotion
 
 Keep immutable migrations in the configured directory as `YYYYMMDDHHMMSS_name.sql`. Ordinary schema admission is expand-only: create schemas `auth`, `extensions` or `private` with IF NOT EXISTS; extensions `pgcrypto`, `btree_gist` or `unaccent`; tables, types, domains, sequences, views, functions and indexes. Functions use SQL or PL/pgSQL, with a fixed search_path for SECURITY DEFINER. On existing tables, add only nullable columns without defaults and non-unique indexes. Constraints, foreign keys, unique indexes and triggers may attach to tables created in the same pending migration run, not existing tables. The matching backend-RLS release additionally admits bounded CREATE/ALTER/DROP POLICY and ENABLE/FORCE statements on explicitly qualified, migrator-owned ordinary public/private tables; all touched tables must finish enabled and forced. Ordinary DROP, row-changing statements, CREATE OR REPLACE, other ALTER and role/grant changes remain refused. Reserved-schema references are rejected except structurally checked `ohmyhost.user_id()` and `ohmyhost.claims()` calls inside policy expressions. Supabase helper SQL must first pass explicit reviewed conversion. At most 128 files, 256 KiB per file and 2 MiB total; use UTF-8/LF without BOM. Pending files apply atomically with a 30-second statement and five-second lock timeout. Applied files cannot change, and new timestamps must follow the applied catalog. Read `init` blockers before paying for a build. Source planning checks filenames, so a plan alone does not establish SQL admission; runtime catalog checks may still refuse changes to existing schema.

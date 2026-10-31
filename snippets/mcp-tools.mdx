@@ -43,6 +43,18 @@
 | `database_access_create` | `project_id`, `environment` | Change or prepare a change |
 | `database_access_list` | `project_id` | Read |
 | `database_access_revoke` | `project_id`, `access_id` | Change or prepare a change |
+| `database_webhook_list` | `project_id` | Read |
+| `database_webhook_create` | `project_id`, `environment`, `url`, `event_types`, `idempotency_key`, `confirmed` | Change or prepare a change |
+| `database_webhook_test` | `project_id`, `environment`, `webhook_id` | Change or prepare a change |
+| `database_webhook_delete` | `project_id`, `environment`, `webhook_id`, `confirmed` | Change or prepare a change |
+| `database_webhook_delivery_list` | `project_id` | Read |
+| `database_webhook_delivery_replay` | `project_id`, `environment`, `delivery_id` | Change or prepare a change |
+| `database_schedule_list` | `project_id` | Read |
+| `database_schedule_set` | `project_id`, `environment`, `name`, `statements`, `confirmed` | Change or prepare a change |
+| `database_schedule_delete` | `project_id`, `environment`, `name`, `confirmed` | Change or prepare a change |
+| `database_schedule_run_list` | `project_id`, `name` | Read |
+| `database_schedule_run_now` | `project_id`, `environment`, `name`, `confirmed` | Change or prepare a change |
+| `database_execution_usage_get` | `project_id`, `from`, `to`, `granularity` | Read |
 | `promotion_plan` | `project_id`, `source_deployment_id` | Change or prepare a change |
 | `promotion_execute` | `project_id`, `source_deployment_id`, `if_match`, `confirmation_token`, `idempotency_key`, `confirmed` | Change or prepare a change |
 | `token_create` | `organization_id`, `name`, `idempotency_key`, `out_file`, `confirmed` | Change or prepare a change |

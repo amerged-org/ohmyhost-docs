@@ -62,6 +62,20 @@ and follow the returned schema rather than guessing arguments.
 
 - `ohmyhost database access list` — ohmyhost database access list --project ULID [--environment dev|prod] --json
 - `ohmyhost database access revoke` — ohmyhost database access revoke --project ULID --access ULID --yes --json
+- `ohmyhost database webhook create` — ohmyhost database webhook create --project ULID --environment dev|prod --url HTTPS_URL --event-types TYPE[,TYPE] [--headers-file PATH] --idempotency-key KEY --yes --json (the signing secret is shown once in this answer; types: database.created, database.ready, database.woke, database.slept, database.suspended, database.resized, database.deleted; the headers file is a UTF-8 JSON object of at most 8 KiB)
+- `ohmyhost database webhook list` — ohmyhost database webhook list --project ULID [--environment dev|prod] --json (dev when omitted; the secret is never listed)
+- `ohmyhost database webhook get` — ohmyhost database webhook get --project ULID [--environment dev|prod] --webhook ID --json
+- `ohmyhost database webhook delete` — ohmyhost database webhook delete --project ULID --environment dev|prod --webhook ID --yes --json
+- `ohmyhost database webhook test` — ohmyhost database webhook test --project ULID --environment dev|prod --webhook ID --yes --json (sends one signed test request to the receiver; nothing is stored)
+- `ohmyhost database webhook deliveries` — ohmyhost database webhook deliveries --project ULID [--environment dev|prod] [--webhook ID] [--limit 1..100] [--cursor CURSOR] --json
+- `ohmyhost database webhook replay` — ohmyhost database webhook replay --project ULID --environment dev|prod --delivery ID --yes --json
+- `ohmyhost database schedule set` — ohmyhost database schedule set --project ULID --environment dev|prod --name NAME (--cron EXPR | --every-seconds N) --statements-file PATH [--timeout-ms N] [--enabled true|false] --yes --json (runs the statements in the file, a UTF-8 JSON array of 1 to 20 SQL strings, as the runtime role of the application; cron has five fields in UTC; every-seconds is 60 to 2678400; timeout-ms is 1000 to 30000, default 10000)
+- `ohmyhost database schedule list` — ohmyhost database schedule list --project ULID [--environment dev|prod] --json (dev when omitted)
+- `ohmyhost database schedule get` — ohmyhost database schedule get --project ULID [--environment dev|prod] --name NAME --json
+- `ohmyhost database schedule delete` — ohmyhost database schedule delete --project ULID --environment dev|prod --name NAME --yes --json
+- `ohmyhost database schedule runs` — ohmyhost database schedule runs --project ULID [--environment dev|prod] --name NAME [--limit 1..50] --json
+- `ohmyhost database schedule run` — ohmyhost database schedule run --project ULID --environment dev|prod --name NAME --yes --json (queues one run now, in addition to the timer)
+- `ohmyhost database executions` — ohmyhost database executions --project ULID [--environment dev|prod] --from ISO --to ISO --granularity hour|day [--limit 1..100] [--cursor CURSOR] --json (UTC timestamps like 2026-10-30T00:00:00.000Z aligned to the granularity, at most 31 days; counts schedule runs, webhook attempts and events per hour or day; usage counters only, nothing is charged for them until the operator prices them)
 - `ohmyhost database psql` — ohmyhost database psql --project ULID --environment dev|prod [--mode read|write] [--ttl 5m|1h|24h|SECONDS] [--json] (starts local psql with a temporary credential and revokes it on exit)
 - `ohmyhost link` — ohmyhost link --project ULID --repository-owner OWNER --repository-name REPOSITORY --idempotency-key KEY --json (uses the workspace GitHub connection and waits for the source-link operation)
 - `ohmyhost source auto-deploy set` — ohmyhost source auto-deploy set --project ULID --branch BRANCH --enabled true|false --idempotency-key KEY --json
@@ -172,6 +186,18 @@ and follow the returned schema rather than guessing arguments.
 - `database_access_create` — Issue a time-bound PostgreSQL credential for this project's own Dev or Prod database.
 - `database_access_list` — List this project's issued database credentials with their state (active, expired or revoked).
 - `database_access_revoke` — Revoke one issued database credential immediately: open sessions end and its PostgreSQL role is removed.
+- `database_webhook_list` — List this project's database webhooks of one Dev or Prod environment (dev when omitted), without signing secrets.
+- `database_webhook_create` — Subscribe one HTTPS receiver to database lifecycle events (database.created, ready, woke, slept, suspended, resized, deleted) of one Dev or Prod database.
+- `database_webhook_test` — Send one signed test request to a database webhook and report the outcome synchronously.
+- `database_webhook_delete` — Stop all deliveries to one database webhook.
+- `database_webhook_delivery_list` — List recent database webhook deliveries, newest first, optionally for one webhook.
+- `database_webhook_delivery_replay` — Queue one more attempt for a database webhook delivery that is no longer being retried.
+- `database_schedule_list` — List this project's database schedules of one Dev or Prod environment (dev when omitted), with their cadence, statements, timeout and next run.
+- `database_schedule_set` — Create or replace a named database schedule that runs SQL statements repeatedly on a timer, as the application's own runtime role, so row-level security applies.
+- `database_schedule_delete` — Remove one database schedule so it never runs again.
+- `database_schedule_run_list` — List the newest runs of one database schedule, newest first, with each run's outcome (succeeded, failed, timed_out, outcome_unknown, rejected or a skipped reason) and SQLSTATE when one applies.
+- `database_schedule_run_now` — Queue one immediate run of a database schedule.
+- `database_execution_usage_get` — Read metered database execution usage: schedule runs and webhook attempts per UTC hour or day window.
 - `promotion_plan` — Plan promotion of the current Dev artifact to Prod without a rebuild.
 - `promotion_execute` — Execute an explicitly confirmed Dev-to-Prod promotion using the unchanged plan guards.
 - `token_create` — Create your own non-expiring API token after interactive login and save it to the selected private env file.

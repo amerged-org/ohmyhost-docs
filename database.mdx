@@ -190,6 +190,47 @@ curl --fail-with-body "https://app.ohmyho.st/v1/projects/$PROJECT_ID/database/qu
 
 The write endpoint is `POST /v1/projects/{project_id}/database/write`; supply the `Idempotency-Key` header and JSON `environment`, `statement` and `parameters`. An automation should keep the same key for retries of one event and use a new key only for a deliberately new write. [Download the exact OpenAPI schema](/openapi.json).
 
+## Webhooks, schedules and executions
+
+Client 0.1.42 or newer manages three things per Dev or Prod database. All of them are tied to the one database of the selected environment; another project's webhook, schedule or delivery answers `resource_not_found`.
+
+**Webhooks** send a signed HTTPS `POST` when the database changes state: `database.created`, `database.ready`, `database.woke`, `database.slept`, `database.suspended`, `database.resized` and `database.deleted`. A project environment can have five. The signing secret appears once in the answer of `create`; store it in your receiver.
+
+```sh
+printf '{"x-tenant":"acme"}' > headers.json
+ohmyhost database webhook create --project "$PROJECT_ID" --environment dev \
+  --url https://example.com/hooks/database --event-types database.woke,database.slept \
+  --headers-file headers.json --idempotency-key "$KEY" --yes --json
+ohmyhost database webhook test --project "$PROJECT_ID" --environment dev --webhook "$WEBHOOK_ID" --yes --json
+ohmyhost database webhook deliveries --project "$PROJECT_ID" --json
+ohmyhost database webhook replay --project "$PROJECT_ID" --environment dev --delivery "$DELIVERY_ID" --yes --json
+```
+
+Every request carries `PGCF-Signature: t=<unix seconds>,v1=<hex>`, where `v1` is the HMAC-SHA256 of `<t>.<raw body>` with the secret. Reject a signature older than five minutes, compare in constant time, and answer a 2xx status within a few seconds. `PGCF-Event-Id` and `PGCF-Delivery-Id` identify the event and the attempt; a retried delivery repeats the event id, so deduplicate on it. A failed delivery is retried with growing delays for up to 24 hours, then it stays visible as dead-lettered for a week and can be replayed. `webhook test` sends one signed request and stores nothing; it is limited to one call per five seconds.
+
+**Schedules** run SQL on a timer, in the database, as the runtime role of your application, so [row-level security](/row-level-security) applies and schema changes are refused. A schedule has a cron expression (five fields, UTC) or an interval of 60 to 2,678,400 seconds, one to twenty statements that run in one transaction, and a timeout of 1,000 to 30,000 milliseconds.
+
+```sh
+printf '["DELETE FROM sessions WHERE expires_at < now()"]' > cleanup.json
+ohmyhost database schedule set --project "$PROJECT_ID" --environment prod --name cleanup \
+  --every-seconds 3600 --statements-file cleanup.json --yes --json
+ohmyhost database schedule run --project "$PROJECT_ID" --environment prod --name cleanup --yes --json
+ohmyhost database schedule runs --project "$PROJECT_ID" --name cleanup --json
+```
+
+A run starts a few seconds after its occurrence; the offset is fixed per schedule so that many schedules do not start together. A run ends as `succeeded`, `failed` (with the SQLSTATE), `timed_out`, `rejected`, `outcome_unknown` or one of the `skipped_*` states, and the last fifty runs are kept. A run whose answer was lost is `outcome_unknown` and is not repeated, so write statements that are safe to run twice. A run wakes a sleeping database and counts as database use, like a query. A project's Stop budget does not pause its schedules: delete or disable a schedule to stop it.
+
+**Executions** count schedule runs, webhook attempts and events per hour or day:
+
+```sh
+ohmyhost database executions --project "$PROJECT_ID" --from 2026-10-31T00:00:00.000Z \
+  --to 2026-11-01T00:00:00.000Z --granularity hour --json
+```
+
+An hour is `final` once it is complete. These are usage counters only; nothing is charged for them until a price is published.
+
+MCP offers the same operations as `database_webhook_*`, `database_schedule_*` and `database_execution_usage_get` (the remote server offers the five read tools; changes need the local server or the CLI). REST uses `/v1/projects/{project_id}/database/webhooks`, `/database/schedules` and `/database/execution-usage`; see the [OpenAPI schema](/openapi.json). Retrying a lost `webhook create` with the same idempotency key returns the same webhook. The other changes have no key: after a lost answer read the list first, then repeat.
+
 ## Permissions and shared data
 
 Application [row-level security (RLS)](/row-level-security) applies to reads and writes on explicitly protected tables. Hosting Owner permission does not bypass those policies or sign you in as an application user. A filtered or empty query does not prove the database is empty. Keep the policies; use the separate authorized [SQL export](/backups) when a complete archive is required.

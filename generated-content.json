@@ -1,7 +1,7 @@
 {
-  "source_commit": "02a4fa93e16f56eb3004d537ebc88e614224a2f4",
+  "source_commit": "b5426b707f095eb473b672b9bbd38ef93e2c426d",
   "source_dirty": false,
-  "release": "0.1.41",
+  "release": "0.1.42",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -78,6 +78,22 @@
     {
       "path": "errors/database-access-limit.mdx",
       "sha256": "3eb2f39041ea354605b2d4d7d89ce6c60cfeaedadf8dc8809b2e39165f061669"
+    },
+    {
+      "path": "errors/database-schedule-limit.mdx",
+      "sha256": "07a44d813d4dd7a532a6c25621762b27a050ddcacc800aee40daad17319ecdc9"
+    },
+    {
+      "path": "errors/database-schedule-not-runnable.mdx",
+      "sha256": "bb7f093db83cab168ec8bc67a7c2003f78a0052f63e8d81bac54b5bbe4443747"
+    },
+    {
+      "path": "errors/database-webhook-delivery-pending.mdx",
+      "sha256": "7cf131cb9561e23d5b48047f5c73d6643a1ad78b4d2e4ce5e02b4cf5e4c3ee9a"
+    },
+    {
+      "path": "errors/database-webhook-limit.mdx",
+      "sha256": "1a0cb2ee4ef7a39454411fb9900333e718fd3723abacd6431d3bd5962486da2a"
     },
     {
       "path": "errors/database-write-pending.mdx",
@@ -305,7 +321,7 @@
     },
     {
       "path": "snippets/error-codes.mdx",
-      "sha256": "e2f5d0e5cc4fc3527b19c12bdb14db546d676a3e5255b8a1dfed107793204aab"
+      "sha256": "23d36f2fc15c994116ddc69e153d377f57e0e89271d5f179a694832f35fe293f"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/SKILL.md",
@@ -349,7 +365,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/SKILL.md",
-      "sha256": "dc754060ee585a2ff8e71f10e46f88fbbcaa50fab1eed1ebfb777a32593c6610"
+      "sha256": "e339a428ddb520c8e4c482b9c87ba161a2d4a7117593652bb4aa934b03bad8d6"
     },
     {
       "path": "skills/ohmyhost-get-started/references/harness-setup.md",
@@ -357,11 +373,11 @@
     },
     {
       "path": "skills/ohmyhost-get-started/references/surfaces.md",
-      "sha256": "a602790fad833f658a93dacdc7be8655f7f60def8644c58334c890168938431b"
+      "sha256": "b9b379406e05553175524342717b8e86abf033413327bfdad16d10be4b1aed65"
     },
     {
       "path": "skills/ohmyhost-manage-database/SKILL.md",
-      "sha256": "d61cb7364bb2a115faaf64d001824e3fd99e416d9540f9bd741a13916d848c63"
+      "sha256": "c9917a841513a8e334431137896b909a4221c81e8d953fc1597ad3b642b087ac"
     },
     {
       "path": "skills/ohmyhost-migrate-supabase-postgres/SKILL.md",
@@ -385,19 +401,19 @@
     },
     {
       "path": "skills/ohmyhost-usage-and-budgets/SKILL.md",
-      "sha256": "c74422b8e649122618b6ca98692d11a3ecb38b25fe2a8eda02d09ae223e61867"
+      "sha256": "effe85056782557a36ba3009dac72e0512042e91ae4729f0aaf27ef08da555b7"
     },
     {
       "path": "openapi.yaml",
-      "sha256": "ddc0e257b52612a86c5bc42a0f3a7b8f5f359d63b89e7e952c1dc019cfd29729"
+      "sha256": "c107fa866d0426334b5521a5c993c7ea4423eac754e2a05aa0670cd98c228f1c"
     },
     {
       "path": "openapi.json",
-      "sha256": "9d117cfd4257b11e0c1004bafd8f5fbc87f1921d3a97634fe072cdf4107f7498"
+      "sha256": "d474ddc934283ab70599c6303ff08691888de2ad6c731868ce61b4e286c65ace"
     },
     {
       "path": "mcp-tools.json",
-      "sha256": "5fea5611fde5dbe7eee84365c318cc978049b55ceb8778be10964ee376a777b2"
+      "sha256": "8c9710c885a960f70505bb4ee60663c7620bcd89197c6909fe5ef21c91b5f829"
     },
     {
       "path": "mcp.json",
@@ -405,11 +421,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "45f30ea8d3b308f1ebdac3c3053c8c3955c7024bd37135885fcb18b871715813"
+      "sha256": "7cd04d9db4540ca956f0f230be3348520563ff4ea3db370d1bfcffc48c0f9919"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "c2a1302be8daea74ffed7ec9015e6d8bcbf032ac3d415ee03ffd8498e493a93e"
+      "sha256": "845dddcfbf885f9b9a3e0088deb2a18fbf826b4edceff0ed389a497763041616"
     },
     {
       "path": "snippets/skill-catalog.mdx",
@@ -417,7 +433,7 @@
     },
     {
       "path": "snippets/mcp-tools.mdx",
-      "sha256": "d591704a5cb11fb92fc8725874da7f1fd958b44e96e37e1634abb06f44f23629"
+      "sha256": "982bd15f35471cc868eda89e3518cc60615ae20f6d2905d4c76bb908b3328047"
     },
     {
       "path": "logo/light.svg",

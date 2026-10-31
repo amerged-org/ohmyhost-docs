@@ -1,0 +1,12 @@
+---
+title: "Database schedule not runnable"
+description: "What the `database_schedule_not_runnable` error means and what to do next."
+---
+
+The API, CLI and MCP return `database_schedule_not_runnable` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Read the schedule and its runs. Enable a disabled schedule, or wait until the run already queued has finished, then request the run again.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

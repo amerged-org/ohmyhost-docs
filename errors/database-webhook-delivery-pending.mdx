@@ -1,0 +1,12 @@
+---
+title: "Database webhook delivery pending"
+description: "What the `database_webhook_delivery_pending` error means and what to do next."
+---
+
+The API, CLI and MCP return `database_webhook_delivery_pending` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+The platform is still retrying this webhook delivery. Read the delivery in the delivery list; replay it only if it ends dead_lettered or the receiver needs the event again.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

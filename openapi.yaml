@@ -3672,6 +3672,421 @@ paths:
         "429": { $ref: "#/components/responses/Problem" }
         "503": { $ref: "#/components/responses/Problem" }
       x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/database/webhooks:
+    post:
+      operationId: createProjectDatabaseWebhook
+      summary: Create a signed webhook for database lifecycle events
+      description: Subscribes one HTTPS receiver to database lifecycle events of one environment.
+        The signing secret is returned exactly once and is never retrievable again. Deliveries are
+        retried and end dead-lettered when retries stop. At most five webhooks exist per project
+        environment.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/DatabaseEnvironment"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DatabaseWebhookCreateRequest" }
+      responses:
+        "201":
+          description: The webhook with its signing secret, returned once and never persisted in plaintext.
+          headers:
+            Cache-Control:
+              schema:
+                type: string
+                const: no-store
+            Pragma:
+              schema:
+                type: string
+                const: no-cache
+            X-Request-Id:
+              $ref: "#/components/headers/XRequestId"
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatabaseWebhookCreated" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "409": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-idempotency:
+        canonicalRequestVersion: v1
+        identicalRequest: replay-stored-response
+        changedRequest: 409-idempotency-key-reused
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    get:
+      operationId: listProjectDatabaseWebhooks
+      summary: List the project's database webhooks
+      description: Returns every webhook of the selected environment without signing secrets.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/DatabaseEnvironmentRead"
+      responses:
+        "200":
+          description: The database webhooks of the environment.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatabaseWebhookPage" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/database/webhooks/{webhook_id}:
+    get:
+      operationId: getProjectDatabaseWebhook
+      summary: Read one database webhook
+      description: Returns one webhook without its signing secret.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/DatabaseWebhookId"
+        - $ref: "#/components/parameters/DatabaseEnvironmentRead"
+      responses:
+        "200":
+          description: The database webhook.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatabaseWebhook" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    delete:
+      operationId: deleteProjectDatabaseWebhook
+      summary: Delete one database webhook
+      description: Stops deliveries to the webhook. Deleting an already deleted webhook answers
+        not found.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/DatabaseWebhookId"
+        - $ref: "#/components/parameters/DatabaseEnvironment"
+      responses:
+        "200":
+          description: The identifier of the deleted webhook.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatabaseWebhookDeleted" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/database/webhooks/{webhook_id}/test:
+    post:
+      operationId: testProjectDatabaseWebhook
+      summary: Send one test delivery to a database webhook
+      description: Sends one signed test request to the webhook URL and reports the outcome
+        synchronously. Each call sends one request; the platform allows one test per webhook every
+        five seconds.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/DatabaseWebhookId"
+        - $ref: "#/components/parameters/DatabaseEnvironment"
+      responses:
+        "200":
+          description: The outcome of the test request.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatabaseWebhookTestResult" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/database/webhook-deliveries:
+    get:
+      operationId: listProjectDatabaseWebhookDeliveries
+      summary: List database webhook deliveries
+      description: Returns the newest deliveries first, optionally for one webhook, with the state
+        of each delivery and its last attempt.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/DatabaseEnvironmentRead"
+        - name: webhook_id
+          in: query
+          description: Restrict the listing to the deliveries of one webhook.
+          required: false
+          schema:
+            type: string
+            pattern: ^whk_[a-z0-9]{20}$
+        - name: limit
+          in: query
+          description: Maximum number of deliveries in this page.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: cursor
+          in: query
+          description: Opaque cursor returned by the previous page.
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+      responses:
+        "200":
+          description: One page of database webhook deliveries.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatabaseWebhookDeliveryPage" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/database/webhook-deliveries/{delivery_id}/replay:
+    post:
+      operationId: replayProjectDatabaseWebhookDelivery
+      summary: Replay one database webhook delivery
+      description: Queues a new attempt for a delivery that is no longer being retried. Each call
+        queues one more attempt, and the delivery returns to pending until it is delivered or
+        dead-lettered again.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/DatabaseWebhookDeliveryId"
+        - $ref: "#/components/parameters/DatabaseEnvironment"
+      responses:
+        "202":
+          description: The delivery was queued for another attempt.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatabaseWebhookReplayAccepted" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "409": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/database/schedules:
+    get:
+      operationId: listProjectDatabaseSchedules
+      summary: List the project's database schedules
+      description: Returns every schedule of the selected environment.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/DatabaseEnvironmentRead"
+      responses:
+        "200":
+          description: The database schedules of the environment.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatabaseSchedulePage" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/database/schedules/{name}:
+    put:
+      operationId: setProjectDatabaseSchedule
+      summary: Create or replace one database schedule
+      description: Creates the named schedule or replaces it. Each run executes the statements as
+        the application's own runtime role, so row-level security applies as for the application.
+        A run that does not finish within timeout_ms is cancelled.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/DatabaseScheduleName"
+        - $ref: "#/components/parameters/DatabaseEnvironment"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/DatabaseScheduleSetRequest" }
+      responses:
+        "200":
+          description: The schedule as stored.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatabaseSchedule" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "409": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    get:
+      operationId: getProjectDatabaseSchedule
+      summary: Read one database schedule
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/DatabaseScheduleName"
+        - $ref: "#/components/parameters/DatabaseEnvironmentRead"
+      responses:
+        "200":
+          description: The database schedule.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatabaseSchedule" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    delete:
+      operationId: deleteProjectDatabaseSchedule
+      summary: Delete one database schedule
+      description: Removes the schedule.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/DatabaseScheduleName"
+        - $ref: "#/components/parameters/DatabaseEnvironment"
+      responses:
+        "200":
+          description: The name of the deleted schedule.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatabaseScheduleDeleted" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/database/schedules/{name}/runs:
+    get:
+      operationId: listProjectDatabaseScheduleRuns
+      summary: List the recent runs of one database schedule
+      description: Returns the newest runs first, with the outcome of each run.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/DatabaseScheduleName"
+        - $ref: "#/components/parameters/DatabaseEnvironmentRead"
+        - name: limit
+          in: query
+          description: Maximum number of runs in this page.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 20
+      responses:
+        "200":
+          description: The newest runs of the schedule, newest first.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatabaseScheduleRunPage" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/database/schedules/{name}/run:
+    post:
+      operationId: runProjectDatabaseSchedule
+      summary: Queue one immediate run of a database schedule
+      description: Queues one manual run. The run is refused while the schedule is disabled or
+        while a run is already queued.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/DatabaseScheduleName"
+        - $ref: "#/components/parameters/DatabaseEnvironment"
+      responses:
+        "202":
+          description: The run was queued.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatabaseScheduleRunAccepted" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "409": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/database/execution-usage:
+    get:
+      operationId: getProjectDatabaseExecutionUsage
+      summary: Read metered database execution usage
+      description: Returns schedule runs and webhook attempts per time window. Only completed
+        windows are final; the current window may still change. Windows are UTC and at most 31
+        days long. Rejected, skipped, event and delivery counts are reported but not billed.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/DatabaseEnvironmentRead"
+        - name: from
+          in: query
+          description: Inclusive window start in UTC, aligned to the granularity.
+          required: true
+          schema:
+            type: string
+            format: date-time
+            pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z$
+        - name: to
+          in: query
+          description: Exclusive window end in UTC, aligned to the granularity.
+          required: true
+          schema:
+            type: string
+            format: date-time
+            pattern: ^[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9]{2}:[0-9]{2}:[0-9]{2}\.[0-9]{3}Z$
+        - name: granularity
+          in: query
+          description: Length of each returned window.
+          required: true
+          schema:
+            type: string
+            enum: [hour, day]
+        - name: limit
+          in: query
+          description: Maximum number of windows in this page.
+          required: false
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 50
+        - name: cursor
+          in: query
+          description: Opaque cursor returned by the previous page.
+          required: false
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 200
+      responses:
+        "200":
+          description: One page of execution usage windows.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/DatabaseExecutionUsagePage" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
   /v1/projects/{project_id}/deployments/{target_deployment_id}:rollback-plan:
     post:
       operationId: planDeploymentRollback
@@ -4629,6 +5044,15 @@ components:
       required: true
       schema:
         $ref: "#/components/schemas/Ulid"
+    DatabaseEnvironmentRead:
+      name: environment
+      in: query
+      description: Application environment to read; dev when omitted.
+      required: false
+      schema:
+        type: string
+        enum: [dev, prod]
+        default: dev
     DatabaseEnvironmentFilter:
       name: environment
       in: query
@@ -4637,6 +5061,38 @@ components:
       schema:
         type: string
         enum: [dev, prod]
+    DatabaseEnvironment:
+      name: environment
+      in: query
+      description: Application environment the mutation applies to.
+      required: true
+      schema:
+        type: string
+        enum: [dev, prod]
+    DatabaseWebhookId:
+      name: webhook_id
+      in: path
+      description: Database webhook identifier.
+      required: true
+      schema:
+        type: string
+        pattern: ^whk_[a-z0-9]{20}$
+    DatabaseWebhookDeliveryId:
+      name: delivery_id
+      in: path
+      description: Database webhook delivery identifier.
+      required: true
+      schema:
+        type: string
+        pattern: ^dlv_[0-9a-f]{20}$
+    DatabaseScheduleName:
+      name: name
+      in: path
+      description: Database schedule name, unique per project environment.
+      required: true
+      schema:
+        type: string
+        pattern: ^[a-z][a-z0-9_-]{0,62}$
     ProjectCursor:
       name: cursor
       in: query
@@ -6691,6 +7147,9 @@ components:
         - mode
         - role_name
         - host
+        - provider
+        - transport
+        - websocket_url
         - database
         - label
         - state
@@ -6708,7 +7167,8 @@ components:
         host: { type: string, minLength: 1, maxLength: 253 }
         database:
           type: string
-          description: neondb for a transitional Neon credential; the exact 20-character PGCF database identity for WSS.
+          pattern: "^[a-z][a-z0-9]{19}$"
+          description: The exact 20-character PGCF database identity for WSS.
         provider: { type: string, const: pgcf }
         transport: { type: string, const: wss }
         websocket_url:
@@ -6723,17 +7183,6 @@ components:
         revocation_reason:
           type: [string, "null"]
           enum: [principal, expired, budget, creation_failed, data_change, null]
-      oneOf:
-        - properties:
-            database: { const: neondb }
-          not:
-            anyOf:
-              - required: [provider]
-              - required: [transport]
-              - required: [websocket_url]
-        - required: [provider, transport, websocket_url]
-          properties:
-            database: { pattern: "^[a-z][a-z0-9]{19}$" }
     ProjectDatabaseAccessCredential:
       type: object
       additionalProperties: false
@@ -6745,6 +7194,9 @@ components:
         - mode
         - role_name
         - host
+        - provider
+        - transport
+        - websocket_url
         - database
         - label
         - state
@@ -6762,7 +7214,8 @@ components:
         host: { type: string, minLength: 1, maxLength: 253 }
         database:
           type: string
-          description: neondb for a transitional Neon credential; the exact 20-character PGCF database identity for WSS.
+          pattern: "^[a-z][a-z0-9]{19}$"
+          description: The exact 20-character PGCF database identity for WSS.
         provider: { type: string, const: pgcf }
         transport: { type: string, const: wss }
         websocket_url:
@@ -6783,18 +7236,7 @@ components:
           description: Returned once as credential material. For PGCF this identifies a WSS transport, never direct public TCP. Never place it in command arguments, files, notes or source.
         psql_command:
           type: string
-          description: For PGCF, a secret-free ohmyhost database psql invocation that obtains and revokes its own session credential. Transitional Neon responses retain their original direct invocation.
-      oneOf:
-        - properties:
-            database: { const: neondb }
-          not:
-            anyOf:
-              - required: [provider]
-              - required: [transport]
-              - required: [websocket_url]
-        - required: [provider, transport, websocket_url]
-          properties:
-            database: { pattern: "^[a-z][a-z0-9]{19}$" }
+          description: For PGCF, a secret-free ohmyhost database psql invocation that obtains and revokes its own session credential.
     ProjectDatabaseAccessPage:
       type: object
       additionalProperties: false
@@ -6804,6 +7246,378 @@ components:
           type: array
           maxItems: 50
           items: { $ref: "#/components/schemas/ProjectDatabaseAccess" }
+    DatabaseWebhookEventType:
+      type: string
+      enum:
+        - database.created
+        - database.ready
+        - database.woke
+        - database.slept
+        - database.suspended
+        - database.resized
+        - database.deleted
+    DatabaseWebhookCreateRequest:
+      type: object
+      additionalProperties: false
+      required: [url, event_types]
+      properties:
+        url:
+          type: string
+          maxLength: 2048
+          pattern: ^https://
+          description: HTTPS receiver URL.
+        event_types:
+          type: array
+          minItems: 1
+          maxItems: 16
+          uniqueItems: true
+          items: { $ref: "#/components/schemas/DatabaseWebhookEventType" }
+        headers:
+          type: object
+          description:
+            Extra headers sent with every delivery. Names are case-insensitive and must be
+            unique; content-type, host, content-length, connection, transfer-encoding, user-agent,
+            te, upgrade, expect and any name starting with pgcf-, cf- or x-forwarded- are refused.
+          maxProperties: 8
+          propertyNames:
+            type: string
+            pattern: ^[A-Za-z][A-Za-z0-9-]{0,63}$
+          additionalProperties:
+            type: string
+            minLength: 1
+            maxLength: 512
+            pattern: '^[\x21-\x7e]([\x20-\x7e]*[\x21-\x7e])?$'
+    DatabaseWebhook:
+      type: object
+      additionalProperties: false
+      required: [id, environment, url, event_types, header_names, created_at]
+      properties:
+        id:
+          type: string
+          pattern: ^whk_[a-z0-9]{20}$
+        environment: { type: string, enum: [dev, prod] }
+        url: { type: string, maxLength: 2048, pattern: ^https:// }
+        event_types:
+          type: array
+          minItems: 1
+          maxItems: 16
+          items: { $ref: "#/components/schemas/DatabaseWebhookEventType" }
+        header_names:
+          type: array
+          maxItems: 8
+          items:
+            type: string
+            pattern: ^[A-Za-z][A-Za-z0-9-]{0,63}$
+          description: Names of the extra headers only; their values are never returned.
+        created_at: { type: string, format: date-time }
+    DatabaseWebhookCreated:
+      type: object
+      additionalProperties: false
+      required: [id, environment, url, event_types, header_names, created_at, secret]
+      properties:
+        id:
+          type: string
+          pattern: ^whk_[a-z0-9]{20}$
+        environment: { type: string, enum: [dev, prod] }
+        url: { type: string, maxLength: 2048, pattern: ^https:// }
+        event_types:
+          type: array
+          minItems: 1
+          maxItems: 16
+          items: { $ref: "#/components/schemas/DatabaseWebhookEventType" }
+        header_names:
+          type: array
+          maxItems: 8
+          items:
+            type: string
+            pattern: ^[A-Za-z][A-Za-z0-9-]{0,63}$
+        created_at: { type: string, format: date-time }
+        secret:
+          type: string
+          minLength: 1
+          description: Signing secret, returned only by this creation answer.
+    DatabaseWebhookPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items: { $ref: "#/components/schemas/DatabaseWebhook" }
+    DatabaseWebhookDeleted:
+      type: object
+      additionalProperties: false
+      required: [id, deleted]
+      properties:
+        id:
+          type: string
+          pattern: ^whk_[a-z0-9]{20}$
+        deleted: { type: boolean, const: true }
+    DatabaseWebhookDelivery:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - event_id
+        - event_type
+        - webhook_id
+        - state
+        - attempts
+        - created_at
+        - next_attempt_at
+        - delivered_at
+        - last_status
+        - last_error
+      properties:
+        id:
+          type: string
+          pattern: ^dlv_[0-9a-f]{20}$
+        event_id:
+          type: string
+          pattern: ^evt_[0-9a-f]{20}$
+        event_type: { $ref: "#/components/schemas/DatabaseWebhookEventType" }
+        webhook_id:
+          type: string
+          pattern: ^whk_[a-z0-9]{20}$
+        state: { type: string, enum: [pending, delivered, dead_lettered] }
+        attempts: { type: integer, minimum: 0 }
+        created_at: { type: string, format: date-time }
+        next_attempt_at: { type: [string, "null"], format: date-time }
+        delivered_at: { type: [string, "null"], format: date-time }
+        last_status: { type: [integer, "null"] }
+        last_error:
+          type: [string, "null"]
+          enum: [timeout, network, http, expired, permanent, null]
+    DatabaseWebhookDeliveryPage:
+      type: object
+      additionalProperties: false
+      required: [items, next_cursor]
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items: { $ref: "#/components/schemas/DatabaseWebhookDelivery" }
+        next_cursor:
+          type: [string, "null"]
+          minLength: 1
+          maxLength: 200
+    DatabaseWebhookTestResult:
+      type: object
+      additionalProperties: false
+      required: [delivered, status, error, duration_ms]
+      properties:
+        delivered: { type: boolean }
+        status: { type: [integer, "null"] }
+        error:
+          type: [string, "null"]
+          enum: [timeout, network, http, null]
+        duration_ms: { type: integer, minimum: 0 }
+    DatabaseWebhookReplayAccepted:
+      type: object
+      additionalProperties: false
+      required: [delivery_id, state]
+      properties:
+        delivery_id:
+          type: string
+          pattern: ^dlv_[0-9a-f]{20}$
+        state: { type: string, const: pending }
+    DatabaseScheduleSetRequest:
+      type: object
+      additionalProperties: false
+      required: [statements, confirm]
+      oneOf:
+        - required: [cron]
+        - required: [every_seconds]
+      properties:
+        cron:
+          type: string
+          minLength: 9
+          maxLength: 120
+          description: Five-field cron expression evaluated in UTC. Send exactly one of cron or every_seconds.
+        every_seconds:
+          type: integer
+          minimum: 60
+          maximum: 2678400
+          description: Interval in seconds between runs. Send exactly one of cron or every_seconds.
+        statements:
+          type: array
+          minItems: 1
+          maxItems: 20
+          description: Statements run in order by the application's runtime role. At most 16 KiB per statement and 64 KiB in total.
+          items:
+            type: string
+            minLength: 1
+            maxLength: 16384
+            pattern: '\S'
+        timeout_ms:
+          type: integer
+          minimum: 1000
+          maximum: 30000
+          default: 10000
+        enabled:
+          type: boolean
+          default: true
+        confirm:
+          type: boolean
+          const: true
+          description: Confirms that the statements run with the application's runtime role.
+    DatabaseSchedule:
+      type: object
+      additionalProperties: false
+      required:
+        - name
+        - environment
+        - cron
+        - every_seconds
+        - statements
+        - timeout_ms
+        - enabled
+        - next_run_at
+        - created_at
+      oneOf:
+        - properties:
+            cron: { type: string, minLength: 9, maxLength: 120 }
+            every_seconds: { type: "null" }
+        - properties:
+            cron: { type: "null" }
+            every_seconds: { type: integer, minimum: 60, maximum: 2678400 }
+      properties:
+        name:
+          type: string
+          pattern: ^[a-z][a-z0-9_-]{0,62}$
+        environment: { type: string, enum: [dev, prod] }
+        cron: { type: [string, "null"] }
+        every_seconds: { type: [integer, "null"] }
+        statements:
+          type: array
+          maxItems: 20
+          items: { type: string }
+        timeout_ms: { type: integer, minimum: 1000, maximum: 30000 }
+        enabled: { type: boolean }
+        next_run_at: { type: [string, "null"], format: date-time }
+        created_at: { type: string, format: date-time }
+    DatabaseSchedulePage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items: { $ref: "#/components/schemas/DatabaseSchedule" }
+    DatabaseScheduleDeleted:
+      type: object
+      additionalProperties: false
+      required: [name, deleted]
+      properties:
+        name:
+          type: string
+          pattern: ^[a-z][a-z0-9_-]{0,62}$
+        deleted: { type: boolean, const: true }
+    DatabaseScheduleRun:
+      type: object
+      additionalProperties: false
+      required:
+        - id
+        - schedule
+        - scheduled_at
+        - started_at
+        - finished_at
+        - outcome
+        - sqlstate
+        - attempts
+        - manual
+      properties:
+        id: { type: integer, minimum: 0 }
+        schedule:
+          type: string
+          pattern: ^[a-z][a-z0-9_-]{0,62}$
+        scheduled_at: { type: string, format: date-time }
+        started_at: { type: [string, "null"], format: date-time }
+        finished_at: { type: string, format: date-time }
+        outcome:
+          type: string
+          enum:
+            - succeeded
+            - failed
+            - timed_out
+            - outcome_unknown
+            - rejected
+            - skipped_capacity
+            - skipped_suspended
+            - skipped_deleted
+            - skipped_missed
+        sqlstate: { type: [string, "null"] }
+        attempts: { type: integer, minimum: 0 }
+        manual: { type: boolean }
+    DatabaseScheduleRunPage:
+      type: object
+      additionalProperties: false
+      required: [items]
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items: { $ref: "#/components/schemas/DatabaseScheduleRun" }
+    DatabaseScheduleRunAccepted:
+      type: object
+      additionalProperties: false
+      required: [schedule, state]
+      properties:
+        schedule:
+          type: string
+          pattern: ^[a-z][a-z0-9_-]{0,62}$
+        state: { type: string, const: queued }
+    DatabaseExecutionMetrics:
+      type: object
+      additionalProperties: false
+      required:
+        - schedule_runs_succeeded
+        - schedule_runs_failed
+        - schedule_runs_timed_out
+        - schedule_runs_outcome_unknown
+        - schedule_runs_rejected
+        - schedule_runs_skipped
+        - events_emitted
+        - event_bytes
+        - webhook_attempts
+        - webhook_deliveries_delivered
+        - webhook_deliveries_dead_lettered
+      properties:
+        schedule_runs_succeeded: { type: integer, minimum: 0 }
+        schedule_runs_failed: { type: integer, minimum: 0 }
+        schedule_runs_timed_out: { type: integer, minimum: 0 }
+        schedule_runs_outcome_unknown: { type: integer, minimum: 0 }
+        schedule_runs_rejected: { type: integer, minimum: 0 }
+        schedule_runs_skipped: { type: integer, minimum: 0 }
+        events_emitted: { type: integer, minimum: 0 }
+        event_bytes: { type: integer, minimum: 0 }
+        webhook_attempts: { type: integer, minimum: 0 }
+        webhook_deliveries_delivered: { type: integer, minimum: 0 }
+        webhook_deliveries_dead_lettered: { type: integer, minimum: 0 }
+    DatabaseExecutionUsageRow:
+      type: object
+      additionalProperties: false
+      required: [start, end, final, metrics]
+      properties:
+        start: { type: string, format: date-time }
+        end: { type: string, format: date-time }
+        final: { type: boolean }
+        metrics: { $ref: "#/components/schemas/DatabaseExecutionMetrics" }
+    DatabaseExecutionUsagePage:
+      type: object
+      additionalProperties: false
+      required: [items, next_cursor]
+      properties:
+        items:
+          type: array
+          maxItems: 100
+          items: { $ref: "#/components/schemas/DatabaseExecutionUsageRow" }
+        next_cursor:
+          type: [string, "null"]
+          minLength: 1
+          maxLength: 200
     SetDevAccessModeRequest:
       type: object
       additionalProperties: false
@@ -7814,6 +8628,10 @@ components:
             - compute_performance_unavailable
             - database_write_pending
             - database_access_limit
+            - database_webhook_limit
+            - database_schedule_limit
+            - database_schedule_not_runnable
+            - database_webhook_delivery_pending
             - compute_change_pending
             - compute_change_conflict
             - billing_purchase_conflict
