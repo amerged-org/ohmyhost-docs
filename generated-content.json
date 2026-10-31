@@ -1,7 +1,7 @@
 {
-  "source_commit": "b5426b707f095eb473b672b9bbd38ef93e2c426d",
+  "source_commit": "6a255d75c58cdedaeaf44bd1dd051cda3b12f5cb",
   "source_dirty": false,
-  "release": "0.1.42",
+  "release": "0.1.43",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -365,7 +365,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/SKILL.md",
-      "sha256": "e339a428ddb520c8e4c482b9c87ba161a2d4a7117593652bb4aa934b03bad8d6"
+      "sha256": "3a7f098909a2f46b153c131c235c0e281b0cd915c440ee8a968182977a9375f8"
     },
     {
       "path": "skills/ohmyhost-get-started/references/harness-setup.md",
@@ -373,7 +373,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/references/surfaces.md",
-      "sha256": "b9b379406e05553175524342717b8e86abf033413327bfdad16d10be4b1aed65"
+      "sha256": "2c6675202228a6d2a6c80bce28621598a6f7692cea0746da0d46061f3182dc7a"
     },
     {
       "path": "skills/ohmyhost-manage-database/SKILL.md",
@@ -405,15 +405,15 @@
     },
     {
       "path": "openapi.yaml",
-      "sha256": "c107fa866d0426334b5521a5c993c7ea4423eac754e2a05aa0670cd98c228f1c"
+      "sha256": "08a0fff8905b638d3388c996efa406d9700f41dc2e75703f186d42587bd60d1f"
     },
     {
       "path": "openapi.json",
-      "sha256": "d474ddc934283ab70599c6303ff08691888de2ad6c731868ce61b4e286c65ace"
+      "sha256": "1c20e66ed3400ba26b0c04709cea428c608ec1944c4f950a58b1e14fb2fd4fb7"
     },
     {
       "path": "mcp-tools.json",
-      "sha256": "8c9710c885a960f70505bb4ee60663c7620bcd89197c6909fe5ef21c91b5f829"
+      "sha256": "10612147cedd49a64523485cf69900516c7e8fab76fac709541bbf10f9c78744"
     },
     {
       "path": "mcp.json",
@@ -421,11 +421,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "7cd04d9db4540ca956f0f230be3348520563ff4ea3db370d1bfcffc48c0f9919"
+      "sha256": "10f0e8e87c7948dc0ccec686f50db40093a68efefe445638b8eeabb323cb87d3"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "845dddcfbf885f9b9a3e0088deb2a18fbf826b4edceff0ed389a497763041616"
+      "sha256": "68e4745f45f01abcdeb2d4e211dbad08e063b2f55b9fb5852b1da48a36ce3cfa"
     },
     {
       "path": "snippets/skill-catalog.mdx",

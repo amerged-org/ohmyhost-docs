@@ -3,6 +3,20 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
+## Client release 0.1.43 (October 31, 2026)
+
+**Breaking for clients older than 0.1.43 that read the credit balance.** Update CLI and MCP together:
+
+```sh
+npm install --global @amerged/ohmyhost-cli@0.1.43 @amerged/ohmyhost-mcp@0.1.43
+```
+
+- **Credit balance only.** `GET /v1/organizations/{organization_id}/credits` and `ohmyhost credits balance` return `available_micros`, `reserved_micros`, `grace_started_at` and `grace_expires_at`. `active_meters` and `rate_cards` are removed; an older CLI rejects the answer with `response_contract_invalid`. [Understand usage](/usage).
+
+## Client release 0.1.42 (October 31, 2026)
+
+- **Database webhooks, schedules and executions.** `ohmyhost database webhook`, `database schedule` and `database executions` (and the matching MCP tools and REST routes) manage signed HTTPS webhooks for database state changes, scheduled SQL and execution counters of a Dev or Prod database. [Webhooks, schedules and executions](/database).
+
 ## Client release 0.1.41 (October 30, 2026)
 
 **Breaking for clients older than 0.1.41 that read credits or usage.** Update CLI and MCP together before you read either:

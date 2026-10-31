@@ -1701,9 +1701,10 @@ paths:
       description: Returns the spendable credit and the open reservations, in microcredits (one
         credit is 1000000 microcredits). available_micros is the monthly credit plus the one-time
         credit minus the reservations, never below zero. Only the organization Owner may read this
-        balance. active_meters names the currently billed sources; usage that is not billed yet is
-        not included. When the credit is used up, grace_started_at and grace_expires_at name the
-        seven days that keep existing services running. Remains available at zero credit.
+        balance. It states what is left and never what the credit was spent on; read the recent
+        usage from getOrganizationCreditUsage. When the credit is used up, grace_started_at and
+        grace_expires_at name the seven days that keep existing services running. Remains available
+        at zero credit.
       parameters:
         - $ref: "#/components/parameters/RequestId"
         - name: organization_id
@@ -5891,8 +5892,6 @@ components:
           reserved_micros,
           grace_started_at,
           grace_expires_at,
-          active_meters,
-          rate_cards,
         ]
       properties:
         organization_id:
@@ -5918,20 +5917,6 @@ components:
             Seven days after the credit was used up. Existing services and domains are retained
             during this grace; no automatic data deletion. Explicit project stop budgets are
             separate.
-        active_meters:
-          type: array
-          items:
-            type: string
-            pattern: ^[a-z0-9_.-]{1,128}$
-        rate_cards:
-          type: array
-          maxItems: 4
-          description:
-            Published integer prices, newest first. A published rate is not proof of enabled
-            billing; only active_meters names currently billed sources. Builds retain their accepted
-            quote. Provider cost is a list-price basis before platform allowances, not an invoice.
-          items:
-            $ref: "#/components/schemas/PublishedCreditRateCard"
     UsageTotal:
       type: string
       description: Non-negative integer aggregate, serialized exactly without floating-point rounding.
@@ -6019,51 +6004,6 @@ components:
                             pattern: "^(0|[1-9][0-9]{0,29})(\\.[0-9]{1,12})?$"
                           charged_micros:
                             $ref: "#/components/schemas/UsageTotal"
-    PublishedCreditRateCard:
-      type: object
-      additionalProperties: false
-      required: [id, currency, published_at, effective_from, rates]
-      properties:
-        id:
-          type: string
-          pattern: ^[a-z0-9_.-]{1,128}$
-        currency:
-          type: string
-          const: USD
-        published_at:
-          type: string
-          format: date-time
-        effective_from:
-          type: string
-          format: date-time
-        rates:
-          type: array
-          minItems: 1
-          maxItems: 50
-          items:
-            type: object
-            additionalProperties: false
-            required: [meter, unit, units_per_charge, provider_cost_micros, credit_micros]
-            properties:
-              meter:
-                type: string
-                pattern: ^[a-z0-9_.-]{1,128}$
-              unit:
-                type: string
-                pattern: ^[a-z0-9_.-]{1,128}$
-              units_per_charge:
-                type: string
-                pattern: ^[1-9][0-9]{0,18}$
-              provider_cost_micros:
-                type: [string, "null"]
-                pattern: ^(0|[1-9][0-9]{0,18})$
-                description:
-                  Provider list-cost basis for units_per_charge, in USD micro-units (1000000 equals 1
-                  USD), before shared allowances and discounts. Null for the PGCF RAM tariff means
-                  node infrastructure costs are tracked separately and are not allocated to this
-                  customer rate; null never means zero cost.
-              credit_micros:
-                $ref: "#/components/schemas/CreditMicros"
     SetProjectCreditBudgetRequest:
       type: object
       additionalProperties: false

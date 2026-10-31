@@ -174,7 +174,7 @@ and follow the returned schema rather than guessing arguments.
 - `organization_usage_get` — Read the billed usage of the last up to 14 UTC days (today included) grouped by day, project and meter, and what each project has used so far this UTC month.
 - `organization_account_get` — Owner-only: read the effective Free/Paid plan, its Stripe or granted source, the monthly credits that expire at next_expiry, the top-up and bonus credits that never expire, the reservations that hold part of them, and available_micros (monthly plus one-time minus reservations).
 - `referral_link_get` — Read the workspace's referral link to share.
-- `organization_credits_get` — Read the owner's shared organization credit pool (available_micros is monthly plus one-time credit minus reservations), the seven-day grace_started_at/grace_expires_at that begins when the credit is used up, and published rate_cards.
+- `organization_credits_get` — Read the owner's shared organization credit balance (available_micros is monthly plus one-time credit minus reservations) and the seven-day grace_started_at/grace_expires_at that begins when the credit is used up.
 - `project_budget_get` — Read the owner's project UTC-month budget, this month's use and open reservations.
 - `project_budget_set` — Set an owner's optional monthly project budget in microcredits (1000000 = one credit).
 - `organization_create` — Create an organization owned by the signed-in user.
