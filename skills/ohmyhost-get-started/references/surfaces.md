@@ -62,7 +62,10 @@ and follow the returned schema rather than guessing arguments.
 
 - `ohmyhost database access list` — ohmyhost database access list --project ULID [--environment dev|prod] --json
 - `ohmyhost database access revoke` — ohmyhost database access revoke --project ULID --access ULID --yes --json
-- `ohmyhost database webhook create` — ohmyhost database webhook create --project ULID --environment dev|prod --url HTTPS_URL --event-types TYPE[,TYPE] [--headers-file PATH] --idempotency-key KEY --yes --json (the signing secret is shown once in this answer; types: database.created, database.ready, database.woke, database.slept, database.suspended, database.resized, database.deleted; the headers file is a UTF-8 JSON object of at most 8 KiB)
+- `ohmyhost database watch create` — ohmyhost database watch create --project ULID --environment dev|prod --table NAME [--schema public] --columns COL[,COL] [--operations insert,update,delete] --idempotency-key KEY --yes --json (publishes only the listed columns, at most 32, of each row change as the event type data.<topic> printed in this answer; the table must exist as an ordinary table of the application; a sleeping database wakes; next, subscribe with 'ohmyhost database webhook create ... --event-types data.<topic>')
+- `ohmyhost database watch list` — ohmyhost database watch list --project ULID [--environment dev|prod] --json (dev when omitted; a sleeping database wakes)
+- `ohmyhost database watch delete` — ohmyhost database watch delete --project ULID --environment dev|prod --watch ID --idempotency-key KEY --yes --json
+- `ohmyhost database webhook create` — ohmyhost database webhook create --project ULID --environment dev|prod --url HTTPS_URL --event-types TYPE[,TYPE] [--headers-file PATH] --idempotency-key KEY --yes --json (the signing secret is shown once in this answer; types: database.created, database.ready, database.woke, database.slept, database.suspended, database.resized, database.deleted, data.<topic> for the rows of one watched table printed by database watch create, or data.\* for every watched table; a bare \* is not accepted and does not include data events; the headers file is a UTF-8 JSON object of at most 8 KiB)
 - `ohmyhost database webhook list` — ohmyhost database webhook list --project ULID [--environment dev|prod] --json (dev when omitted; the secret is never listed)
 - `ohmyhost database webhook get` — ohmyhost database webhook get --project ULID [--environment dev|prod] --webhook ID --json
 - `ohmyhost database webhook delete` — ohmyhost database webhook delete --project ULID --environment dev|prod --webhook ID --yes --json
@@ -186,8 +189,11 @@ and follow the returned schema rather than guessing arguments.
 - `database_access_create` — Issue a time-bound PostgreSQL credential for this project's own Dev or Prod database.
 - `database_access_list` — List this project's issued database credentials with their state (active, expired or revoked).
 - `database_access_revoke` — Revoke one issued database credential immediately: open sessions end and its PostgreSQL role is removed.
+- `database_watch_list` — List this project's database watches of one Dev or Prod environment (dev when omitted).
+- `database_watch_create` — Publish row changes of one table of a Dev or Prod database as data events: only the listed columns (at most 32) of each insert, update or delete are published, with the event type data.<topic> returned by this call.
+- `database_watch_delete` — Remove the capture trigger of one database watch: its table publishes no more data events.
 - `database_webhook_list` — List this project's database webhooks of one Dev or Prod environment (dev when omitted), without signing secrets.
-- `database_webhook_create` — Subscribe one HTTPS receiver to database lifecycle events (database.created, ready, woke, slept, suspended, resized, deleted) of one Dev or Prod database.
+- `database_webhook_create` — Subscribe one HTTPS receiver to database lifecycle events (database.created, ready, woke, slept, suspended, resized, deleted) of one Dev or Prod database, or to data events: data.<topic> for the rows of one watched table (the event type database_watch_create returns) or data.\* for every watched table; a bare \* never matches data events.
 - `database_webhook_test` — Send one signed test request to a database webhook and report the outcome synchronously.
 - `database_webhook_delete` — Stop all deliveries to one database webhook.
 - `database_webhook_delivery_list` — List recent database webhook deliveries, newest first, optionally for one webhook.

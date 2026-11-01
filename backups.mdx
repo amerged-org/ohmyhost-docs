@@ -14,7 +14,7 @@ ohmyhost export get "$EXPORT_ID" --project "$PROJECT_ID" --json
 
 ## What the ZIP contains
 
-SQL dumps of the current assignments only: isolated data uses `dev.sql` and/or `prod.sql`; shared data is exported once as `shared.sql`. Retired databases are not included. The export contains no R2 files, application code, runtime secrets or configuration. The maximum plaintext SQL payload is 256 MiB. Before a destructive [data-assignment change](/environments#change-data-assignments), download any needed SQL export and use the application's own downloads for files.
+SQL dumps of the current assignments only: isolated data uses `dev.sql` and/or `prod.sql`; shared data is exported once as `shared.sql`. Retired databases are not included. The SQL dumps leave out the platform event schema. The export contains no R2 files, application code, runtime secrets or configuration. The maximum plaintext SQL payload is 256 MiB. Before a destructive [data-assignment change](/environments#change-data-assignments), download any needed SQL export and use the application's own downloads for files.
 
 An AES-compatible ZIP tool such as 7-Zip opens it with your password. The service cannot recover a lost password.
 

@@ -1,0 +1,12 @@
+---
+title: "Database watch table unavailable"
+description: "What the `database_watch_table_unavailable` error means and what to do next."
+---
+
+The API, CLI and MCP return `database_watch_table_unavailable` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+The table must exist as an ordinary table owned by the application, created by a deployed migration; views, partitions, temporary tables and the schemas pgcf, ohmyhost, information_schema and pg_* cannot be watched. Fix the name or deploy the migration, then create the watch again.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

@@ -3,6 +3,27 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
+## Client release 0.1.45 (November 1, 2026)
+
+Install the matching CLI and MCP. Clients older than 0.1.45 do not have the `database watch` commands and tools:
+
+```sh
+npm install --global @amerged/ohmyhost-cli@0.1.45 @amerged/ohmyhost-mcp@0.1.45
+```
+
+- **Table watches.** A watch publishes the insert, update and delete changes of one table's listed columns as signed `data.<topic>` webhook events. `ohmyhost database watch create|list|delete`, MCP `database_watch_create|list|delete` and the REST watch routes manage them. [Table watches](/database#table-watches).
+- **Operation lookup.** `ohmyhost operation get` and every CLI `--wait`, and MCP `operation_get`, find existing deployment, source and project operations again. [Read deployment status](/status).
+- **Project renames.** A project handle change ends as a succeeded operation. [Connect a domain](/domains).
+- **Deployment faults.** A fault that stopped deployments before the build started is fixed. [Diagnose a deployment](/troubleshooting).
+- **Database dumps.** Customer database dumps leave out the platform event schema. [Export your database](/backups).
+- **Token retries.** After a rejection, `ohmyhost token create` can be run again under the same idempotency key; the stale rejection is replaced. [Login and API tokens](/login-tokens).
+
+## Client release 0.1.44 (October 31, 2026)
+
+- **Executions are counters.** Database executions have no separate price; the cost of a run is the time its database is awake. [Webhooks, schedules and executions](/database#webhooks-schedules-and-executions).
+- **Schedules stop at the Stop budget.** A project that reaches its Stop budget has its schedules turned off. [Schedules](/database#webhooks-schedules-and-executions).
+- **Compute lookup.** `ohmyhost database compute get` answers `resource_not_found` for an environment without a database. [Postgres queries, writes and compute](/database).
+
 ## Client release 0.1.43 (October 31, 2026)
 
 **Breaking for clients older than 0.1.43 that read the credit balance.** Update CLI and MCP together:

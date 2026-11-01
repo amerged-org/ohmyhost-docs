@@ -1,0 +1,12 @@
+---
+title: "Database watch conflict"
+description: "What the `database_watch_conflict` error means and what to do next."
+---
+
+The API, CLI and MCP return `database_watch_conflict` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+A migration already attaches a capture trigger to this table: keep it and skip the watch, or remove it from the migrations, deploy and create the watch again. A table carries one capture trigger.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

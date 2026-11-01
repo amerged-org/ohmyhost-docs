@@ -10,6 +10,8 @@ ohmyhost database compute get --project "$PROJECT_ID" --environment dev --json
 ohmyhost database compute get --project "$PROJECT_ID" --environment prod --json
 ```
 
+An environment without a database answers `resource_not_found`.
+
 Install the exact npm alias from `runtime.packages.customerRuntime` in `ohmyhost init --dry-run --json`, under the import name `@ohmyhost/customer-runtime`: `npm:@amerged/ohmyhost-runtime@<version>`. This applies to every framework; update/commit the lockfile. Use the current CLI/runtime release together. For nested JSON results, depth is measured from each row, while the response envelope and all rows still share the same total budgets.
 
 Application requests use `createPrivateDatabaseClient(env.OHMYHOST_DATABASE)` from `@ohmyhost/customer-runtime/database`. `query()` executes one statement, `transaction()` atomically runs up to 25 statements chosen in advance, and `withConnection()` holds a real connection for read-decide-write; one scope permits 100 statements, 30 seconds total and five seconds idle, with two active transaction/auth connections per physical data area. Shared Dev/Prod use the same lanes. Standalone statements commit before their response; use explicit `BEGIN` and `COMMIT` for an atomic sequence. Closing rolls back an unfinished transaction, and transaction-local server timeouts release its slot if the caller disappears.
@@ -194,7 +196,7 @@ The write endpoint is `POST /v1/projects/{project_id}/database/write`; supply th
 
 Client 0.1.42 or newer manages three things per Dev or Prod database. All of them are tied to the one database of the selected environment; another project's webhook, schedule or delivery answers `resource_not_found`.
 
-**Webhooks** send a signed HTTPS `POST` when the database changes state: `database.created`, `database.ready`, `database.woke`, `database.slept`, `database.suspended`, `database.resized` and `database.deleted`. A project environment can have five. The signing secret appears once in the answer of `create`; store it in your receiver.
+**Webhooks** send a signed HTTPS `POST` when the database changes state: `database.created`, `database.ready`, `database.woke`, `database.slept`, `database.suspended`, `database.resized` and `database.deleted`. The data events `data.<topic>` come from [table watches](#table-watches) instead. A project environment can have five. The signing secret appears once in the answer of `create`; store it in your receiver.
 
 ```sh
 printf '{"x-tenant":"acme"}' > headers.json
@@ -218,7 +220,7 @@ ohmyhost database schedule run --project "$PROJECT_ID" --environment prod --name
 ohmyhost database schedule runs --project "$PROJECT_ID" --name cleanup --json
 ```
 
-A run starts a few seconds after its occurrence; the offset is fixed per schedule so that many schedules do not start together. A run ends as `succeeded`, `failed` (with the SQLSTATE), `timed_out`, `rejected`, `outcome_unknown` or one of the `skipped_*` states, and the last fifty runs are kept. A run whose answer was lost is `outcome_unknown` and is not repeated, so write statements that are safe to run twice. A run wakes a sleeping database and counts as database use, like a query. A project's Stop budget does not pause its schedules: delete or disable a schedule to stop it.
+A run starts a few seconds after its occurrence; the offset is fixed per schedule so that many schedules do not start together. A run ends as `succeeded`, `failed` (with the SQLSTATE), `timed_out`, `rejected`, `outcome_unknown` or one of the `skipped_*` states, and the last fifty runs are kept. A run whose answer was lost is `outcome_unknown` and is not repeated, so write statements that are safe to run twice. A run wakes a sleeping database and counts as database use, like a query. A project that reaches its Stop budget has its schedules turned off automatically, within about an hour; a Continue budget never does this. To stop one schedule sooner, delete or disable it. Turning them on again is manual: raise the budget (or wait for the next UTC month), then run `database schedule set --enabled true` with the schedule's body, which you read with `schedule get`.
 
 **Executions** count schedule runs, webhook attempts and events per hour or day:
 
@@ -227,9 +229,73 @@ ohmyhost database executions --project "$PROJECT_ID" --from 2026-10-31T00:00:00.
   --to 2026-11-01T00:00:00.000Z --granularity hour --json
 ```
 
-An hour is `final` once it is complete. These are usage counters only; nothing is charged for them until a price is published.
+An hour is `final` once it is complete. They are counters without a separate price; the cost of a run is the time its database is awake.
 
-MCP offers the same operations as `database_webhook_*`, `database_schedule_*` and `database_execution_usage_get` (the remote server offers the five read tools; changes need the local server or the CLI). REST uses `/v1/projects/{project_id}/database/webhooks`, `/database/schedules` and `/database/execution-usage`; see the [OpenAPI schema](/openapi.json). Retrying a lost `webhook create` with the same idempotency key returns the same webhook. The other changes have no key: after a lost answer read the list first, then repeat.
+MCP offers the same operations as `database_webhook_*`, `database_schedule_*` and `database_execution_usage_get` (the remote server offers the five read tools; changes need the local server or the CLI). REST uses `/v1/projects/{project_id}/database/webhooks`, `/database/schedules`, `/database/execution-usage` and `/database/watches` ([table watches](#table-watches)); see the [OpenAPI schema](/openapi.json). Retrying a lost `webhook create` with the same idempotency key returns the same webhook. The other changes have no key: after a lost answer read the list first, then repeat.
+
+## Table watches
+
+Client 0.1.45 or newer. A watch publishes the row changes (insert, update and delete) of one table as signed webhook events of type `data.<topic>`. Only the columns you list leave the database; the list is an explicit allowlist of 1 to 32 column names.
+
+Data events need the platform's event schema in the database. If a watch answer carries `database_watch_events_unavailable` (409, "Database events not installed yet"), run any read on that environment once, for example `database query`, wait for its answer and repeat the request with the same idempotency key. The database sleeps again when idle. Every watch call, including list, wakes a sleeping database.
+
+Create the watch first. `--schema` defaults to `public` and `--operations` to `insert,update,delete`. The answer carries `id`, `schema`, `table`, `columns`, `operations`, `topic` and `event_type`:
+
+```sh
+ohmyhost database watch create --project "$PROJECT_ID" --environment dev --table orders --columns id,status,total_cents --idempotency-key "$WATCH_REQUEST_KEY" --yes --json
+```
+
+Then create a webhook whose `--event-types` is the printed `event_type`, for example `data.orders`. For a table that already takes writes, create the webhook before the watch: events committed while no webhook subscribes to the topic are discarded and never replayed. Verify with a real change. `database webhook test` sends a test event, not a data event, so it proves only the receiver and signature handling. Make one harmless change in Dev with the MCP tool `database_write`, then read `database webhook deliveries` for an event of type `data.orders` in state `delivered`. Events normally leave within seconds of the commit.
+
+`ohmyhost database watch list --project ID --environment dev` lists the watches of an environment and does not list triggers declared by migrations. `ohmyhost database watch delete --project ID --environment dev --watch WATCH_ID --idempotency-key KEY --yes` removes one. The local MCP server offers `database_watch_create`, `database_watch_list` and `database_watch_delete`; create and delete need `confirmed: true` and a saved idempotency key. The remote MCP server cannot create or delete watches. REST uses `POST` and `GET /v1/projects/{project_id}/database/watches` (operations `createProjectDatabaseWatch` and `listProjectDatabaseWatches`) and `DELETE /v1/projects/{project_id}/database/watches/{watch_id}` (`deleteProjectDatabaseWatch`).
+
+**Topic.** The topic is the table name in lower case, with every character outside `a-z`, `0-9` and `_` replaced by `_`, prefixed with `t_` when the first character is not a letter, and cut to 48 characters. The schema is not part of the topic, so two tables with the same name in different schemas share one; tell them apart by `data.schema` and `data.table`.
+
+**Subscriptions.** Subscribe with `data.<topic>` for one table or `data.*` for every watched table. A bare `*` and `database.*` do not include data events. A pattern that matches no existing topic never fires, so copy the `event_type` from the watch answer.
+
+**Event.** Each delivery has this shape:
+
+```json
+{
+  "id": "dbexample0123456789a:3:1042",
+  "type": "data.orders",
+  "occurred_at": "2026-11-01T09:30:00.000Z",
+  "project_id": "prj_exampleproject000001",
+  "database_id": "dbexample0123456789a",
+  "epoch": 3,
+  "seq": 1042,
+  "data": {
+    "schema": "public",
+    "table": "orders",
+    "op": "update",
+    "record": { "id": 42, "status": "paid", "total_cents": 1990 },
+    "old_record": { "id": 42, "status": "open", "total_cents": 1990 }
+  }
+}
+```
+
+It is signed exactly like the webhook deliveries above. The `id` is `<database_id>:<epoch>:<seq>`. `epoch` rises after a move or an in-place recovery, and `seq` rises per database. An insert has `old_record: null`, a delete has `record: null`, and an update that changes none of the listed columns publishes nothing.
+
+**Eligibility.** A database holds one watch per table, at most 100 in all. Creating the same watch again returns it; different columns or operations replace its trigger. The table must be an ordinary permanent table created by the project's migrations, not a view, partition, temporary or unlogged table. The schemas `pgcf`, `ohmyhost`, `information_schema` and `pg_*` cannot be watched. Every listed column must exist, with its name written exactly. A table whose migration already declares a capture trigger cannot also have a watch.
+
+**Outcomes.** Each answer below refuses the request. Fix its cause, then repeat the request:
+
+- `database_watch_table_unavailable` (409): the table is not eligible.
+- `database_watch_column_unavailable` (409): a listed column does not exist.
+- `database_watch_events_unavailable` (409): the event schema is not installed yet; see above.
+- `database_watch_conflict` (409): a migration already attaches a capture trigger to the table.
+- `database_watch_limit` (409): the database has 100 watches; delete one first.
+- `project_budget_exceeded` (402): the project's Stop budget is reached. Create and delete are refused; reads are not.
+
+If the answer says the database is busy with a migration, repeat the request with the same idempotency key.
+
+**Delivery and ordering.** Delivery is at least once. The `id` stays the same across retries, so deduplicate on it. Arrival order is not guaranteed, because retries reorder events; order by (`epoch`, `seq`) at the receiver. Answer with a 2xx status within five seconds. An event is sent only if the application's transaction commits, and each subscription gets its own delivery. Retries and replay work as for the other webhooks above.
+
+**Limits.** A watch filters columns, not rows. Rows written before the watch existed produce no events; read the initial state with `database_query`. TRUNCATE is not published. A restore or point-in-time recovery starts with an empty outbox, so undelivered events from before are not sent. Watch only columns the receiver may see, because their row data leaves the database.
+
+Undelivered events are held in an outbox of 10,000 per database. When it is full, the application's write fails with SQLSTATE 53400 and nothing is lost; retry after a pause. Delete the watch before a bulk import or backfill and create it afterwards. Each event is limited to 16 KiB, counting the listed columns in `record` and `old_record` (an update counts them twice); a larger write fails with SQLSTATE 54000. Watch ids, status and counters, not large text or JSON.
+
+**Billing.** Events have no separate price. A database with undelivered events stays awake and is billed as awake time, and the event counts (`events_emitted` and `event_bytes`) appear in `database executions`. A logical `pg_dump` of the database needs `--exclude-schema=pgcf`, because project roles cannot read the platform schema.
 
 ## Permissions and shared data
 

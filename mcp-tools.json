@@ -1756,6 +1756,172 @@
       }
     },
     {
+      "name": "database_watch_list",
+      "description": "List this project's database watches of one Dev or Prod environment (dev when omitted). Each watch shows its table, columns, operations and the event type data.<topic> it publishes. Listing wakes a sleeping database.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "prod"
+            ]
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "database_watch_create",
+      "description": "Publish row changes of one table of a Dev or Prod database as data events: only the listed columns (at most 32) of each insert, update or delete are published, with the event type data.<topic> returned by this call. Pass that event type to database_webhook_create. The table must exist as an ordinary table of the application, created by a deployed migration; a sleeping database wakes. Rows written before the watch exists are not published, and a published column must not be dropped while the watch exists. Requires confirmed: true and an idempotency key. Refused with project_budget_exceeded while the Stop budget is reached.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "prod"
+            ]
+          },
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,62}$"
+          },
+          "table": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,62}$"
+          },
+          "columns": {
+            "minItems": 1,
+            "maxItems": 32,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,62}$"
+            }
+          },
+          "operations": {
+            "minItems": 1,
+            "maxItems": 3,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "enum": [
+                "insert",
+                "update",
+                "delete"
+              ]
+            }
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment",
+          "table",
+          "columns",
+          "idempotency_key",
+          "confirmed"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "database_watch_delete",
+      "description": "Remove the capture trigger of one database watch: its table publishes no more data events. Destructive: requires confirmed: true and an idempotency key. Deleting an already deleted watch answers not found.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "prod"
+            ]
+          },
+          "watch_id": {
+            "type": "string",
+            "pattern": "^pgcf_watch_[0-9a-f]{8}$"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment",
+          "watch_id",
+          "idempotency_key",
+          "confirmed"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true
+      }
+    },
+    {
       "name": "database_webhook_list",
       "description": "List this project's database webhooks of one Dev or Prod environment (dev when omitted), without signing secrets. Each webhook lists its event types and header names only.",
       "inputSchema": {
@@ -1792,7 +1958,7 @@
     },
     {
       "name": "database_webhook_create",
-      "description": "Subscribe one HTTPS receiver to database lifecycle events (database.created, ready, woke, slept, suspended, resized, deleted) of one Dev or Prod database. The signing secret is RETURNED EXACTLY ONCE: store it in a secret manager and never write it into files, notes, source, commit messages or later messages. Deliveries are signed, retried and dead-lettered when retries stop. At most five webhooks exist per project environment. Requires confirmed: true and an idempotency key; the same key with the same request returns the stored answer.",
+      "description": "Subscribe one HTTPS receiver to database lifecycle events (database.created, ready, woke, slept, suspended, resized, deleted) of one Dev or Prod database, or to data events: data.<topic> for the rows of one watched table (the event type database_watch_create returns) or data.* for every watched table; a bare * never matches data events. The signing secret is RETURNED EXACTLY ONCE: store it in a secret manager and never write it into files, notes, source, commit messages or later messages. Deliveries are signed, retried and dead-lettered when retries stop. At most five webhooks exist per project environment. Requires confirmed: true and an idempotency key; the same key with the same request returns the stored answer.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -1819,15 +1985,23 @@
             "maxItems": 16,
             "type": "array",
             "items": {
-              "type": "string",
-              "enum": [
-                "database.created",
-                "database.ready",
-                "database.woke",
-                "database.slept",
-                "database.suspended",
-                "database.resized",
-                "database.deleted"
+              "anyOf": [
+                {
+                  "type": "string",
+                  "enum": [
+                    "database.created",
+                    "database.ready",
+                    "database.woke",
+                    "database.slept",
+                    "database.suspended",
+                    "database.resized",
+                    "database.deleted"
+                  ]
+                },
+                {
+                  "type": "string",
+                  "pattern": "^data\\.(?:\\*|[a-z][a-z0-9_]{0,47})$"
+                }
               ]
             }
           },

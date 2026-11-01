@@ -1,0 +1,12 @@
+---
+title: "Database watch column unavailable"
+description: "What the `database_watch_column_unavailable` error means and what to do next."
+---
+
+The API, CLI and MCP return `database_watch_column_unavailable` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+List only existing column names exactly as written, names are case-sensitive. Delete the watch before a migration drops a published column, because the write would fail.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

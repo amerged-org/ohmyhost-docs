@@ -6157,6 +6157,184 @@
         "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
       }
     },
+    "/v1/projects/{project_id}/database/watches": {
+      "post": {
+        "operationId": "createProjectDatabaseWatch",
+        "summary": "Watch the columns of one table for data events",
+        "description": "Attaches the pgcf.capture trigger that publishes only the listed columns of the table as data events of one environment. Subscribe to the returned event_type with a database webhook. The request wakes a sleeping database. Repeating an identical request leaves the watch unchanged; repeating it with other columns or operations replaces the trigger. A reached Stop budget refuses with project_budget_exceeded (402). At most 100 watches exist per database.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatabaseWatchCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "The watch with the event type its deliveries carry.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              },
+              "Pragma": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-cache"
+                }
+              },
+              "X-Request-Id": {
+                "$ref": "#/components/headers/XRequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseWatch"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      },
+      "get": {
+        "operationId": "listProjectDatabaseWatches",
+        "summary": "List the project's database watches",
+        "description": "Returns every watch of the selected environment. Listing wakes a sleeping database.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/DatabaseEnvironmentRead"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The database watches of the environment.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseWatchPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
+    "/v1/projects/{project_id}/database/watches/{watch_id}": {
+      "delete": {
+        "operationId": "deleteProjectDatabaseWatch",
+        "summary": "Delete one database watch",
+        "description": "Removes the capture trigger of the watch, so its table publishes no more data events. Deleting an already deleted watch answers not found. A reached Stop budget refuses with project_budget_exceeded (402).",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/DatabaseWatchId"
+          },
+          {
+            "$ref": "#/components/parameters/DatabaseEnvironment"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "The identifier of the deleted watch.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseWatchDeleted"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
     "/v1/projects/{project_id}/database/webhooks": {
       "post": {
         "operationId": "createProjectDatabaseWebhook",
@@ -8692,6 +8870,16 @@
         "schema": {
           "type": "string",
           "pattern": "^dlv_[0-9a-f]{20}$"
+        }
+      },
+      "DatabaseWatchId": {
+        "name": "watch_id",
+        "in": "path",
+        "description": "Database watch identifier, derived from the watched schema and table.",
+        "required": true,
+        "schema": {
+          "type": "string",
+          "pattern": "^pgcf_watch_[0-9a-f]{8}$"
         }
       },
       "DatabaseScheduleName": {
@@ -12782,6 +12970,208 @@
           "database.deleted"
         ]
       },
+      "DatabaseWebhookEventPattern": {
+        "description": "A platform event type, data.<topic> for the rows of one watched table, or data.* for every watched table. A bare * is not accepted and never matches data events.",
+        "oneOf": [
+          {
+            "$ref": "#/components/schemas/DatabaseWebhookEventType"
+          },
+          {
+            "type": "string",
+            "pattern": "^data\\.(?:\\*|[a-z][a-z0-9_]{0,47})$"
+          }
+        ]
+      },
+      "DatabaseWatchCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "environment",
+          "table",
+          "columns"
+        ],
+        "properties": {
+          "environment": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "prod"
+            ]
+          },
+          "schema": {
+            "type": "string",
+            "default": "public",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,62}$",
+            "description": "Schema of the table, public when omitted. The schemas pgcf, ohmyhost, information_schema and pg_* cannot be watched."
+          },
+          "table": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,62}$",
+            "description": "Ordinary table owned by the application, created by a deployed migration."
+          },
+          "columns": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 32,
+            "uniqueItems": true,
+            "description": "Columns published with every event, exactly as written; names are case-sensitive.",
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,62}$"
+            }
+          },
+          "operations": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "uniqueItems": true,
+            "default": [
+              "insert",
+              "update",
+              "delete"
+            ],
+            "description": "Row changes that publish an event; all three when omitted.",
+            "items": {
+              "type": "string",
+              "enum": [
+                "insert",
+                "update",
+                "delete"
+              ]
+            }
+          }
+        },
+        "examples": [
+          {
+            "environment": "dev",
+            "table": "orders",
+            "columns": [
+              "id",
+              "total"
+            ]
+          }
+        ]
+      },
+      "DatabaseWatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "environment",
+          "schema",
+          "table",
+          "columns",
+          "operations",
+          "topic",
+          "event_type"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^pgcf_watch_[0-9a-f]{8}$"
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "prod"
+            ]
+          },
+          "schema": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,62}$"
+          },
+          "table": {
+            "type": "string",
+            "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,62}$"
+          },
+          "columns": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 32,
+            "items": {
+              "type": "string",
+              "pattern": "^[A-Za-z_][A-Za-z0-9_]{0,62}$"
+            }
+          },
+          "operations": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 3,
+            "items": {
+              "type": "string",
+              "enum": [
+                "insert",
+                "update",
+                "delete"
+              ]
+            }
+          },
+          "topic": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,47}$",
+            "description": "Topic of the watched table, derived by the platform from its name."
+          },
+          "event_type": {
+            "type": "string",
+            "pattern": "^data\\.[a-z][a-z0-9_]{0,47}$",
+            "description": "Event type of the rows of the table; pass it to a database webhook."
+          }
+        },
+        "examples": [
+          {
+            "id": "pgcf_watch_0a1b2c3d",
+            "environment": "dev",
+            "schema": "public",
+            "table": "orders",
+            "columns": [
+              "id",
+              "total"
+            ],
+            "operations": [
+              "insert",
+              "update",
+              "delete"
+            ],
+            "topic": "orders",
+            "event_type": "data.orders"
+          }
+        ]
+      },
+      "DatabaseWatchPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "maxItems": 100,
+            "items": {
+              "$ref": "#/components/schemas/DatabaseWatch"
+            }
+          }
+        }
+      },
+      "DatabaseWatchDeleted": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "deleted"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^pgcf_watch_[0-9a-f]{8}$"
+          },
+          "deleted": {
+            "type": "boolean",
+            "const": true
+          }
+        }
+      },
       "DatabaseWebhookCreateRequest": {
         "type": "object",
         "additionalProperties": false,
@@ -12802,7 +13192,7 @@
             "maxItems": 16,
             "uniqueItems": true,
             "items": {
-              "$ref": "#/components/schemas/DatabaseWebhookEventType"
+              "$ref": "#/components/schemas/DatabaseWebhookEventPattern"
             }
           },
           "headers": {
@@ -12855,7 +13245,7 @@
             "minItems": 1,
             "maxItems": 16,
             "items": {
-              "$ref": "#/components/schemas/DatabaseWebhookEventType"
+              "$ref": "#/components/schemas/DatabaseWebhookEventPattern"
             }
           },
           "header_names": {
@@ -12907,7 +13297,7 @@
             "minItems": 1,
             "maxItems": 16,
             "items": {
-              "$ref": "#/components/schemas/DatabaseWebhookEventType"
+              "$ref": "#/components/schemas/DatabaseWebhookEventPattern"
             }
           },
           "header_names": {
@@ -12986,10 +13376,18 @@
           },
           "event_id": {
             "type": "string",
-            "pattern": "^evt_[0-9a-f]{20}$"
+            "pattern": "^(?:evt_[0-9a-f]{20}|[a-z][a-z0-9]{19}:[1-9][0-9]{0,15}:[1-9][0-9]{0,15})$"
           },
           "event_type": {
-            "$ref": "#/components/schemas/DatabaseWebhookEventType"
+            "oneOf": [
+              {
+                "$ref": "#/components/schemas/DatabaseWebhookEventType"
+              },
+              {
+                "type": "string",
+                "pattern": "^data\\.[a-z][a-z0-9_]{0,47}$"
+              }
+            ]
           },
           "webhook_id": {
             "type": "string",
@@ -14986,6 +15384,11 @@
               "database_schedule_limit",
               "database_schedule_not_runnable",
               "database_webhook_delivery_pending",
+              "database_watch_limit",
+              "database_watch_table_unavailable",
+              "database_watch_column_unavailable",
+              "database_watch_events_unavailable",
+              "database_watch_conflict",
               "compute_change_pending",
               "compute_change_conflict",
               "billing_purchase_conflict",

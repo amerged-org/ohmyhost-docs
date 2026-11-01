@@ -1,0 +1,12 @@
+---
+title: "Database watch events unavailable"
+description: "What the `database_watch_events_unavailable` error means and what to do next."
+---
+
+The API, CLI and MCP return `database_watch_events_unavailable` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+The platform event schema is installed when the database wakes: run any query against that environment, wait for the answer, then create the watch again. If it still fails, report the request_id through feedback.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.
