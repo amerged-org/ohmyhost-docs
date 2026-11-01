@@ -6157,6 +6157,112 @@
         "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
       }
     },
+    "/v1/projects/{project_id}/database/tables": {
+      "post": {
+        "operationId": "createProjectDatabaseTable",
+        "summary": "Create a table in the project's database",
+        "description": "Creates one ordinary table in the public schema of one environment's database, with the columns and the primary key the request names. Repeating an identical request answers the existing table with 200; a table of the same name with another definition is refused with database_table_conflict (409). The request wakes a sleeping database. A reached Stop budget refuses with project_budget_exceeded (402). At most 100 tables exist per database.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/DatabaseTableCreateRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "The table already exists with the same columns, types, nullability, identity, defaults and primary key.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              },
+              "Pragma": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-cache"
+                }
+              },
+              "X-Request-Id": {
+                "$ref": "#/components/headers/XRequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseTableCreated"
+                }
+              }
+            }
+          },
+          "201": {
+            "description": "The table this request created.",
+            "headers": {
+              "Cache-Control": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-store"
+                }
+              },
+              "Pragma": {
+                "schema": {
+                  "type": "string",
+                  "const": "no-cache"
+                }
+              },
+              "X-Request-Id": {
+                "$ref": "#/components/headers/XRequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DatabaseTableCreated"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
     "/v1/projects/{project_id}/database/watches": {
       "post": {
         "operationId": "createProjectDatabaseWatch",
@@ -12982,6 +13088,216 @@
           }
         ]
       },
+      "DatabaseTableCreateRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "environment",
+          "table",
+          "columns"
+        ],
+        "properties": {
+          "environment": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "prod"
+            ]
+          },
+          "table": {
+            "type": "string",
+            "pattern": "^[a-z_][a-z0-9_]{0,62}$",
+            "description": "Name of the new table in the public schema. Lower-case, not a PostgreSQL reserved word and not starting with pg_."
+          },
+          "columns": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 64,
+            "description": "Columns in the order written. Names are unique, and at most one column is an identity column.",
+            "items": {
+              "$ref": "#/components/schemas/DatabaseTableColumnRequest"
+            }
+          },
+          "primary_key": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 8,
+            "uniqueItems": true,
+            "description": "Columns of the primary key, each one of the table's columns. Identity and primary key columns are NOT NULL; omitted when the table has no primary key.",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z_][a-z0-9_]{0,62}$"
+            }
+          }
+        },
+        "examples": [
+          {
+            "environment": "dev",
+            "table": "orders",
+            "columns": [
+              {
+                "name": "id",
+                "type": "bigint",
+                "nullable": false,
+                "identity": true
+              },
+              {
+                "name": "total",
+                "type": "numeric"
+              }
+            ],
+            "primary_key": [
+              "id"
+            ]
+          }
+        ]
+      },
+      "DatabaseTableColumnRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "type"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z_][a-z0-9_]{0,62}$"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DatabaseTableColumnType"
+          },
+          "nullable": {
+            "type": "boolean",
+            "default": true,
+            "description": "Whether the column accepts NULL. Identity and primary key columns never do."
+          },
+          "identity": {
+            "type": "boolean",
+            "default": false,
+            "description": "Generated always as identity. Only integer and bigint columns can be identity columns, and an identity column has no default."
+          },
+          "default": {
+            "type": "string",
+            "enum": [
+              "now",
+              "uuid"
+            ],
+            "description": "now is now() on a timestamptz column; uuid is gen_random_uuid() on a uuid column. Omitted when the column has no default."
+          }
+        }
+      },
+      "DatabaseTableColumnType": {
+        "type": "string",
+        "enum": [
+          "text",
+          "integer",
+          "bigint",
+          "boolean",
+          "numeric",
+          "double precision",
+          "timestamptz",
+          "date",
+          "uuid",
+          "jsonb"
+        ]
+      },
+      "DatabaseTableColumn": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "type",
+          "nullable",
+          "identity",
+          "default"
+        ],
+        "properties": {
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "$ref": "#/components/schemas/DatabaseTableColumnType"
+          },
+          "nullable": {
+            "type": "boolean"
+          },
+          "identity": {
+            "type": "boolean"
+          },
+          "default": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "now",
+              "uuid",
+              null
+            ]
+          }
+        }
+      },
+      "DatabaseTable": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "environment",
+          "schema",
+          "table",
+          "columns",
+          "primary_key",
+          "created"
+        ],
+        "properties": {
+          "environment": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "prod"
+            ]
+          },
+          "schema": {
+            "type": "string",
+            "const": "public"
+          },
+          "table": {
+            "type": "string"
+          },
+          "columns": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 64,
+            "items": {
+              "$ref": "#/components/schemas/DatabaseTableColumn"
+            }
+          },
+          "primary_key": {
+            "type": "array",
+            "maxItems": 8,
+            "uniqueItems": true,
+            "items": {
+              "type": "string"
+            }
+          },
+          "created": {
+            "type": "boolean",
+            "description": "true when this request created the table, false when an identical table already existed."
+          }
+        }
+      },
+      "DatabaseTableCreated": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "table"
+        ],
+        "properties": {
+          "table": {
+            "$ref": "#/components/schemas/DatabaseTable"
+          }
+        }
+      },
       "DatabaseWatchCreateRequest": {
         "type": "object",
         "additionalProperties": false,
@@ -15389,6 +15705,8 @@
               "database_watch_column_unavailable",
               "database_watch_events_unavailable",
               "database_watch_conflict",
+              "database_table_conflict",
+              "database_table_limit",
               "compute_change_pending",
               "compute_change_conflict",
               "billing_purchase_conflict",

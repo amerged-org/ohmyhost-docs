@@ -161,6 +161,20 @@ Some things are not possible. The remote MCP cannot create or delete watches; th
 
 A migration may declare the same trigger instead of creating a watch, and only this form is admitted on an existing table: `CREATE TRIGGER name AFTER INSERT OR UPDATE OR DELETE ON schema.table FOR EACH ROW EXECUTE FUNCTION pgcf.capture('col1', 'col2')`. Operations may be a subset. The columns are single-quoted plain names, at most 32, with no duplicates, and a table has at most one capture trigger. Names of the form `pgcf_watch_` plus 8 hex digits are reserved for watches. The table and every column must exist when the migration runs. Any other statement that names `pgcf` stays refused.
 
+## Create a table
+
+Use this when a customer or an automation such as Zapier or Make needs a new table and no source migration is wanted. The CLI is `ohmyhost database table create --project "$PROJECT_ID" --environment "$PROJECT_ENVIRONMENT" --table orders --columns-file "$COLUMNS_FILE" --primary-key id --idempotency-key "$TABLE_REQUEST_KEY" --yes --json`, and the local MCP tool is `database_table_create` with `confirmed: true` and a saved idempotency key. The columns file is a UTF-8 JSON array of at most 64 column objects:
+
+```json
+[
+  { "name": "id", "type": "bigint", "identity": true },
+  { "name": "status", "type": "text", "nullable": false },
+  { "name": "created_at", "type": "timestamptz", "default": "now" }
+]
+```
+
+Types are text, integer, bigint, boolean, numeric, double precision, timestamptz, date, uuid and jsonb. `identity` needs integer or bigint, `default` takes `now` on timestamptz or `uuid` on uuid, and each primary key column must be one of the listed columns (`primary_key` in MCP). The table is created in the public schema as the migration role, with the same access as migration tables, so a watch can attach later. An identical repeat answers created false. A table of the same name with another definition answers `database_table_conflict` (409), and a database at its limit of 100 tables answers `database_table_limit` (409); neither is retryable. Tables created this way are not in the repository's migration files, so record them with `project_notes_set` and add a migration for them when the source should reproduce the database.
+
 ## Schema and promotion
 
 Keep immutable migrations in the configured directory as `YYYYMMDDHHMMSS_name.sql`. Ordinary schema admission is expand-only: create schemas `auth`, `extensions` or `private` with IF NOT EXISTS; extensions `pgcrypto`, `btree_gist` or `unaccent`; tables, types, domains, sequences, views, functions and indexes. Functions use SQL or PL/pgSQL, with a fixed search_path for SECURITY DEFINER. On existing tables, add only nullable columns without defaults and non-unique indexes. Constraints, foreign keys, unique indexes and triggers may attach to tables created in the same pending migration run, not existing tables. A trigger on an existing table is refused except the one data-event form described under "Get notified when a table changes". The matching backend-RLS release additionally admits bounded CREATE/ALTER/DROP POLICY and ENABLE/FORCE statements on explicitly qualified, migrator-owned ordinary public/private tables; all touched tables must finish enabled and forced. Ordinary DROP, row-changing statements, CREATE OR REPLACE, other ALTER and role/grant changes remain refused. Reserved-schema references are rejected except structurally checked `ohmyhost.user_id()` and `ohmyhost.claims()` calls inside policy expressions. Supabase helper SQL must first pass explicit reviewed conversion. At most 128 files, 256 KiB per file and 2 MiB total; use UTF-8/LF without BOM. Pending files apply atomically with a 30-second statement and five-second lock timeout. Applied files cannot change, and new timestamps must follow the applied catalog. Read `init` blockers before paying for a build. Source planning checks filenames, so a plan alone does not establish SQL admission; runtime catalog checks may still refuse changes to existing schema.

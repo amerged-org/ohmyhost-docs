@@ -1,0 +1,12 @@
+---
+title: "Database table limit"
+description: "What the `database_table_limit` error means and what to do next."
+---
+
+The API, CLI and MCP return `database_table_limit` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+This database already holds the maximum number of tables in its public schema, so no table can be added. Use an existing table, or remove a table you no longer need through a deployed migration, then create the table again.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

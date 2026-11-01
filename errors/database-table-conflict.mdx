@@ -1,0 +1,12 @@
+---
+title: "Database table conflict"
+description: "What the `database_table_conflict` error means and what to do next."
+---
+
+The API, CLI and MCP return `database_table_conflict` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+A table with this name already exists with another definition. Choose another table name, or create the table again with the same columns, types, nullability, identity, defaults and primary key it has.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

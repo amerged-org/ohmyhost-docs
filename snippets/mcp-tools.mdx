@@ -46,6 +46,7 @@
 | `database_watch_list` | `project_id` | Read |
 | `database_watch_create` | `project_id`, `environment`, `table`, `columns`, `idempotency_key`, `confirmed` | Change or prepare a change |
 | `database_watch_delete` | `project_id`, `environment`, `watch_id`, `idempotency_key`, `confirmed` | Change or prepare a change |
+| `database_table_create` | `project_id`, `environment`, `table`, `columns`, `idempotency_key`, `confirmed` | Change or prepare a change |
 | `database_webhook_list` | `project_id` | Read |
 | `database_webhook_create` | `project_id`, `environment`, `url`, `event_types`, `idempotency_key`, `confirmed` | Change or prepare a change |
 | `database_webhook_test` | `project_id`, `environment`, `webhook_id` | Change or prepare a change |

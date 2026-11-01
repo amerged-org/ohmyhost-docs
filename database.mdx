@@ -231,11 +231,13 @@ ohmyhost database executions --project "$PROJECT_ID" --from 2026-10-31T00:00:00.
 
 An hour is `final` once it is complete. They are counters without a separate price; the cost of a run is the time its database is awake.
 
-MCP offers the same operations as `database_webhook_*`, `database_schedule_*` and `database_execution_usage_get` (the remote server offers the five read tools; changes need the local server or the CLI). REST uses `/v1/projects/{project_id}/database/webhooks`, `/database/schedules`, `/database/execution-usage` and `/database/watches` ([table watches](#table-watches)); see the [OpenAPI schema](/openapi.json). Retrying a lost `webhook create` with the same idempotency key returns the same webhook. The other changes have no key: after a lost answer read the list first, then repeat.
+MCP offers the same operations as `database_webhook_*`, `database_schedule_*` and `database_execution_usage_get` (the remote server offers the five read tools; changes need the local server or the CLI). REST uses `/v1/projects/{project_id}/database/webhooks`, `/database/schedules`, `/database/execution-usage`, `/database/watches` ([table watches](#table-watches)) and `/database/tables` ([create a table](#create-a-table)); see the [OpenAPI schema](/openapi.json). Retrying a lost `webhook create` with the same idempotency key returns the same webhook. The other changes have no key: after a lost answer read the list first, then repeat.
 
 ## Table watches
 
 Client 0.1.45 or newer. A watch publishes the row changes (insert, update and delete) of one table as signed webhook events of type `data.<topic>`. Only the columns you list leave the database; the list is an explicit allowlist of 1 to 32 column names.
+
+A watch can also be attached to a table created with `ohmyhost database table create`; see [Create a table](#create-a-table).
 
 Data events need the platform's event schema in the database. If a watch answer carries `database_watch_events_unavailable` (409, "Database events not installed yet"), run any read on that environment once, for example `database query`, wait for its answer and repeat the request with the same idempotency key. The database sleeps again when idle. Every watch call, including list, wakes a sleeping database.
 
@@ -276,7 +278,7 @@ Then create a webhook whose `--event-types` is the printed `event_type`, for exa
 
 It is signed exactly like the webhook deliveries above. The `id` is `<database_id>:<epoch>:<seq>`. `epoch` rises after a move or an in-place recovery, and `seq` rises per database. An insert has `old_record: null`, a delete has `record: null`, and an update that changes none of the listed columns publishes nothing.
 
-**Eligibility.** A database holds one watch per table, at most 100 in all. Creating the same watch again returns it; different columns or operations replace its trigger. The table must be an ordinary permanent table created by the project's migrations, not a view, partition, temporary or unlogged table. The schemas `pgcf`, `ohmyhost`, `information_schema` and `pg_*` cannot be watched. Every listed column must exist, with its name written exactly. A table whose migration already declares a capture trigger cannot also have a watch.
+**Eligibility.** A database holds one watch per table, at most 100 in all. Creating the same watch again returns it; different columns or operations replace its trigger. The table must be an ordinary permanent table owned by the project's migration role, created by a migration or with [`database table create`](#create-a-table), not a view, partition, temporary or unlogged table. The schemas `pgcf`, `ohmyhost`, `information_schema` and `pg_*` cannot be watched. Every listed column must exist, with its name written exactly. A table whose migration already declares a capture trigger cannot also have a watch.
 
 **Outcomes.** Each answer below refuses the request. Fix its cause, then repeat the request:
 
@@ -296,6 +298,53 @@ If the answer says the database is busy with a migration, repeat the request wit
 Undelivered events are held in an outbox of 10,000 per database. When it is full, the application's write fails with SQLSTATE 53400 and nothing is lost; retry after a pause. Delete the watch before a bulk import or backfill and create it afterwards. Each event is limited to 16 KiB, counting the listed columns in `record` and `old_record` (an update counts them twice); a larger write fails with SQLSTATE 54000. Watch ids, status and counters, not large text or JSON.
 
 **Billing.** Events have no separate price. A database with undelivered events stays awake and is billed as awake time, and the event counts (`events_emitted` and `event_bytes`) appear in `database executions`. A logical `pg_dump` of the database needs `--exclude-schema=pgcf`, because project roles cannot read the platform schema.
+
+## Create a table
+
+Client 0.1.46 or newer. Use this when Zapier, Make or another automation, or any caller, needs a new table and no source migration is wanted. The CLI creates it in one call:
+
+```sh
+ohmyhost database table create --project "$PROJECT_ID" --environment dev --table orders --columns-file "$COLUMNS_FILE" --primary-key id --idempotency-key "$TABLE_REQUEST_KEY" --yes --json
+```
+
+`--columns-file` names a UTF-8 JSON array of 1 to 64 column objects, at most 64 KiB:
+
+```json
+[
+  { "name": "id", "type": "bigint", "identity": true },
+  { "name": "status", "type": "text", "nullable": false },
+  { "name": "created_at", "type": "timestamptz", "default": "now" }
+]
+```
+
+The local MCP server offers the same operation as `database_table_create`; it needs `confirmed: true` and a saved idempotency key, and `primary_key` takes the column names. The remote MCP server does not offer it. REST uses `POST /v1/projects/{project_id}/database/tables` (operation `createProjectDatabaseTable`) with an `Idempotency-Key` header and the same permission as the other database changes. The body is `environment`, `table`, `columns` and an optional `primary_key`:
+
+```json
+{
+  "environment": "dev",
+  "table": "orders",
+  "columns": [
+    { "name": "id", "type": "bigint", "identity": true },
+    { "name": "status", "type": "text", "nullable": false }
+  ],
+  "primary_key": ["id"]
+}
+```
+
+Each column has a `name`, a `type` and the optional `nullable` (default `true`), `identity` and `default` fields. Types are `text`, `integer`, `bigint`, `boolean`, `numeric`, `double precision`, `timestamptz`, `date`, `uuid` and `jsonb`.
+
+- **Identifiers.** Table and column names are lower-case: a letter or underscore first, then letters, digits or underscores, at most 63 characters. Names starting with `pg_` and PostgreSQL reserved words are refused. Column names are unique.
+- **Identity.** `identity` needs `integer` or `bigint`, takes no `default`, and makes the column `NOT NULL`. A table has at most one identity column.
+- **Defaults.** `default: "now"` needs `timestamptz` and sets `now()`; `default: "uuid"` needs `uuid` and sets `gen_random_uuid()`.
+- **Primary key.** Name 1 to 8 of the table's columns with `--primary-key` (CLI, comma-separated) or `primary_key` (REST and MCP). Key columns are `NOT NULL`, so `nullable: true` on one is refused.
+
+The table is created in the public schema as the migration role, and the runtime and read-only roles get the same access as to a migration table. A [table watch](#table-watches) can attach to it. Tables created this way are not in the repository's [migrations](/migrations); add a migration for a table when the source should reproduce the database.
+
+The first successful request answers `201` with the table and `created` set to `true`. Repeating an identical request answers `200` with `created` set to `false`, so a retry after a lost answer is safe with the same idempotency key. The request can fail with these codes:
+
+- `database_table_conflict` (409): a table of that name already exists with another definition. Repeating the request does not help.
+- `database_table_limit` (409): the database has 100 tables. Repeating the request does not help.
+- `project_budget_exceeded` (402): the project's Stop budget is reached. See [Project budget exceeded](/errors/project-budget-exceeded).
 
 ## Permissions and shared data
 

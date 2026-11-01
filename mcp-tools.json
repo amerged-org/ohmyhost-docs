@@ -1922,6 +1922,111 @@
       }
     },
     {
+      "name": "database_table_create",
+      "description": "Create one ordinary table in the public schema of a Dev or Prod database, as the migration role with the same access as migration tables, so a database_watch_create can attach later. Each column has a lower-case name, a type (text, integer, bigint, boolean, numeric, double precision, timestamptz, date, uuid or jsonb) and optional nullable, identity (integer or bigint only) and default (now for timestamptz, uuid for uuid); at most 64 columns, 8 primary-key columns and 100 tables per database. An identical repeat answers created: false; a table of the same name with another definition is refused with database_table_conflict. Tables created this way are not in the repository's migration files: record them in project notes and add a migration when the source should reproduce the database. Requires confirmed: true and an idempotency key. Refused with project_budget_exceeded while the Stop budget is reached.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "prod"
+            ]
+          },
+          "table": {
+            "type": "string"
+          },
+          "columns": {
+            "minItems": 1,
+            "maxItems": 64,
+            "type": "array",
+            "items": {
+              "type": "object",
+              "properties": {
+                "name": {
+                  "type": "string"
+                },
+                "type": {
+                  "type": "string",
+                  "enum": [
+                    "text",
+                    "integer",
+                    "bigint",
+                    "boolean",
+                    "numeric",
+                    "double precision",
+                    "timestamptz",
+                    "date",
+                    "uuid",
+                    "jsonb"
+                  ]
+                },
+                "nullable": {
+                  "type": "boolean"
+                },
+                "identity": {
+                  "type": "boolean"
+                },
+                "default": {
+                  "type": "string",
+                  "enum": [
+                    "now",
+                    "uuid"
+                  ]
+                }
+              },
+              "required": [
+                "name",
+                "type"
+              ]
+            }
+          },
+          "primary_key": {
+            "minItems": 1,
+            "maxItems": 8,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "confirmed": {
+            "type": "boolean",
+            "const": true
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment",
+          "table",
+          "columns",
+          "idempotency_key",
+          "confirmed"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
       "name": "database_webhook_list",
       "description": "List this project's database webhooks of one Dev or Prod environment (dev when omitted), without signing secrets. Each webhook lists its event types and header names only.",
       "inputSchema": {

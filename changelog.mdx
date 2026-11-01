@@ -3,6 +3,16 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
+## Client release 0.1.46 (November 1, 2026)
+
+Install the matching CLI and MCP. Clients older than 0.1.46 do not have the `database table create` command or the `database_table_create` tool:
+
+```sh
+npm install --global @amerged/ohmyhost-cli@0.1.46 @amerged/ohmyhost-mcp@0.1.46
+```
+
+- **Create a table.** `ohmyhost database table create`, MCP `database_table_create` (local server only) and `POST /v1/projects/{project_id}/database/tables` create a table in the public schema of a Dev or Prod database without a source migration. [Create a table](/database#create-a-table).
+
 ## Client release 0.1.45 (November 1, 2026)
 
 Install the matching CLI and MCP. Clients older than 0.1.45 do not have the `database watch` commands and tools:

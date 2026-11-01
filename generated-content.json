@@ -1,7 +1,7 @@
 {
-  "source_commit": "48ca455136b70be9786d3a1a402f2b41716e566d",
+  "source_commit": "4aab3bdd040aab2f7e04814bbf429296bd996d84",
   "source_dirty": false,
-  "release": "0.1.45",
+  "release": "0.1.46",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -86,6 +86,14 @@
     {
       "path": "errors/database-schedule-not-runnable.mdx",
       "sha256": "bb7f093db83cab168ec8bc67a7c2003f78a0052f63e8d81bac54b5bbe4443747"
+    },
+    {
+      "path": "errors/database-table-conflict.mdx",
+      "sha256": "5b6e535452d374b0adfbc00e8e4c95af7747432a31425923fbb3fce418811970"
+    },
+    {
+      "path": "errors/database-table-limit.mdx",
+      "sha256": "7a7359575a2a6cf2827d4c6e4461a343a87740ad863dfc598698e784d6882ae6"
     },
     {
       "path": "errors/database-watch-column-unavailable.mdx",
@@ -341,7 +349,7 @@
     },
     {
       "path": "snippets/error-codes.mdx",
-      "sha256": "7dd292433abb70aa468f7c141bc005c67ab5b49e074b2bccf33300138b27e770"
+      "sha256": "822f878d3afa7da4aee0a63fe6580d20e0bb9a0344607ea60833a6ccc53d491f"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/SKILL.md",
@@ -385,7 +393,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/SKILL.md",
-      "sha256": "fea71a6ff1364ce3f10af7154d2f8b05f489105522c0458e0729c7148b44c8c6"
+      "sha256": "9165c0b7348bfb9412f30fd5775888d74c8df3cfff36f6d3b64016b5ef65fcd4"
     },
     {
       "path": "skills/ohmyhost-get-started/references/harness-setup.md",
@@ -393,11 +401,11 @@
     },
     {
       "path": "skills/ohmyhost-get-started/references/surfaces.md",
-      "sha256": "d6accd4a5e86a27e79cf6181c15b09b6cfab188c79b453ed6e2d0a6d9fed81d1"
+      "sha256": "09262d7a9fd1a47c5c53e4eeacad6a2df5f9d40d5b76f1bc28f1d6f0217d07de"
     },
     {
       "path": "skills/ohmyhost-manage-database/SKILL.md",
-      "sha256": "b856e6678dc8866080d22b4253ebe336edeb01cd9463883fbcf1e01a19adde23"
+      "sha256": "9b7cf83280e2d293807757b289a6767e0108c91f006928eb7c79ca7323a509ea"
     },
     {
       "path": "skills/ohmyhost-migrate-supabase-postgres/SKILL.md",
@@ -425,15 +433,15 @@
     },
     {
       "path": "openapi.yaml",
-      "sha256": "d2143ca9c9b9f26a26e2338a888407c5b5183834796abbfe65c4190d40eeffe8"
+      "sha256": "be46c1b48459e91fd332957cd79e3f67c9f18d1b1a026495199460d22cb8b7a6"
     },
     {
       "path": "openapi.json",
-      "sha256": "400262040b6e258c49c343c4e550f0effdefb6d8dce099145f00b269293fdd13"
+      "sha256": "0e245bb97cff772a77955f543dfc7a06e09bd592a6039416fd0e06886b5b8ffe"
     },
     {
       "path": "mcp-tools.json",
-      "sha256": "6a4060a8c22845c6b3cc899e07177a4b7aea0f139b66ed38543cb4ffd3dbe465"
+      "sha256": "431b623877a1e64954c074dfa5cde37b0dfcf5e61c732d6285b588b8c494e576"
     },
     {
       "path": "mcp.json",
@@ -441,11 +449,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "6f2bf1ecec046b7a8f964943f10526ecf1616676d5e078872fc69baa14006cd8"
+      "sha256": "3ba709de1b1e74a9f852444fdbde4021b6ae06036b2cb4895b5ab66b31c48d9b"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "6b6193895b4d2551fd4d7d00d84210fc4227f4e76a94b993ade9be06b0359bb7"
+      "sha256": "aedf7d4e94f5a33603c5388eb31412767d6743b2d133389c4f1a8acc2164b2c0"
     },
     {
       "path": "snippets/skill-catalog.mdx",
@@ -453,7 +461,7 @@
     },
     {
       "path": "snippets/mcp-tools.mdx",
-      "sha256": "f90394c9d700354580405c225eeed0327ee4808683397180c1fb26135a175e54"
+      "sha256": "ebc921398232d9706c68277efcd9ec99a2867f78eb7e897ff974b9e18702eec9"
     },
     {
       "path": "logo/light.svg",
