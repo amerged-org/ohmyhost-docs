@@ -1,7 +1,7 @@
 {
-  "source_commit": "c1573efe2cacf525b8e5045f3d0628f4928f1005",
+  "source_commit": "778535d7e57bcb92b4322374f423a6a292881364",
   "source_dirty": false,
-  "release": "0.1.47",
+  "release": "0.1.48",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -357,7 +357,7 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/ai.md",
-      "sha256": "f3e1ddb1736a4045498c691f6d1b7aa3e238e7773d583c8894e9824ac2c723e9"
+      "sha256": "94baed63820ef2137bd0b453b5b1b2f926c6db555fbd4f4397426392ad6a9fb6"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/cli-deploy.md",
@@ -397,7 +397,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/SKILL.md",
-      "sha256": "ab19e99c77c4bf3e57d8c9ad07fbfafa89c45b6ec8472b186ee9b057621c6327"
+      "sha256": "6411c07a645dc72bfd3e19b0c264ae8524d3685cf0ce0845f0c87438adaf29fe"
     },
     {
       "path": "skills/ohmyhost-get-started/references/harness-setup.md",
@@ -433,7 +433,7 @@
     },
     {
       "path": "skills/ohmyhost-usage-and-budgets/SKILL.md",
-      "sha256": "dd19ed7635700813fddb8a6d399178f949a46b6e3365e8b4e7c6a938d3c8dfe2"
+      "sha256": "90daf7b8507816c0ea7c5d4a951b2d2952cb39c1ea9e861f12894f39ba0d5e54"
     },
     {
       "path": "openapi.yaml",
@@ -453,11 +453,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "5eefbac20df3fa1ccc69246100141b9940ba655c1dcef917d4f76071a2e181d3"
+      "sha256": "d9e19ddbe71f66aa1ac12849ebe543a7e399983043ab45ebb5cfa01b601865d2"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "ddfc6ebd05ec47d5a33686aa5db50ee6974adf88648838820211e8072b5768ac"
+      "sha256": "a74e30bcb883cfa2dd2e488cee69b8d615b33cb465b0e1d0c9d8564ea2f96ed6"
     },
     {
       "path": "snippets/skill-catalog.mdx",

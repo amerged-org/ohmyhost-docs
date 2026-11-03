@@ -20,6 +20,10 @@ Database usage is selected RAM multiplied by active time. Do not multiply the co
 The [AI gateway](/ai) reports settled calls under `ai.cost` with unit
 `usd_micro`. It needs active Paid access and available credit for each hold; the
 ordinary hosting credit-grace period does not admit AI calls without enough credit.
+Recorded cost, including zero, takes priority. From release 0.1.48, only chat and
+Responses calls without a usable cost use the USD 0.01 fallback before the
+unchanged rate-card factor; other unmeasured AI routes settle at zero. See
+[AI billing rules](/ai#credits-and-budgets) for scope and reconciliation.
 
 ## Read the balance correctly
 

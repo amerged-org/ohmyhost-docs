@@ -175,7 +175,7 @@ exact rules.
 
 ## Step 1 — determine the state before doing anything
 
-Use CLI and local MCP version 0.1.47 or newer together. Older clients reject the credits and usage
+Use CLI and local MCP version 0.1.48 or newer together. Older clients reject the credits and usage
 responses that 0.1.41 and 0.1.43 changed (credits is now only the balance) with
 `response_contract_invalid`, the native `psql` access transport needs 0.1.39 or newer, the
 database webhook, schedule and executions commands and tools need 0.1.42 or newer, the

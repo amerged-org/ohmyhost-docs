@@ -148,14 +148,21 @@ direction, or when either peer closes or fails.
 
 ## Credits and budgets
 
-The gateway reserves credit before forwarding a call and settles against the
-actual cost orq records using the active `ai.cost` rate card. Read the
-[current AI pricing](https://ohmyho.st/pricing) before enabling it. A recorded cost
-of zero settles at zero. When a call's cost cannot be measured, the gateway also
-settles at zero and records the trace for operator reconciliation; the platform
-absorbs that unknown cost. It does not add an estimated minimum, a speech or
-duration charge, or an automatic later debit. Without an active AI rate card,
-calls answer `503 ai_unavailable`.
+The gateway reserves credit before forwarding a call. The actual cost orq records
+for its trace takes priority, including zero and amounts below USD 0.01. From
+release 0.1.48, only answered `/chat/completions` and `/responses` calls use a
+fallback cost of USD 0.01 when no usable recorded cost is available after the
+bounded lookup, or the answer has no usable trace id. This is not a minimum
+charge: a usable lower cost is charged as reported.
+
+The selected recorded or fallback cost is priced through the active `ai.cost`
+rate card with the unchanged factor 1.390895. Operator records tag an assumed
+cost with `fallback_nano_usd`; the gateway does not retry the generation or
+automatically adjust the settled charge if telemetry arrives later. Other routes,
+including images, speech, transcription, OCR, classifiers and realtime, still
+settle unmeasured cost at zero, absorbed by the platform. There is no speech or
+duration estimate. Read the [current AI pricing](https://ohmyho.st/pricing) before
+enabling it. Without an active AI rate card, calls answer `503 ai_unavailable`.
 
 AI consumption counts toward the project's [Stop budget](/budgets). A hold is not
 a maximum charge: a call can cost more, and existing work can settle after the
