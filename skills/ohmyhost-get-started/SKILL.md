@@ -1,6 +1,6 @@
 ---
 name: ohmyhost-get-started
-description: Connect a customer agent or native chat to ohmyho.st, verify the intended account and workspace, and continue an application from its saved source. Use managed OAuth for a remote chat and the existing local login for a terminal agent. Also use for account selection, customer support, or private automation credentials; use ohmyhost-deploy once access is ready.
+description: Connect a customer agent or native chat to ohmyho.st, verify the intended account and workspace, and continue an application from its saved source. Use managed OAuth for a remote chat and the existing local login for a terminal agent. Also use for account selection, customer support, or private automation credentials, and to route LLM, image, speech, classifier or OCR requests to the app Skill; use ohmyhost-deploy once access is ready.
 ---
 
 # Start with ohmyho.st
@@ -16,7 +16,7 @@ Source can be a connected GitHub repository or an ohmyho.st-managed repository. 
 verify the app, and promote a tested Dev artifact when appropriate. Dev is protected by default;
 the deployment Skill handles public Dev, data choices and the shared-database promotion rule.
 You can also give the app Postgres, private runtime secrets, Cloudflare R2 files, optional
-transactional mail and a custom domain, export its database as an encrypted SQL ZIP, and read
+transactional mail, LLMs, images, speech, classifiers and OCR through an OpenAI-compatible gateway, and a custom domain, export its database as an encrypted SQL ZIP, and read
 usage, credits and project budgets. The customer keeps their own application authentication;
 nothing here replaces it. Sign-up is open and free to start.
 
@@ -52,6 +52,7 @@ Which Skill to read next:
 | understand a queued, stuck or failed deployment, or report a bug | ohmyhost-troubleshoot-deployment   |
 | read or change data, database size or Dev-to-Prod migrations     | ohmyhost-manage-database           |
 | connect a custom domain or mail sender                           | ohmyhost-domains-and-mail          |
+| add LLMs, images, speech, classifiers or OCR to the app          | ohmyhost-build-portable-app        |
 | export the database as an encrypted backup                       | ohmyhost-export-database           |
 | see usage, credits or set a spending limit                       | ohmyhost-usage-and-budgets         |
 
@@ -174,11 +175,11 @@ exact rules.
 
 ## Step 1 — determine the state before doing anything
 
-Use CLI and local MCP version 0.1.46 or newer together. Older clients reject the credits and usage
+Use CLI and local MCP version 0.1.47 or newer together. Older clients reject the credits and usage
 responses that 0.1.41 and 0.1.43 changed (credits is now only the balance) with
 `response_contract_invalid`, the native `psql` access transport needs 0.1.39 or newer, the
 database webhook, schedule and executions commands and tools need 0.1.42 or newer, the
-`database watch` commands and tools need 0.1.45 or newer, and the `database table` commands and tools need 0.1.46 or newer. `ohmyhost whoami` and MCP `identity_get` return the current account's email and the
+`database watch` commands and tools need 0.1.45 or newer, and the `database table` commands and tools need 0.1.46 or newer. The `ai` block in `ohmyhost.yaml` needs 0.1.47 or newer: `ai: {enabled: true, jurisdiction: eu}` (or `any`) declares LLM, image, speech, classifier and OCR use, and `jurisdiction` is required whenever `enabled` is true. A Vite app with `ai` uses `runtime.mode: edge` and a companion Worker, as the init refusal names. Models are served through [orq.ai](https://orq.ai). `ohmyhost whoami` and MCP `identity_get` return the current account's email and the
 credential's organizations with IDs and current names. Compare that email and workspace with the account the customer intended before
 changing resources. Service credentials have `email: null`.
 
@@ -287,7 +288,7 @@ Compare the installed versions with <https://ohmyho.st/client-release.json>: `oh
 names the CLI, and `npm ls --global --depth=0` lists both packages (`ohmyhost-mcp` has no
 `--version` flag; it starts the server). When either is missing or older, install both from the
 source already in use: the current archive URLs from that guide, or npm
-(`npm install --global @amerged/ohmyhost-cli@0.1.46 @amerged/ohmyhost-mcp@0.1.46`). Both provide the same
+(`npm install --global @amerged/ohmyhost-cli@0.1.47 @amerged/ohmyhost-mcp@0.1.47`). Both provide the same
 `ohmyhost` and `ohmyhost-mcp` commands, so uninstall one pair before switching to the other.
 An older client lacks commands and rejects newer server responses with `response_contract_invalid`;
 an older MCP server reports the same case as `client_request_failed` although connection and login

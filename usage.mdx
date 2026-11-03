@@ -17,6 +17,10 @@ Builds, active database compute, storage and supported service operations are me
 
 Database usage is selected RAM multiplied by active time. Do not multiply the complete bill or already valued usage again.
 
+The upcoming [AI gateway](/ai) reports settled calls under `ai.cost` with unit
+`usd_micro`. It needs active Paid access and available credit for each hold; the
+ordinary hosting credit-grace period does not admit AI calls without enough credit.
+
 ## Read the balance correctly
 
 `available_micros` is the monthly credit plus the one-time credit minus reservations. Monthly credits (200 on Free, 1,000 on Paid) expire on the date shown in Billing (`next_expiry`) and are spent before one-time credits. One-time credits never expire: top-ups, auto-recharges, and signup, referral and bonus credits stay until used, also after a downgrade to Free. Only effective Paid workspaces can buy top-ups or enable auto-recharge, but bought credit stays usable after a downgrade. An unpaid Stripe renewal keeps Paid features for up to fourteen days after period end; `paid_until` in `credits account` is the end of the paid coverage and includes those days. Otherwise the workspace returns to Free, and cancellation ends Paid at the paid period end. In-flight reservations appear as `reserved_micros` in `credits account` and `credits balance`; the portal does not show them.

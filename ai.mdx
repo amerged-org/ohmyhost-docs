@@ -1,0 +1,178 @@
+---
+title: "Build AI features"
+description: "Use chat, images and audio through the ohmyho.st AI gateway with a model and jurisdiction you choose."
+---
+
+<Note>
+  This guide describes the upcoming AI gateway release. Availability requires
+  the published AI rate card. Realtime voice still needs live provider
+  acceptance.
+</Note>
+
+The AI gateway serves the models [orq.ai offers](https://docs.orq.ai/ai-gateway/supported-models)
+on the routes below. A call needs an active Paid workspace and enough available
+prepaid credit. Choose a model for each request; there is no separate ohmyho.st model catalog.
+
+## Enable AI
+
+Add this to the application's existing `ohmyhost.yaml`, then deploy:
+
+```yaml
+ai:
+  enabled: true
+  jurisdiction: eu
+```
+
+Choose `eu` or `any` explicitly with the application owner. `any` permits every
+model served by orq on the supported routes. `eu` checks orq's current location
+metadata for the exact requested model before reserving credit. It permits only
+a non-empty location list whose every location is `eu`. Mixed-region, global and
+non-EU models answer `403 model_outside_jurisdiction`.
+
+Region metadata is read for each request. Unavailable, malformed or incomplete
+metadata, or a lookup that exceeds five seconds, answers `503 ai_unavailable`.
+Review the selected provider's data-handling terms for your application's other
+requirements.
+
+The platform injects the secret `OHMYHOST_AI_KEY` and the URL
+`OHMYHOST_AI_BASE_URL` into the deployed server runtime. Do not set either value
+manually. The gateway origin is allowed automatically; omit it from
+`runtime.egress.allow`. Runtime secrets are absent during builds.
+
+Keep the key in server code. An edge app, a Vite companion or a functions Worker
+can call the gateway; a static-only app cannot enable it. Dev and Prod have their
+own keys. The active revision's configuration decides whether its key works and
+which jurisdiction applies, including after a promotion or rollback.
+
+## Choose a model and call it
+
+`GET {OHMYHOST_AI_BASE_URL}/models`, with the injected Bearer key, returns the
+current model ids allowed by the project's jurisdiction. For `eu`, the gateway
+intersects orq's enabled models with its complete EU catalog and retains only
+models whose locations are entirely `eu`. Incomplete EU catalog metadata answers
+`503 ai_unavailable`. Choose a model that supports your route. Listing a model
+does not promise it supports every modality.
+Read [orq's model request contract](https://docs.orq.ai/ai-gateway/features/openai-compatible-api)
+for model-specific fields.
+
+Install the official `openai` package using the application's package manager.
+Resolve `env` from the framework's server request context. This example accepts a
+chat model id selected from the current model list:
+
+```ts
+import OpenAI from "openai";
+
+export async function answer(
+  env: { OHMYHOST_AI_BASE_URL: string; OHMYHOST_AI_KEY: string },
+  chosenModel: string,
+  question: string,
+): Promise<string> {
+  const ai = new OpenAI({
+    baseURL: env.OHMYHOST_AI_BASE_URL,
+    apiKey: env.OHMYHOST_AI_KEY,
+    maxRetries: 0,
+  });
+  const reply = await ai.chat.completions.create({
+    model: chosenModel,
+    messages: [{ role: "user", content: question }],
+    max_tokens: 512,
+  });
+  return reply.choices[0]?.message.content ?? "";
+}
+```
+
+For streamed chat, add `stream: true` and consume the returned async iterable.
+Set an output limit appropriate to the chosen model. Automatic SDK retries are
+disabled here so a failed response does not silently start another paid generation.
+Verify the feature through an authenticated route on the deployed app. A health
+check must not start a paid AI call.
+
+## Supported routes
+
+These paths are relative to `OHMYHOST_AI_BASE_URL`, which already ends in `/v1`.
+Use the OpenAI SDK where it implements the route, or server-side `fetch` with
+`Authorization: Bearer <injected key>`.
+
+| Method | Path                    | Request                                  |
+| ------ | ----------------------- | ---------------------------------------- |
+| POST   | `/chat/completions`     | JSON; streaming supported                |
+| POST   | `/responses`            | JSON                                     |
+| POST   | `/images/generations`   | JSON                                     |
+| POST   | `/images/edits`         | JSON or multipart form data              |
+| POST   | `/audio/transcriptions` | JSON or multipart form data              |
+| POST   | `/audio/speech`         | JSON; the response can be audio bytes    |
+| POST   | `/decisions`            | JSON                                     |
+| POST   | `/ocr`                  | JSON                                     |
+| GET    | `/models`               | No body                                  |
+| GET    | `/realtime?model=<id>`  | Server-side WebSocket upgrade; see below |
+
+Every POST needs a non-empty `model`. JSON bodies are limited to 16 MiB and
+multipart bodies to 26 MiB including fields and boundaries. An upload needs
+exactly one `model` field. Let the SDK or `FormData` set its multipart boundary.
+Query parameters on POST routes or `/models` answer `404 not_found`. Embeddings,
+rerank, moderation, video generation and audio translation routes are not offered.
+
+The gateway refuses these top-level JSON keys and multipart field names in both
+jurisdictions: `orq`, `load_balancer`, `fallbacks`, `fallback_on_codes`, `retry`,
+`cache`, `timeout`, `plugins`, `models`, `route` and `routing`. They control orq
+routing or override the call's identity. Other model-specific fields follow orq's
+API. JSON bytes pass unchanged after validation; duplicate top-level keys are
+refused. Multipart bodies are rebuilt with a new boundary.
+
+A body must arrive within 30 seconds. Response headers have a 120-second deadline;
+streams end after 60 seconds without a chunk or ten minutes overall. Address and
+project rate limits also apply. A workspace can have at most eight unresolved AI
+calls; another call answers `429 ai_rate_limited` with `Retry-After: 5`.
+
+## Realtime voice
+
+The realtime route is implemented and tested locally. Live acceptance remains
+pending: the latest authenticated check found enabled voice models, but upstream
+sessions closed with code `1011` before any messages. Verify a real session through
+the deployed application before relying on voice input or output.
+
+Connect from server code using the injected Bearer key. A browser WebSocket cannot
+set that header. Keep the upstream socket in an authenticated server route. The
+request requires `Upgrade: websocket` and exactly one `model` query parameter;
+extra or repeated parameters answer `400 invalid_request`.
+
+A session ends after five minutes, after one minute without messages in either
+direction, or when either peer closes or fails.
+
+## Credits and budgets
+
+The gateway reserves credit before forwarding a call and settles against the
+actual cost orq records using the active `ai.cost` rate card. Read the
+[current AI pricing](https://ohmyho.st/pricing) before enabling it. A recorded cost
+of zero settles at zero. When a call's cost cannot be measured, the gateway also
+settles at zero and records the trace for operator reconciliation; the platform
+absorbs that unknown cost. It does not add an estimated minimum, a speech or
+duration charge, or an automatic later debit. Without an active AI rate card,
+calls answer `503 ai_unavailable`.
+
+AI consumption counts toward the project's [Stop budget](/budgets). A hold is not
+a maximum charge: a call can cost more, and existing work can settle after the
+budget is reached. Read `ohmyhost credits usage` for the `ai.cost` meter and
+`ohmyhost credits balance` for current reservations. See [measured usage](/usage).
+
+## Handle failures
+
+Gateway errors have the OpenAI shape `{ "error": { "message", "type", "code" } }`.
+Branch on `code`, not the message. Honor `Retry-After` when retrying rate limits.
+
+| Code                                | Action                                                                                   |
+| ----------------------------------- | ---------------------------------------------------------------------------------------- |
+| `invalid_api_key`                   | Verify the active revision enables AI and use its injected server key.                   |
+| `paid_plan_required`                | Use an active Paid workspace.                                                            |
+| `insufficient_organization_credits` | Add available credit before another call.                                                |
+| `project_budget_exceeded`           | Review the project's Stop budget.                                                        |
+| `model_outside_jurisdiction`        | Choose a model permitted by the declared jurisdiction.                                   |
+| `model_not_found`                   | Refresh the model list and check the model id.                                           |
+| `invalid_request`                   | Correct the model request, content type or refused control field.                        |
+| `request_too_large`                 | Reduce the body to the route's limit.                                                    |
+| `not_found`                         | Correct the route and remove unsupported query parameters.                               |
+| `ai_rate_limited`                   | Wait for `Retry-After`; bound application retries.                                       |
+| `ai_upstream_unavailable`           | Report a provider failure without exposing private upstream details.                     |
+| `ai_unavailable`                    | Retry after gateway or region-metadata availability returns; check the active rate card. |
+
+[Runtime secrets](/secrets) · [Build-portable-app Skill](https://ohmyho.st/skills/ohmyhost-build-portable-app/SKILL.md).

@@ -1,11 +1,11 @@
 {
-  "source_commit": "4aab3bdd040aab2f7e04814bbf429296bd996d84",
+  "source_commit": "4954871a070d6905cc97bb1608ec8ec51bad529f",
   "source_dirty": false,
-  "release": "0.1.46",
+  "release": "0.1.47",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
-      "sha256": "56f83dd2819aa1d8510ff5610a93b2ba10d7ac976237f264a1830d330af65a26"
+      "sha256": "7d26451cb9478e2cd8bb18a0c5f7ca2062220b80f730a174b21db2fa191a6959"
     },
     {
       "path": "errors/api-key-creation-uncertain.mdx",
@@ -353,7 +353,11 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/SKILL.md",
-      "sha256": "9ebc6a013b9174f06bc95cfc03d7367baca240643c66dfb5c408e5a944d3af0e"
+      "sha256": "a6eca0c5b5d19ac8421290e1462676325cb37e862ba6c8c2026cd0568a26da07"
+    },
+    {
+      "path": "skills/ohmyhost-build-portable-app/references/ai.md",
+      "sha256": "f3e1ddb1736a4045498c691f6d1b7aa3e238e7773d583c8894e9824ac2c723e9"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/cli-deploy.md",
@@ -373,7 +377,7 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/stack-contracts.md",
-      "sha256": "915ff18dfc0f6cc5e57819f6216517f3b309554eb9e4521f255f98097c6b1c01"
+      "sha256": "7dd14156edd70c3e8f3f0bf20e68185aa5321acb4983acaa713161a3d24664eb"
     },
     {
       "path": "skills/ohmyhost-deploy-github/SKILL.md",
@@ -393,7 +397,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/SKILL.md",
-      "sha256": "9165c0b7348bfb9412f30fd5775888d74c8df3cfff36f6d3b64016b5ef65fcd4"
+      "sha256": "ab19e99c77c4bf3e57d8c9ad07fbfafa89c45b6ec8472b186ee9b057621c6327"
     },
     {
       "path": "skills/ohmyhost-get-started/references/harness-setup.md",
@@ -429,7 +433,7 @@
     },
     {
       "path": "skills/ohmyhost-usage-and-budgets/SKILL.md",
-      "sha256": "bbb30196356e2e776c36d297fdd1f5aa14189660f28c81e26f97e8a4b1e0cd0d"
+      "sha256": "dd19ed7635700813fddb8a6d399178f949a46b6e3365e8b4e7c6a938d3c8dfe2"
     },
     {
       "path": "openapi.yaml",
@@ -449,15 +453,15 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "3ba709de1b1e74a9f852444fdbde4021b6ae06036b2cb4895b5ab66b31c48d9b"
+      "sha256": "5eefbac20df3fa1ccc69246100141b9940ba655c1dcef917d4f76071a2e181d3"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "aedf7d4e94f5a33603c5388eb31412767d6743b2d133389c4f1a8acc2164b2c0"
+      "sha256": "ddfc6ebd05ec47d5a33686aa5db50ee6974adf88648838820211e8072b5768ac"
     },
     {
       "path": "snippets/skill-catalog.mdx",
-      "sha256": "5873f266438908f0aef890ab9b0c47b94d09ca2a4aab1ecb07dfdb7be2e1172a"
+      "sha256": "43259b7652c55faf146d6c85b4fd191cf9711817a2b23eeb80ab774e0afb1f43"
     },
     {
       "path": "snippets/mcp-tools.mdx",
