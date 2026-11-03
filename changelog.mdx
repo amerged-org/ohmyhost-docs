@@ -3,14 +3,16 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
-## Upcoming AI gateway
+## Client release 0.1.47 (November 3, 2026)
 
-The next client release adds the `ai` configuration block for Paid workspaces.
-Choose a jurisdiction and call orq models for chat, Responses, images,
-speech-to-text, text-to-speech, classifiers and OCR through injected server
-credentials. AI consumes prepaid credit and contributes to project budgets.
-Realtime voice is implemented, with live provider acceptance still pending.
-Availability depends on the active AI rate card. [Build AI features](/ai).
+Install the matching CLI and MCP. The `ai` configuration block requires 0.1.47 or newer:
+
+```sh
+npm install --global @amerged/ohmyhost-cli@0.1.47 @amerged/ohmyhost-mcp@0.1.47
+```
+
+- **AI gateway.** Paid workspaces can use orq models for chat, Responses, image generation and editing, speech-to-text, text-to-speech, classifiers and OCR through injected server credentials. Declare `ai.enabled` and choose `ai.jurisdiction` explicitly. The active revision controls the capability and jurisdiction after promotion or rollback. Calls consume prepaid credit under the active `ai.cost` rate card and contribute to project Stop budgets; without an active card they answer `ai_unavailable`. [Build AI features](/ai).
+- **Realtime voice qualification.** The server-side WebSocket route is implemented. Upstream sessions closed with code `1011` during verification, and successful live voice acceptance remains pending. [Realtime voice](/ai#realtime-voice).
 
 ## Client release 0.1.46 (November 1, 2026)
 
