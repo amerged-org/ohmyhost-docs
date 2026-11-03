@@ -3,6 +3,10 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
+## Client release 0.1.48 (November 3, 2026)
+
+- **LLM cost fallback.** Chat and Responses use a USD 0.01 cost only when the answered call has no usable recorded trace cost after bounded lookup, or no usable trace id. Actual cost always takes priority, including zero and amounts below USD 0.01. The unchanged rate-card factor applies to the selected cost; operator records mark fallback use, and there is no automatic later correction. Other unmeasured AI routes still settle at zero. [AI billing rules](/ai#credits-and-budgets).
+
 ## Client release 0.1.47 (November 3, 2026)
 
 Install the matching CLI and MCP. The `ai` configuration block requires 0.1.47 or newer:

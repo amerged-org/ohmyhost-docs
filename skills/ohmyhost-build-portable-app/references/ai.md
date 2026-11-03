@@ -135,8 +135,8 @@ at most eight unresolved AI calls; a ninth answers `429 ai_rate_limited` with
 ## Realtime voice
 
 The `/realtime` WebSocket route is implemented and tested locally. Live acceptance
-is still pending: the orq workspace's xAI provider was inactive at the last check.
-Do not claim it works in the customer's deployed app until a real session passes.
+is still pending: authenticated upstream sessions closed with code `1011` before
+messages or audio. Do not claim voice works until a real hosted session passes.
 
 Connect from server code with the injected Bearer key. A browser WebSocket cannot
 set that header; keep the upstream socket in an authenticated application server
@@ -151,9 +151,11 @@ the hosted application.
 Calls need sufficient available credit for a temporary hold before forwarding.
 They settle against the cost orq records using the active `ai.cost` rate card and
 count toward the project's Stop budget. Recorded zero is charged zero. A call whose
-cost cannot be read settles at zero and is logged for operator reconciliation;
-the platform absorbs that unknown cost, with no automatic later debit. No guessed
-minimum, character or duration charge applies. Read the current factor on
+cost cannot be read after bounded retries uses a **USD 0.01 cost fallback only for
+`/chat/completions` and `/responses`**, then the active rate-card factor. This is
+not a minimum: any reported cost, including zero or a smaller value, takes priority.
+Other routes with unavailable cost settle at zero and are logged; no character or
+duration tariff applies. No later automatic correction is posted. Read the current factor on
 [the pricing page](https://ohmyho.st/pricing). Usage and credit balances come from
 **ohmyhost-usage-and-budgets**. No active AI rate card means calls are unavailable.
 
