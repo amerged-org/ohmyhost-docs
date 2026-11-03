@@ -47,6 +47,13 @@ The default mail/storage response-header timeout is 10,000 ms, configurable from
 binary `readMany` retains its per-read idle timeout. A timeout does not undo durable progress.
 Runtime attachment downloads are currently unsupported. [Files](/files) · [Email](/email).
 
+## AI gateway
+
+The [AI gateway](/ai) accepts JSON bodies up to 16 MiB and multipart
+uploads up to 26 MiB. A workspace may have eight unresolved calls. Address and
+project limits carry `Retry-After`; realtime sessions end after five minutes or
+one minute idle. Paid access and available credit are required for each call.
+
 ## API versions and interface changes
 
 Product endpoints use the `/v1` route family. The CLI, SDK and MCP are released together under one version; `/v1` does not yet promise a stable interface.

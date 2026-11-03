@@ -3,6 +3,17 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
+## Client release 0.1.47 (November 3, 2026)
+
+Install the matching CLI and MCP. The `ai` configuration block requires 0.1.47 or newer:
+
+```sh
+npm install --global @amerged/ohmyhost-cli@0.1.47 @amerged/ohmyhost-mcp@0.1.47
+```
+
+- **AI gateway.** Paid workspaces can use orq models for chat, Responses, image generation and editing, speech-to-text, text-to-speech, classifiers and OCR through injected server credentials. Declare `ai.enabled` and choose `ai.jurisdiction` explicitly. The active revision controls the capability and jurisdiction after promotion or rollback. Calls consume prepaid credit under the active `ai.cost` rate card and contribute to project Stop budgets; without an active card they answer `ai_unavailable`. [Build AI features](/ai).
+- **Realtime voice qualification.** The server-side WebSocket route is implemented. Upstream sessions closed with code `1011` during verification, and successful live voice acceptance remains pending. [Realtime voice](/ai#realtime-voice).
+
 ## Client release 0.1.46 (November 1, 2026)
 
 Install the matching CLI and MCP. Clients older than 0.1.46 do not have the `database table create` command or the `database_table_create` tool:
