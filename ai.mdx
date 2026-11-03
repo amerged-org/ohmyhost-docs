@@ -34,6 +34,14 @@ metadata, or a lookup that exceeds five seconds, answers `503 ai_unavailable`.
 Review the selected provider's data-handling terms for your application's other
 requirements.
 
+AI requests pass through orq.ai to the provider serving the selected model. The
+gateway does not persist prompt or response bodies; upstream processing and
+retention follow those providers' applicable terms. Review the
+[provider register](https://ohmyho.st/dpa/subprocessors),
+[Privacy notice](https://ohmyho.st/privacy) and [DPA](https://ohmyho.st/dpa).
+The `eu` setting limits model selection; it does not make Cloudflare edge
+execution, support or all other service processing EU-only.
+
 The platform injects the secret `OHMYHOST_AI_KEY` and the URL
 `OHMYHOST_AI_BASE_URL` into the deployed server runtime. Do not set either value
 manually. The gateway origin is allowed automatically; omit it from
