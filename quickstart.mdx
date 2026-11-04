@@ -11,7 +11,7 @@ Start with the app you want to deploy, in a local checkout or a connected chat. 
 
 Your agent uses the [get-started Skill](https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md). A local agent first checks what is installed and whether you are signed in, installs the current CLI/MCP only if required, and gives you a sign-in link when needed. Open it, check the confirmation code, sign in or create your account on that page, and tell the agent when you are done. It confirms the result with `identity_get` or `ohmyhost whoami --json`.
 
-A connected chat uses managed OAuth and the returned **Review connection** card or private portal link. It verifies the intended account, workspace and project grants before continuing; it needs no local CLI installation or copied API token. Choose the existing app in the portal picker when it is not yet visible. Consent to create a new app is sufficient to begin it; publishing has its own grant. [Connect MCP](/agents/mcp).
+A connected chat uses managed OAuth and verifies the intended account, workspace and project before continuing. Current membership, role and any token restrictions determine access; no local CLI installation or copied API token is needed. [Connect MCP](/agents/mcp).
 
 Reuse the workspace for this app. A local agent reads the organizations returned by `whoami` and follows the get-started Skill if none exists. A connected chat with no workspace uses the `workspace_setup` portal handoff and verifies its identity again. If you already have projects, select the existing project instead of creating another.
 
@@ -55,7 +55,7 @@ The response supplies an operation ID. The agent observes that operation until i
 
 The agent reads `dev_access_mode` and the URL from project status. For protected Dev it obtains the persistent owner-only share link; for public Dev it opens the clean URL directly. Check navigation and, where used, application login and a real data read/write. A successful build alone is not the finished app.
 
-When you request publication, the agent confirms the connected chat's publishing grant when applicable, creates a promotion plan and publishes the verified artifact to Prod. Isolated promotion applies migrations without copying Dev records into Prod. Prod receives its own private secret inputs. With isolated data, the agent can also build a commit straight into Prod; a project whose Dev and Prod share a database always deploys to Dev and promotes. [Deploy to Prod](/environments#deploy-to-prod).
+When you request publication, the agent checks current authorization, creates a promotion plan and publishes the verified artifact to Prod. Isolated promotion applies migrations without copying Dev records into Prod. Prod receives its own private secret inputs. With isolated data, the agent can also build a commit straight into Prod; a project whose Dev and Prod share a database always deploys to Dev and promotes. [Deploy to Prod](/environments#deploy-to-prod).
 
 Managed source keeps version history across chats. Restoring an earlier source version creates a new commit; it is separate from deployment rollback and does not roll back database migrations. [Restore a version](/sources).
 

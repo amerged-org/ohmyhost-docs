@@ -62,7 +62,7 @@ After an interruption, `source inspect` lists safe `pending_publications` IDs. O
 
 ## Develop in a connected chat
 
-Use the [remote OAuth connection](/agents/mcp) and its approved project grants. The remote server edits saved files directly; it does not read a directory on your computer. Read its actual `tools/list` schema, since the local and remote catalogs differ.
+Use the [remote OAuth connection](/agents/mcp) and current account authorization. The remote server edits saved files directly; it does not read a directory on your computer. Read its actual `tools/list` schema, since the local and remote catalogs differ.
 
 For a new managed app, remote `project_create` accepts `source_provider: "managed"` and `template: "vite-react"` or `"empty"`. Use the basic Vite template for a blank web app, or an empty source for an explicitly selected supported stack. Follow `operation_get`, then `source_get` with `include_binding: true` until the source is `ready` with a persisted commit. Project creation can finish before source initialization. Do not issue a duplicate `source_initialize` while it is pending. A returned `initialization_operation_id` identifies the child operation; `initialization_error_code` explains a failed initialization.
 

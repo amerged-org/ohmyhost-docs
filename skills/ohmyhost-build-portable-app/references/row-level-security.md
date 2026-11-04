@@ -2,7 +2,7 @@
 
 Use PostgreSQL policies when the customer wants database-enforced row permissions. Backend RLS is part of the coordinated 0.1.30 cohort and requires both the matching customer-runtime package with `withRls` and the deployed database service exposing `openRls`, including trusted SQL-helper preparation. Source code or a package import alone does not prove the deployed capability. Report a missing capability; never replace a refused RLS call with a context-free query. The earlier 0.1.29 package does not provide `withRls`.
 
-The application authenticates its own users before accessing protected data. An ohmyho.st login, API key, MCP project grant or protected Dev ticket is not the application's end-user identity. Authentication tables and existing unprotected application tables are not automatically changed.
+The application authenticates its own users before accessing protected data. An ohmyho.st login, API key, MCP connection or protected Dev ticket is not the application's end-user identity. Authentication tables and existing unprotected application tables are not automatically changed.
 
 ## Define a policy in a new migration
 

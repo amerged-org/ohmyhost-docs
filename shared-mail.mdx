@@ -72,7 +72,7 @@ This stops dependent shared-sender admission. It does not activate, delete or re
 
 ## MCP and API access
 
-Remote MCP needs selected sender-domain read/use/admin consent in addition to the target project grant. Access to a project does not automatically grant access to every sender in its workspace.
+Remote MCP checks current sender-domain permissions as well as project permissions and any token restrictions. Access to a project does not automatically grant access to every sender in its workspace.
 
 | Purpose | MCP tools |
 | --- | --- |

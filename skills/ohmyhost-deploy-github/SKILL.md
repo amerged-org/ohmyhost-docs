@@ -33,7 +33,7 @@ The source choice follows the selected repository and user preference, including
 runs in a cloud environment. Use this flow when the authenticated remote tools are available;
 the local CLI flow below remains available for a local checkout.
 
-1. Complete the remote OAuth and project-grant flow in **ohmyhost-get-started**. Reuse the saved
+1. Complete the remote OAuth flow in **ohmyhost-get-started**. Reuse the saved
    project through `project_list`, `project_get` and `project_context_get`. For a new GitHub app,
    send `source_provider: "github"` explicitly to `project_create`, together with the user's
    organization, name, region, data mode and Dev access choice. This avoids queuing a managed
@@ -55,7 +55,7 @@ the local CLI flow below remains available for a local checkout.
    `deployment_create`, and observe its original `operation_get`. Verify Dev with the returned
    URL and, when protected, `project_dev_share_link_get` for the user or a one-use
    `project_dev_access_create` ticket for the agent. Keep entry links out of source and logs.
-5. When publication is requested and its separate project grant permits it, use `promotion_plan`
+5. When publication is requested and the current role and token permit it, use `promotion_plan`
    and `deployment_promote` with the actual ETag, confirmation and idempotency guards. Shared
    data requires Dev followed by promotion; isolated data also permits an exact commit planned
    into Prod. Supply Prod's own credentials, observe completion and verify the public result.

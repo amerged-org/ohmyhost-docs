@@ -7918,10 +7918,19 @@
       "get": {
         "operationId": "listAuditEvents",
         "summary": "List audit events",
-        "description": "Returns events visible to the authenticated organization in stable descending order.",
+        "description": "Returns events visible in an authorized workspace in stable descending order. Select a workspace when the credential has multiple workspaces and no active workspace context.",
         "parameters": [
           {
             "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "name": "organization_id",
+            "in": "query",
+            "description": "Authorized workspace to query; defaults to the active or only workspace.",
+            "required": false,
+            "schema": {
+              "$ref": "#/components/schemas/Ulid"
+            }
           },
           {
             "$ref": "#/components/parameters/ProjectFilter"

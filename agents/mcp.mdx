@@ -27,19 +27,11 @@ For a client that supports authenticated remote MCP, connect:
 https://app.ohmyho.st/mcp
 ```
 
-Complete the client's OAuth sign-in. The agent verifies `identity_get` and `connection_grants` in the background. If you already described an application or task, it continues that request. Otherwise it asks only "What would you like to host?" in your language—for example, "Was möchtest du hosten?" in German. Routine checks need no permission table, internal IDs, empty fields or grant timestamps.
+Complete the client's OAuth sign-in. The agent verifies `identity_get`, the intended workspace and the requested project before continuing. Current workspace membership, role and any explicit token restrictions determine access. If you already described an application or task, the agent continues it; otherwise it asks what you would like to host.
 
-New-app consent is explicit: `allow_create: true` permits creation even when the approved project list is empty. An empty list without that consent does not authorize creation. `allow_publish_created_projects` covers only applications created under that consent; an existing application needs its own publication permission. Every operation still checks current account and project authorization.
+Existing authenticated connections continue to use their current OAuth identity. If a client has cached older tools or instructions, refresh its catalog or start a fresh chat; a catalog refresh does not require a new OAuth connection. A role or resource denial needs the appropriate current access. An account with no workspace can use `workspace_setup` and verify identity again afterward.
 
-Editing and Dev previews are separate from publication. The agent requests a publication handoff only when you have asked to publish and the relevant permission is missing. If workspace setup is needed, `workspace_setup` returns the account portal; the agent verifies identity again after you finish.
-
-When project access is missing, the agent uses `connection_request`. Open its **Review connection** card when your client displays it; otherwise open the returned private portal link. Use the browser profile signed in to the ohmyho.st account connected to this client. Check the account, workspace, selected applications and requested access before confirming. The card opens the consent page; it does not approve access.
-
-When the client provides the actual current chat address, the portal can return you to that conversation after approval. The agent may supply `return_url` only when it knows that exact address. Never construct it from anonymized session IDs or session metadata. Without a conversation address, a recognized client's home page is the fallback; with an unrecognized client, return to your chat manually. Returning to chat does not confirm project access: the agent checks `connection_status` and `connection_grants` in the background before continuing.
-
-Project-access portal links are valid for one hour. Portal links for secret input and GitHub setup last ten minutes. If a link expires, ask your agent for a fresh one.
-
-The client manages its OAuth credential. This route needs no copied platform token or local device-code login. A plugin installation or completed browser page is not the access check: verify an authenticated tool call and the actual project grant. Discover this connected server's tools rather than assuming the local catalog applies to it. Private application values use the portal flow in [Runtime secrets](/secrets).
+The client manages its OAuth credential; there is no copied platform token or local device-code login in a connected chat. Verify an authenticated tool call and discover this server's actual tools. Private application values and GitHub setup use their own protected portal links; `connection_status` reports their status. Those links last ten minutes. [Runtime secrets](/secrets) describes secret input.
 
 For a complete file tree, the remote tools are `source_upload_prepare`, `source_blob_put`, `source_upload`, `source_upload_commit` and `source_switch`. They use actual file contents available to the client; a local directory path gives the chat no filesystem access. Blob uploads return server-computed hash/length receipts. Retain those exact receipts for the complete manifest, and require a succeeded operation plus a committed upload before using its saved SHA. Saving or switching source starts no deployment. Follow [the full snapshot and switch flow](/sources#save-a-complete-tree-in-chat).
 

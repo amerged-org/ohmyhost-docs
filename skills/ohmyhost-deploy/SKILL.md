@@ -87,8 +87,7 @@ for exact binary contents. The REST/SDK wire format remains base64.
 ## Managed application in native chat
 
 This workflow needs the authenticated remote tools; it has no local filesystem or shell
-dependency. Use `connection_grants` and the approved `connection_request`/`connection_status`
-flow from the get-started Skill before project actions.
+dependency. Verify the connected account and workspace using the get-started Skill before project actions.
 
 1. Reuse the chosen project via `project_list`/`project_get` and read `project_context_get`. For a new
    app, use `project_create` with its approved organization, name, region, data mode and Dev
@@ -103,8 +102,7 @@ flow from the get-started Skill before project actions.
    Keep polling that source rather than starting a duplicate initialization. A `failed` source
    needs its recorded failure diagnosed. When `initialization_operation_id` is returned, follow
    that actual child operation with `operation_get`; otherwise use the returned
-   `initialization_error_code`. An `authorization_changed` failure needs the approved connection
-   and project grant restored through **ohmyhost-get-started** before retrying the source action.
+   `initialization_error_code`. An `authorization_changed` failure needs the current account, role and token access checked through **ohmyhost-get-started** before retrying the source action.
    For an existing project with no source and no pending
    initialization, `source_initialize` can create the explicitly chosen template under the
    current generation and a saved key. Observe that accepted operation and reread `source_get`
@@ -147,7 +145,7 @@ flow from the get-started Skill before project actions.
    Verify the app's meaningful
    interaction, expected content and any requested data flow before calling it ready. If the
    chat cannot inspect the preview, say exactly what remains unverified and keep the same project.
-8. Publish only when requested and allowed by the project's explicit publishing grant. Use
+8. Publish only when requested and authorized by the current role and token. Use
    `promotion_plan` then `deployment_promote` for the verified Dev deployment, including the
    exact ETag, confirmation and idempotency guards. Alternatively plan an exact commit into
    isolated Prod when that is the requested supported route. Prod needs its own secret inputs;

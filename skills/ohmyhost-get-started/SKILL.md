@@ -66,10 +66,10 @@ Before continuing an existing app, inspect the execution environment, any reacha
 its saved project binding, then verify the intended account and workspace with the matching
 credential context.
 Reuse a working local CLI/MCP login or private token source that matches that project unless the
-user explicitly chooses a remote connection; the availability of `connection_request` alone
+user explicitly chooses a remote connection; the availability of remote tools alone
 does not select the remote path.
 If a remote connection cannot see the intended project, verify that connection's account and
-workspace before requesting additional access, and stop the access-link loop when they do not match.
+workspace and current role, and stop when they do not match.
 If the previous local workspace or credential store is unreachable in this session, explain that
 concrete environment gap without claiming credentials were deleted, changing the saved source
 or using an unrelated Review/demo account as a substitute.
@@ -77,40 +77,19 @@ or using an unrelated Review/demo account as a substitute.
 ## Native chat with a remote connection
 
 Use this path when the task's established access context calls for the authenticated remote
-server and it exposes `connection_request`.
+server.
 Discover its tools and call `identity_get`; do not install a CLI,
 start a device-code login, or ask for an API key in this chat. The client completes the managed
 OAuth sign-in itself. A configured plugin or completed browser page is not proof of authorization.
 
-Verify the account and read `connection_grants` for the returned organization silently.
-A returned `allow_create: true` records consent to create a new application, even when `projects`
-is empty; do not request another project-selection approval just because that list is empty.
-Every operation still checks current human and project authorization.
-`allow_publish_created_projects` records consent inherited only by newly created apps; an existing
-app needs its own entry in `projects`.
-Reuse the customer's selected project when its grant allows the requested action. Otherwise
-use `connection_request` for that exact
-organization and the intended `project_ids`; request `allow_create: true` only when the user
-wants a new application, and `allow_publish: true` only when they asked to publish. Prefer the
-**Review connection** card when the client displays it; otherwise present the actual returned
-private approval URL. Let the host preserve its actual return-to-chat context; pass `return_url`
-only when the actual conversation URL is available, never derive it from an anonymized session
-ID. After the user completes approval, verify `connection_status` with its `request_id` and
-reread the grants silently. The browser must be signed in as the same person as the chat connection.
-Continue with app creation, editing and Dev previews when authorized. Explain missing publication
-permission only when a requested publication needs its own approval handoff; never promise
-publication before that access is confirmed.
-
-If the intended existing project is not yet visible to this client, request the workspace's
-portal picker with `project_ids: []` and `allow_create: false`. The signed-in user selects their
-existing project there. After approval, reread `connection_grants` and `project_list`; do not
-invent a project ID or create a replacement application to gain visibility.
+Verify the account with `identity_get` and use `project_list` to find the intended project.
+Current workspace membership, role and any explicit token restrictions determine access. Continue
+with the requested work when authorized; a role denial needs the appropriate workspace role,
+not a separate project approval. Do not create a replacement project to gain visibility.
 
 An identity with no organization needs `workspace_setup` before project work. Present its
 returned portal URL and ask the customer to sign in there with the same connected account.
-After setup, call `identity_get` again, then obtain the selected workspace's project grant.
-Reconnect OAuth if its actual authorization response requires it. Never
-guess an organization from a project name or treat identity-only access as a project grant.
+After setup, call `identity_get` again. Never guess an organization from a project name.
 
 Continue with **ohmyhost-deploy**. A new application developed entirely in this chat uses managed
 source. Read the project's source and context before continuing a saved app; changing chats does
@@ -129,11 +108,6 @@ tokens are not a substitute for a missing remote connection.
 ## How to talk to the customer here
 
 - One action per message, in short plain sentences. Give the link, then what they will see.
-- For native `connection_request` handoffs, use only one short localized sentence plus the actual
-  **Review connection** card or returned approval link, such as "Please confirm the connection."
-  Let the portal show the requested rights. Omit rights lists, routine status summaries such as
-  "not confirmed" or "no app created", and timestamps or validity details unless the customer asks
-  or an expired link needs action. Verify the actual grant internally after approval.
 - Write in the language the customer writes in. Translate the message templates below; copy no
   other sentence from this file into the chat.
 - Keep customer-facing messages focused on the action and why it is needed. Avoid narrating
@@ -141,7 +115,7 @@ tokens are not a substitute for a missing remote connection.
 - After the verified connection, if the customer has not said what they want to build or host,
   ask only "What would you like to host?" in their language (for example, "Was möchtest du hosten?").
   If the app or task is already known, continue directly without this question.
-- Keep raw account/grant IDs, permission tables, `projectId: null` and routine access diagnostics
+- Keep raw account IDs, permission tables, `projectId: null` and routine access diagnostics
   out of normal chat replies. Use recognizable account or application names when a choice is needed.
 - Wait for required browser input before taking actions that depend on it. Independent repository
   inspection can continue while the customer signs in; do not start another sign-in for the same

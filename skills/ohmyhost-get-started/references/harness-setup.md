@@ -5,8 +5,7 @@
 The remote product endpoint is `https://app.ohmyho.st/mcp`. A native ChatGPT or Claude
 connection uses managed OAuth, not `OHMYHOST_TOKEN` or a local device-code profile. Installing
 a plugin adds its Skills/configuration; verify that its remote connector is enabled and signed
-in, then discover tools and call `identity_get`. Use `connection_request` and `connection_status`
-for the user's explicit project/create/publish grants. Never paste credentials into the
+in, then discover tools and call `identity_get`. Current account membership and roles determine access; use `connection_status` for protected secret and GitHub handoffs. Never paste credentials into the
 connection configuration or chat. The native flow is in **ohmyhost-get-started** and
 **ohmyhost-deploy**.
 
