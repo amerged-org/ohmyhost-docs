@@ -1,0 +1,12 @@
+---
+title: "Native domain sync pending"
+description: "What the `native_domain_sync_pending` error means and what to do next."
+---
+
+The API, CLI and MCP return `native_domain_sync_pending` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Read project status and Paid domain status to identify the pending change. If a Paid domain removal is pending, retry it as a current owner with a new idempotency key. If a project address change is pending, submit a fresh address change as a current owner. After it finishes, create a new project deletion plan.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

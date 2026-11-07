@@ -7,6 +7,6 @@ The API, CLI and MCP return `project_rename_blocked` with HTTP 409. Repeating th
 
 ## What to do
 
-Wait for the running operation to finish, read the project again, then rename with the new ETag.
+Read project status and finish or retry any pending Native Auth deployment or other operation. Once preparation is complete, read the project again and rename with its current ETag.
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

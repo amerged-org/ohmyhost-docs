@@ -123,6 +123,19 @@
 | `mail_domain_set` | `project_id`, `environment_id`, `domain`, `sending`, `receiving`, `idempotency_key` | Change or prepare a change |
 | `mail_domain_status` | `project_id`, `environment_id` | Read |
 | `mail_domain_delete` | `project_id`, `environment_id`, `idempotency_key`, `confirm` | Change or prepare a change |
+| `native_auth_config_get` | `project_id`, `environment_id` | Read |
+| `native_auth_config_set` | `project_id`, `environment_id`, `configuration_revision`, `enabled`, `signup_policy`, `application_name`, `idempotency_key` | Change or prepare a change |
+| `native_auth_provider_get` | `project_id`, `environment_id`, `provider` | Read |
+| `native_auth_provider_set` | `project_id`, `environment_id`, `provider`, `configuration_revision`, `enabled`, `idempotency_key` | Change or prepare a change |
+| `native_auth_users_list` | `project_id`, `environment_id` | Read |
+| `native_auth_user_create` | `project_id`, `environment_id`, `email`, `idempotency_key` | Change or prepare a change |
+| `native_auth_user_get` | `project_id`, `environment_id`, `user_id` | Read |
+| `native_auth_user_delete` | `project_id`, `environment_id`, `user_id`, `idempotency_key`, `confirm` | Change or prepare a change |
+| `native_auth_user_invite` | `project_id`, `environment_id`, `user_id`, `idempotency_key`, `confirm` | Change or prepare a change |
+| `native_auth_user_suspend` | `project_id`, `environment_id`, `user_id`, `idempotency_key`, `confirm` | Change or prepare a change |
+| `native_auth_user_reactivate` | `project_id`, `environment_id`, `user_id`, `idempotency_key`, `confirm` | Change or prepare a change |
+| `native_auth_user_revoke_sessions` | `project_id`, `environment_id`, `user_id`, `idempotency_key`, `confirm` | Change or prepare a change |
+| `native_auth_provider_secret_input_request` | `project_id`, `environment_id`, `provider`, `configuration_revision`, `enabled`, `idempotency_key` | Read |
 | `secrets_list` | `project_id`, `environment_id` | Read |
 | `secret_delete` | `project_id`, `environment_id`, `name`, `idempotency_key` | Change or prepare a change |
 | `secret_set_command` | `project_id`, `environment_id`, `name`, `idempotency_key` | Read |

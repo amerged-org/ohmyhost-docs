@@ -17,8 +17,8 @@ verify the app, and promote a tested Dev artifact when appropriate. Dev is prote
 the deployment Skill handles public Dev, data choices and the shared-database promotion rule.
 You can also give the app Postgres, private runtime secrets, Cloudflare R2 files, optional
 transactional mail, LLMs, images, speech, classifiers and OCR through an OpenAI-compatible gateway, and a custom domain, export its database as an encrypted SQL ZIP, and read
-usage, credits and project budgets. The customer keeps their own application authentication;
-nothing here replaces it. Sign-up is open and free to start.
+usage, credits and project budgets. The customer chooses application authentication; the unreleased
+Native Auth option does not imply a provider migration or a hosted acceptance claim. Its password-first launch candidate requires Paid access and the customer's own authorized, verified sender; social sign-in is disabled server-side. See the [runtime contracts](../ohmyhost-build-portable-app/references/stack-contracts.md) for the application identity and setup requirements. Sign-up is open and free to start.
 
 The initial connection asks the customer to sign in and approve the access they want to give this
 agent. GitHub authorization is needed only for the GitHub source route. A working saved local login
@@ -401,6 +401,8 @@ existing key automatically. Revoke or replace only the exact key covered by scop
 authorization; existing explicit cleanup authorization can cover that action without another
 question. Otherwise explain the failed save and obtain that authorization first. Never change
 an already working credential merely to make a replay return a new value.
+
+Native Auth management requires the separate `auth:read` or `auth:manage` permission in addition to current Owner authority. Existing tokens retain their recorded permissions; a token limited to environment secrets does not gain Native Auth access. Once Native is released and its provider permissions are ready, an Owner may explicitly authorize creation of a new Native-capable token. Never revoke or replace an existing token without the customer's scoped authorization.
 
 `OHMYHOST_TOKEN` overrides the saved logins in any process where it is set. A token alone runs every
 command in these Skills except these, which need the interactive login: `login`, `logout` (including

@@ -1,7 +1,7 @@
 {
-  "source_commit": "d87ca9a3dbcf8e82391917e039b31f164b004e9c",
+  "source_commit": "96e13f88b173009ee657905817f6a5cd6aa9a126",
   "source_dirty": false,
-  "release": "0.1.49",
+  "release": "0.1.50",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -200,6 +200,10 @@
       "sha256": "75f513f247d7608e6ff277ca3f5d061fe048b72e0dc03c2b3bd705c22a6f3b6a"
     },
     {
+      "path": "errors/native-domain-sync-pending.mdx",
+      "sha256": "fcd49ebc25c8d398a49e09a3a04dd72fa6cacbaa33e7c7690fa4d545321855d5"
+    },
+    {
       "path": "errors/organization-required.mdx",
       "sha256": "e37a96c89a47360cbfbb8c8f845d3d5ca8ccfa760d5c2ec27133bd68e92c1340"
     },
@@ -257,7 +261,7 @@
     },
     {
       "path": "errors/project-rename-blocked.mdx",
-      "sha256": "48760d93d2ba12e2a121c8fb4a4c62e9bc9ed84989fae29c7c7dda5f0b2c870d"
+      "sha256": "31f4490eb3120b92ddd40982a74a4dcc0e869970f887b4fabdbf59b58bb3ad85"
     },
     {
       "path": "errors/promotion-invalid-target.mdx",
@@ -349,11 +353,11 @@
     },
     {
       "path": "snippets/error-codes.mdx",
-      "sha256": "822f878d3afa7da4aee0a63fe6580d20e0bb9a0344607ea60833a6ccc53d491f"
+      "sha256": "5f5f7f65a79d4950eba1e8b9e977fba24ca0fcd2208a4100901259a5d0f933c7"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/SKILL.md",
-      "sha256": "a6eca0c5b5d19ac8421290e1462676325cb37e862ba6c8c2026cd0568a26da07"
+      "sha256": "da0a0e57cb340e9a80cde376448e8deacd261de03bc349264e2d8f9e0331a77d"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/ai.md",
@@ -377,7 +381,7 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/stack-contracts.md",
-      "sha256": "7dd14156edd70c3e8f3f0bf20e68185aa5321acb4983acaa713161a3d24664eb"
+      "sha256": "f82e117831b345647fd379399a0516f68d13c71a3cb5e704afab130f23c18404"
     },
     {
       "path": "skills/ohmyhost-deploy-github/SKILL.md",
@@ -397,7 +401,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/SKILL.md",
-      "sha256": "ce343f5e71926932f8bf97c9b77c7c352424e43ab5fa3b471d666553a15e7715"
+      "sha256": "9e16cbc2da008d3533cb0e279d8783a3c4c2d84329a6ceffe885150711ce73cc"
     },
     {
       "path": "skills/ohmyhost-get-started/references/harness-setup.md",
@@ -405,7 +409,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/references/surfaces.md",
-      "sha256": "09262d7a9fd1a47c5c53e4eeacad6a2df5f9d40d5b76f1bc28f1d6f0217d07de"
+      "sha256": "7aba7a1e49ae08aaec20ffa96377cef5d7b24e3724543435c87656d2aeebffc5"
     },
     {
       "path": "skills/ohmyhost-manage-database/SKILL.md",
@@ -437,15 +441,15 @@
     },
     {
       "path": "openapi.yaml",
-      "sha256": "1a0296e233c3ba838a683890c730545a5ac55b8f8c45311ce34118a67dbc1352"
+      "sha256": "67b1573390a4338924155e5868557e2b5131ab3e5b776e1b4a6c0e4f95ee90c6"
     },
     {
       "path": "openapi.json",
-      "sha256": "ff218be96bb4e03ce81ddeef16429c5a90ef4768e859c898a678efdd00ff6115"
+      "sha256": "43123368669b35730152e5f01754c886600ee2f0ec348a31148bde99b667b6cb"
     },
     {
       "path": "mcp-tools.json",
-      "sha256": "431b623877a1e64954c074dfa5cde37b0dfcf5e61c732d6285b588b8c494e576"
+      "sha256": "5d9933a4d16734f7cfd967afcf5da0b4e7c3476cfa1b967c695690a022b881b6"
     },
     {
       "path": "mcp.json",
@@ -453,11 +457,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "ad671bcd76f4564ada61e589f8b5a0d068ff6429eca80756e8b99bddc1fb3702"
+      "sha256": "311ed1a4881d06e9cbdfc4cc1761dc0bd81892963ae4254e1e6e56e147228fb9"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "2b2183e153db99982128c95ad3e2b2a1508d057eea366c9e5fcbda5ab534c8e8"
+      "sha256": "26b04da12b94a694ac57695448d43c52ceda6be827fdeea9a3760b70fd1eae29"
     },
     {
       "path": "snippets/skill-catalog.mdx",
@@ -465,7 +469,7 @@
     },
     {
       "path": "snippets/mcp-tools.mdx",
-      "sha256": "ebc921398232d9706c68277efcd9ec99a2867f78eb7e897ff974b9e18702eec9"
+      "sha256": "da775c9bf9a2900ca9bbafbb926fc7c93b5d3801b0478df05e67cda2ca9a270f"
     },
     {
       "path": "logo/light.svg",

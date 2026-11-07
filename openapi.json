@@ -22,6 +22,811 @@
     }
   ],
   "paths": {
+    "/v1/projects/{project_id}/environments/{environment_id}/auth": {
+      "get": {
+        "operationId": "getNativeAuthConfiguration",
+        "summary": "Read Native Auth configuration",
+        "description": "Requires the current project Owner for this environment. Source capability and owner pause are independent.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/EnvironmentId"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current authorized resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NativeAuthConfiguration"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      },
+      "put": {
+        "operationId": "updateNativeAuthConfiguration",
+        "summary": "Update Native Auth configuration",
+        "description": "Requires the current project Owner for this environment. Source capability and owner pause are independent.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/EnvironmentId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NativeAuthConfigurationUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Current authorized resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NativeAuthConfiguration"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
+    "/v1/projects/{project_id}/environments/{environment_id}/auth/providers/{provider}": {
+      "get": {
+        "operationId": "getNativeAuthProvider",
+        "summary": "Read a Native Auth provider",
+        "description": "Requires the current project Owner for this environment. Source capability and owner pause are independent.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/EnvironmentId"
+          },
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "google",
+                "github"
+              ]
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current authorized resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NativeAuthProviderStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      },
+      "put": {
+        "operationId": "updateNativeAuthProvider",
+        "summary": "Update a Native Auth provider",
+        "description": "Requires the current project Owner for this environment. Source capability and owner pause are independent.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/EnvironmentId"
+          },
+          {
+            "name": "provider",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "enum": [
+                "google",
+                "github"
+              ]
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NativeAuthProviderUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Current authorized resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NativeAuthProviderStatus"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
+    "/v1/projects/{project_id}/environments/{environment_id}/auth/users": {
+      "get": {
+        "operationId": "listNativeAuthUsers",
+        "summary": "List Native Auth users",
+        "description": "Requires the current project Owner for this environment. Source capability and owner pause are independent.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/EnvironmentId"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 100,
+              "default": 50
+            }
+          },
+          {
+            "name": "cursor",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            }
+          },
+          {
+            "name": "search",
+            "in": "query",
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 320
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current authorized resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NativeAuthUserPage"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      },
+      "post": {
+        "operationId": "createNativeAuthUser",
+        "summary": "Create and invite a Native Auth user",
+        "description": "Requires the current project Owner for this environment. Source capability and owner pause are independent.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/EnvironmentId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/NativeAuthUserCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Current authorized resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NativeAuthUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
+    "/v1/projects/{project_id}/environments/{environment_id}/auth/users/{user_id}": {
+      "get": {
+        "operationId": "getNativeAuthUser",
+        "summary": "Read a Native Auth user",
+        "description": "Requires the current project Owner for this environment. Source capability and owner pause are independent.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/EnvironmentId"
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current authorized resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NativeAuthUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      },
+      "delete": {
+        "operationId": "deleteNativeAuthUser",
+        "summary": "Delete a Native Auth user",
+        "description": "Requires the current project Owner for this environment. Source capability and owner pause are independent.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/EnvironmentId"
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "204": {
+            "description": "User deleted and sessions revoked."
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
+    "/v1/projects/{project_id}/environments/{environment_id}/auth/users/{user_id}/invite": {
+      "post": {
+        "operationId": "resendNativeAuthInvitation",
+        "summary": "Resend an invitation",
+        "description": "Requires the current project Owner for this environment. Source capability and owner pause are independent.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/EnvironmentId"
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current authorized resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NativeAuthUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
+    "/v1/projects/{project_id}/environments/{environment_id}/auth/users/{user_id}/suspend": {
+      "post": {
+        "operationId": "suspendNativeAuthUser",
+        "summary": "Suspend a Native Auth user",
+        "description": "Requires the current project Owner for this environment. Source capability and owner pause are independent.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/EnvironmentId"
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current authorized resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NativeAuthUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
+    "/v1/projects/{project_id}/environments/{environment_id}/auth/users/{user_id}/reactivate": {
+      "post": {
+        "operationId": "reactivateNativeAuthUser",
+        "summary": "Reactivate a Native Auth user",
+        "description": "Requires the current project Owner for this environment. Source capability and owner pause are independent.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/EnvironmentId"
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current authorized resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NativeAuthUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
+    "/v1/projects/{project_id}/environments/{environment_id}/auth/users/{user_id}/revoke-sessions": {
+      "post": {
+        "operationId": "revokeNativeAuthUserSessions",
+        "summary": "Revoke a Native Auth user's sessions",
+        "description": "Requires the current project Owner for this environment. Source capability and owner pause are independent.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/EnvironmentId"
+          },
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "format": "uuid"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current authorized resource.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/NativeAuthUser"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "402": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
     "/v1/organizations/{organization_id}/mail-domains": {
       "get": {
         "operationId": "listWorkspaceMailDomains",
@@ -9237,6 +10042,317 @@
       }
     },
     "schemas": {
+      "NativeAuthConfiguration": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "enabled",
+          "configurationRevision",
+          "revocationEpoch",
+          "signupPolicy",
+          "canonicalOrigin",
+          "applicationName",
+          "allowedRedirectPaths",
+          "resetPasswordPath",
+          "invitationPath",
+          "readiness"
+        ],
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "description": "Persistent Owner setting; source deployment cannot clear a pause."
+          },
+          "configurationRevision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "revocationEpoch": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "signupPolicy": {
+            "type": "string",
+            "enum": [
+              "open",
+              "invite-only"
+            ]
+          },
+          "canonicalOrigin": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          },
+          "applicationName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "allowedRedirectPaths": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/NativeAuthRedirectPath"
+            }
+          },
+          "resetPasswordPath": {
+            "$ref": "#/components/schemas/NativeAuthRedirectPath"
+          },
+          "invitationPath": {
+            "$ref": "#/components/schemas/NativeAuthRedirectPath"
+          },
+          "readiness": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "paid",
+              "sender",
+              "origin",
+              "storage"
+            ],
+            "properties": {
+              "paid": {
+                "type": "boolean"
+              },
+              "sender": {
+                "type": "boolean"
+              },
+              "origin": {
+                "type": "boolean"
+              },
+              "storage": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      },
+      "NativeAuthConfigurationUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "configurationRevision",
+          "enabled",
+          "signupPolicy",
+          "applicationName"
+        ],
+        "description": "The revision must match current configuration; a stale write returns 409. Omitted optional values are preserved. A null canonicalOrigin selects the primary origin; explicit origins must be currently approved for this project and environment. Changing origin advances the revocation epoch. Both form paths must be in the resulting redirect allowlist.",
+        "properties": {
+          "configurationRevision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "signupPolicy": {
+            "type": "string",
+            "enum": [
+              "open",
+              "invite-only"
+            ]
+          },
+          "applicationName": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "canonicalOrigin": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri"
+          },
+          "allowedRedirectPaths": {
+            "type": "array",
+            "minItems": 1,
+            "maxItems": 16,
+            "uniqueItems": true,
+            "items": {
+              "$ref": "#/components/schemas/NativeAuthRedirectPath"
+            }
+          },
+          "resetPasswordPath": {
+            "$ref": "#/components/schemas/NativeAuthRedirectPath"
+          },
+          "invitationPath": {
+            "$ref": "#/components/schemas/NativeAuthRedirectPath"
+          }
+        }
+      },
+      "NativeAuthRedirectPath": {
+        "type": "string",
+        "maxLength": 256,
+        "pattern": "^/(?!/)(?!.*//)(?!\\.{1,2}(?:/|$))(?!.*\\/\\.{1,2}(?:/|$))[A-Za-z0-9/_~.-]*$",
+        "description": "Absolute application path without query, fragment, percent escapes, backslashes or dot segments."
+      },
+      "NativeAuthProviderStatus": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "provider",
+          "enabled",
+          "configured",
+          "clientId",
+          "secretPresent",
+          "callbackUrl",
+          "scopes",
+          "lastSuccessfulFlowAt"
+        ],
+        "description": "Configuration presence does not establish provider approval or a successful flow.",
+        "properties": {
+          "provider": {
+            "type": "string",
+            "enum": [
+              "google",
+              "github"
+            ]
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "configured": {
+            "type": "boolean"
+          },
+          "clientId": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "secretPresent": {
+            "type": "boolean"
+          },
+          "callbackUrl": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "uri",
+            "description": "Null until a canonical origin is ready."
+          },
+          "scopes": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "lastSuccessfulFlowAt": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "format": "date-time"
+          }
+        }
+      },
+      "NativeAuthProviderUpdate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "configurationRevision",
+          "enabled"
+        ],
+        "description": "The revision must match current configuration. Secrets are write-only and never echoed in responses or replay receipts.",
+        "properties": {
+          "configurationRevision": {
+            "type": "integer",
+            "minimum": 0
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "clientId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "clientSecret": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 5120,
+            "writeOnly": true,
+            "description": "At most 5120 UTF-8 bytes. The value is accepted only by this write-only operation."
+          }
+        }
+      },
+      "NativeAuthUser": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "email",
+          "status",
+          "recoveryAvailable",
+          "createdAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "email": {
+            "type": "string",
+            "format": "email"
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "pending",
+              "active",
+              "suspended"
+            ]
+          },
+          "recoveryAvailable": {
+            "type": "boolean"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "NativeAuthUserCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "email"
+        ],
+        "description": "Creates a pending user and sends an invitation; never accepts an operator-chosen password.",
+        "properties": {
+          "email": {
+            "type": "string",
+            "format": "email",
+            "maxLength": 254
+          }
+        }
+      },
+      "NativeAuthUserPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/NativeAuthUser"
+            }
+          },
+          "nextCursor": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      },
       "WorkspaceMailDomain": {
         "type": "object",
         "additionalProperties": false,
@@ -15740,7 +16856,8 @@
               "data_change_in_progress",
               "data_change_not_applicable",
               "rollback_target_data_changed",
-              "project_domain_delete_required"
+              "project_domain_delete_required",
+              "native_domain_sync_pending"
             ]
           },
           "request_id": {
@@ -16386,13 +17503,49 @@
               "enum": [
                 "dev.sql",
                 "prod.sql",
-                "shared.sql"
+                "shared.sql",
+                "auth.sql"
               ]
             },
             "minItems": 1,
-            "maxItems": 2,
+            "maxItems": 3,
             "uniqueItems": true,
-            "description": "dev.sql and/or prod.sql for isolated data, or shared.sql alone."
+            "enum": [
+              [
+                "dev.sql"
+              ],
+              [
+                "prod.sql"
+              ],
+              [
+                "dev.sql",
+                "prod.sql"
+              ],
+              [
+                "shared.sql"
+              ],
+              [
+                "auth.sql"
+              ],
+              [
+                "dev.sql",
+                "auth.sql"
+              ],
+              [
+                "prod.sql",
+                "auth.sql"
+              ],
+              [
+                "dev.sql",
+                "prod.sql",
+                "auth.sql"
+              ],
+              [
+                "shared.sql",
+                "auth.sql"
+              ]
+            ],
+            "description": "dev.sql and/or prod.sql for isolated data, or shared.sql for shared data; auth.sql may accompany either or stand alone."
           },
           "captured_at": {
             "type": "string",

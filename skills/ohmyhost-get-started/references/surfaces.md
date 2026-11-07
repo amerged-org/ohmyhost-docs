@@ -115,6 +115,7 @@ and follow the returned schema rather than guessing arguments.
 - `ohmyhost secret list` — ohmyhost secret list --project ULID --environment ENVIRONMENT_ULID --json
 - `ohmyhost function runs` — ohmyhost function runs --project ULID --environment ENVIRONMENT_ULID [--limit 1-100] --json
 - `ohmyhost secret set` — printf '%s' "$SECRET_VALUE" | ohmyhost secret set NAME --project ULID --environment ENVIRONMENT_ULID --idempotency-key KEY [--profile-user USER_ID --profile-organization ULID | --token-user USER_ID --token-organization ULID] --stdin [--wait] --json (with --profile-user and --profile-organization the saved login that runs it must belong to that user and organization; with --token-user and --token-organization it runs only with an OHMYHOST_TOKEN of that user and organization, never with a saved login)
+- `ohmyhost auth` — ohmyhost auth config get|set --project ULID --environment ULID [--revision N --enabled true|false --signup-policy open|invite-only --application-name NAME --idempotency-key KEY] [--canonical-origin URL|primary] [--allowed-redirect-paths JSON_ARRAY --reset-password-path PATH --invitation-path PATH]; auth provider get|set --project ULID --environment ULID --provider google|github [--revision N --enabled true|false --client-id ID --idempotency-key KEY --stdin]; auth users list --project ULID --environment ULID [--limit N --cursor CURSOR --search TEXT]; auth user create|get|delete|invite|suspend|reactivate|revoke-sessions --project ULID --environment ULID [--email EMAIL | --user UUID] [--idempotency-key KEY]. Provider secrets are read only from stdin; use --json.
 - `ohmyhost secret delete` — ohmyhost secret delete NAME --project ULID --environment ENVIRONMENT_ULID --idempotency-key KEY [--wait] --json
 - `ohmyhost mail workspace list` — ohmyhost mail workspace list --organization ULID --json
 - `ohmyhost mail workspace create` — ohmyhost mail workspace create --organization ULID --domain DOMAIN --sending true --idempotency-key KEY --json
@@ -270,6 +271,19 @@ and follow the returned schema rather than guessing arguments.
 - `mail_domain_set` — Configure the project's one production mail domain using its Prod environment ID.
 - `mail_domain_status` — Read separate sending and receiving readiness and exact DNS records for the project’s production mail domain.
 - `mail_domain_delete` — Retire the project's mail domain while the project stays active; use its Prod environment ID.
+- `native_auth_config_get` — Read Owner Native Auth configuration and readiness.
+- `native_auth_config_set` — Update Owner Native Auth configuration at the current revision.
+- `native_auth_provider_get` — Read provider setup without its secret.
+- `native_auth_provider_set` — Update provider settings without submitting a secret.
+- `native_auth_users_list` — List Native Auth users with bounded pagination.
+- `native_auth_user_create` — Create and invite a Native Auth user without choosing a password.
+- `native_auth_user_get` — Read a Native Auth user.
+- `native_auth_user_delete` — Delete an Owner-authorized Native Auth user.
+- `native_auth_user_invite` — Resend an Owner-authorized Native Auth user's invitation.
+- `native_auth_user_suspend` — Suspend an Owner-authorized Native Auth user.
+- `native_auth_user_reactivate` — Reactivate an Owner-authorized Native Auth user.
+- `native_auth_user_revoke_sessions` — Revoke an Owner-authorized Native Auth user's sessions.
+- `native_auth_provider_secret_input_request` — Return an account-bound stdin-only command; never place a provider secret in MCP arguments.
 - `secrets_list` — List secret metadata without values
 - `secret_delete` — Delete an environment secret
 - `secret_set_command` — Return the stdin-only CLI command for setting a secret; the value never enters MCP.

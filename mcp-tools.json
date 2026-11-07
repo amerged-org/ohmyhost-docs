@@ -3675,7 +3675,7 @@
     },
     {
       "name": "deployment_plan",
-      "description": "Plan an immutable deployment. Preserve the customer's existing authentication integration, such as Better Auth or WorkOS, and use the same generic Next.js/Vite/TanStack runtime contract. ohmyho.st login is separate. Read the app Skill's auth guidance and report actual plan blockers, required secret names/callback configuration and unverified runtime compatibility. The explicitly selected managed Better Auth bridge requires the managed database; managed mail is optional, and its verification or password-reset send actions require a configured platform sender. Application-owned Better Auth handlers can use their own sender, including Resend, with auth.provider set to none. Never assume a working platform login proves application login or silently replace its auth provider. The plan builds into Dev unless environment is prod; prod builds straight into Prod without a Dev deployment (a project with shared data and a database must deploy to Dev and promote instead). The plan stays valid for 24 hours.",
+      "description": "Plan an immutable deployment. Preserve the customer's existing authentication integration, such as Better Auth or WorkOS, and use the same generic Next.js/Vite/TanStack runtime contract. ohmyho.st login is separate. Read the app Skill's auth guidance and report actual plan blockers, required secret names/callback configuration and unverified runtime compatibility. The explicitly selected managed Better Auth bridge requires the managed database; managed mail is optional, and its verification or password-reset send actions require a configured platform sender. Application-owned Better Auth handlers can use their own sender, including Resend, with auth.provider set to none. The unreleased omh-native capability is an explicit choice requiring Paid access, a verified sender and its separately metered Auth database; verify readiness and hosted support before claiming it works. Never assume a working platform login proves application login or silently replace its auth provider. The plan builds into Dev unless environment is prod; prod builds straight into Prod without a Dev deployment (a project with shared data and a database must deploy to Dev and promote instead). The plan stays valid for 24 hours.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -5234,6 +5234,690 @@
       "annotations": {
         "readOnlyHint": false,
         "destructiveHint": true,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "native_auth_config_get",
+      "description": "Read Owner Native Auth configuration and readiness.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "native_auth_config_set",
+      "description": "Update Owner Native Auth configuration at the current revision.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "configuration_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "signup_policy": {
+            "type": "string",
+            "enum": [
+              "open",
+              "invite-only"
+            ]
+          },
+          "application_name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "canonical_origin": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "uri"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "allowed_redirect_paths": {
+            "minItems": 1,
+            "maxItems": 16,
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "reset_password_path": {
+            "type": "string"
+          },
+          "invitation_path": {
+            "type": "string"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "configuration_revision",
+          "enabled",
+          "signup_policy",
+          "application_name",
+          "idempotency_key"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "native_auth_provider_get",
+      "description": "Read provider setup without its secret.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "google",
+              "github"
+            ]
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "provider"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "native_auth_provider_set",
+      "description": "Update provider settings without submitting a secret.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "google",
+              "github"
+            ]
+          },
+          "configuration_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "client_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "provider",
+          "configuration_revision",
+          "enabled",
+          "idempotency_key"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "native_auth_users_list",
+      "description": "List Native Auth users with bounded pagination.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 100
+          },
+          "cursor": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 512
+          },
+          "search": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 320
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "native_auth_user_create",
+      "description": "Create and invite a Native Auth user without choosing a password.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "email": {
+            "type": "string",
+            "maxLength": 254,
+            "format": "email",
+            "pattern": "^(?:[A-Za-z0-9_'+\\-]+\\.)*[A-Za-z0-9_'+\\-]*[A-Za-z0-9_+-]@(?:[A-Za-z0-9][A-Za-z0-9\\-]*\\.)+[A-Za-z]{2,}$"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "email",
+          "idempotency_key"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "native_auth_user_get",
+      "description": "Read a Native Auth user.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "user_id"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "native_auth_user_delete",
+      "description": "Delete an Owner-authorized Native Auth user.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "user_id",
+          "idempotency_key",
+          "confirm"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "native_auth_user_invite",
+      "description": "Resend an Owner-authorized Native Auth user's invitation.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "user_id",
+          "idempotency_key",
+          "confirm"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "native_auth_user_suspend",
+      "description": "Suspend an Owner-authorized Native Auth user.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "user_id",
+          "idempotency_key",
+          "confirm"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "native_auth_user_reactivate",
+      "description": "Reactivate an Owner-authorized Native Auth user.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "user_id",
+          "idempotency_key",
+          "confirm"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "native_auth_user_revoke_sessions",
+      "description": "Revoke an Owner-authorized Native Auth user's sessions.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "user_id": {
+            "type": "string",
+            "format": "uuid",
+            "pattern": "^([0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[1-8][0-9a-fA-F]{3}-[89abAB][0-9a-fA-F]{3}-[0-9a-fA-F]{12}|00000000-0000-0000-0000-000000000000|ffffffff-ffff-ffff-ffff-ffffffffffff)$"
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "confirm": {
+            "type": "boolean",
+            "const": true
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "user_id",
+          "idempotency_key",
+          "confirm"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "native_auth_provider_secret_input_request",
+      "description": "Return an account-bound stdin-only command; never place a provider secret in MCP arguments.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "provider": {
+            "type": "string",
+            "enum": [
+              "google",
+              "github"
+            ]
+          },
+          "configuration_revision": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 9007199254740991
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "client_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 1024
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "provider",
+          "configuration_revision",
+          "enabled",
+          "idempotency_key"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
         "idempotentHint": true
       }
     },
