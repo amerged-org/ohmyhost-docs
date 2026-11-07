@@ -1,9 +1,11 @@
 ---
-title: "Dev and Prod"
+title: "Preview, Dev and Prod"
 description: "Choose shared or isolated data, change assignments or reset Dev, select US or EU and Dev access, then deploy, promote, roll back or delete."
 ---
 
-Each project has Dev and Prod under one organization credit balance. Choose `isolated` or `shared` data when creating the project (`--data-mode`); the optional default is `shared`. [Confirmed assignment changes](#change-data-assignments) can change it later without copying data.
+Build from a saved Git commit into a [temporary preview](/previews), then deliberately deploy a permanent environment. Free has Prod only; Paid may deploy Dev or Prod. All use one workspace credit balance. Free previews use Prod data. Paid previews default to Dev and may explicitly select Prod. A preview's successful writes persist in that real data target after its URL expires.
+
+Paid projects can use `isolated` or `shared` Dev/Prod data (`--data-mode`); the optional creation default is `shared`. [Confirmed assignment changes](#change-data-assignments) are separate Owner actions and never copy records. A Dev preview on shared data is not isolated from Prod.
 
 | Mode     | Databases and files             | Implication                                                  |
 | -------- | ------------------------------- | ------------------------------------------------------------ |
@@ -14,7 +16,7 @@ Skills recommend isolation and explain the credit difference. An explicit custom
 
 ## Choose who can open Dev
 
-Before creating a project, your agent asks whether Dev should be **protected** or **public**. Protected is the default. Public lets anyone with the clean Dev URL open it without a platform token, even when Dev and Prod use shared data. Your application's own login remains separate.
+For a Paid project with an intentional Dev deployment, choose whether Dev should be **protected** or **public**. Protected is the default. Free has no Dev URL. Temporary previews have their own absolute expiry and do not use Dev share links. Public lets anyone with the clean Dev URL open it without a platform token, even when Dev and Prod use shared data. Your application's own login remains separate.
 
 For protected Dev, the Owner gets one reusable bearer link with `ohmyhost project dev-share link --project "$PROJECT_ID" --json` or MCP `project_dev_share_link_get`. The same `share_url` works for multiple visitors and has no automatic expiry. Opening it starts a 12-hour browser session and redirects to the clean Dev URL; the link can be opened again after that session ends. Keep it with the people you intend to admit, and do not put it in source, logs or project notes.
 
@@ -39,16 +41,18 @@ Use the returned environment IDs for secrets and the returned logical environmen
 
 Prod first runs at the hosting address returned by `ohmyhost project status`, such as `HANDLE.check.omh.st`. Its DNS is already managed by ohmyho.st, so deploying needs no DNS changes to your own domain. You can [reserve a custom domain and authorize Cloudflare](/domains) beforehand; activate it with the original domain apply after verifying Prod.
 
-A deployment builds into Dev unless you name Prod. Unless Dev and Prod share a database, you can build one commit straight into Prod without a Dev deployment:
+Every deployment requires an explicit target. Free deploys directly to Prod. Paid may deploy Dev or Prod, and direct Prod does not require a Dev predecessor, including shared-data projects:
 
 ```sh
 ohmyhost plan --project "$PROJECT_ID" --commit "$COMMIT_SHA" --environment prod --json
 ohmyhost deploy --project "$PROJECT_ID" --commit "$COMMIT_SHA" --environment prod --idempotency-key "$DEPLOY_REQUEST_KEY" --yes --json
 ```
 
-MCP `deployment_plan` takes the same `environment: "prod"`. A project whose Dev and Prod share a database is refused a Prod plan with [`shared_data_requires_promotion`](/errors/shared-data-requires-promotion), because both environments use that one database. Deploy it to Dev and promote the verified artifact instead.
+MCP `deployment_plan` takes the same explicit `environment: "prod"`; Paid can choose `"dev"` instead. The agent asks for the target only when it is not already authorized. Preview creation never chooses a permanent deployment for you.
 
 ## Promote after verification
+
+Promotion uses an existing verified Paid Dev release:
 
 ```sh
 ohmyhost deployment promote plan --project "$PROJECT_ID" --deployment "$DEV_DEPLOYMENT_ID" --json
@@ -60,7 +64,7 @@ Promotion reuses the verified artifact and applies versioned migrations. It does
 
 ## Change data assignments
 
-The Owner first reviews a concrete plan; each action names which data survives and which environment needs redeployment.
+These Dev/Prod actions require Paid. The Owner first reviews a concrete plan; each action names which data survives and which environment needs redeployment.
 
 | Change                    | Starting mode                  | Outcome                                                                                                                       |
 | ------------------------- | ------------------------------ | ----------------------------------------------------------------------------------------------------------------------------- |
@@ -76,7 +80,7 @@ ohmyhost project data change --project "$PROJECT_ID" --change reset_dev --if-mat
 
 Choose the action you intend; `reset_dev` above is a destructive example. `RESOURCE_ETAG` and `CONFIRMATION_TOKEN` come from that exact plan and expire after ten minutes. MCP uses `project_data_plan` and `project_data_change` with `confirmed: true`. Poll the returned operation; after uncertainty retain the same action, guards and key. A fresh key is a new action, not a safe reset retry.
 
-No action copies records, users, auth sessions or files. New databases are provisioned lazily on the next deployment that needs one, replaying the repository's admitted migrations. Files follow the data identity and retain exact physical locators without moving blobs. In a fresh empty identity, logical names such as `avatar.png` are reusable; deletion alone does not make a name reusable in the same identity.
+No action copies records, users, auth sessions or files. A preview or an intentional deployment can prepare a required database for a fresh data identity. Preview preparation applies no schema: authorize the saved commit's separate [preview migration action](/previews#apply-schema-as-a-separate-action) before expecting its tables. Intentional deployments use their normal migration checks. Files follow the data identity and retain exact physical locators without moving blobs. In a fresh empty identity, logical names such as `avatar.png` are reusable; deletion alone does not make a name reusable in the same identity.
 
 Reset/share preserve runtime secrets and Dev access mode and renew a protected share link. Losing Worker bindings, held connections and time-bound SQL logins are revoked before reassignment/purge. The operation never redeploys automatically: use `redeploy_environments` from its result and read fresh project status. Existing retained-side bindings remain usable only with the same target and continuous authorization. A reverted mode cannot restore deleted data/files. Reset on shared data is refused because it would delete Prod's data. Ordinary usage rates apply; a second database consumes credits independently.
 
@@ -100,6 +104,12 @@ ohmyhost delete plan --project "$PROJECT_ID" --json
 ohmyhost delete --project "$PROJECT_ID" --if-match "$RESOURCE_ETAG" --confirmation-token "$CONFIRMATION_TOKEN" --idempotency-key "$DELETE_REQUEST_KEY" --yes --json
 ```
 
-Use the exact plan guards within ten minutes. Deletion removes both environments, all current and historical data identities, files, deployments, schedules, stored SQL exports and the platform-owned mail/DNS resources. Both addresses stop serving. It cannot be undone: download a [SQL export](/backups) first if needed, and remember it contains no files. MCP uses `delete_plan` and `delete_execute`. Keep the original key after uncertainty; a terminal failure needs its stated action and a fresh reviewed plan once no operation is running.
+Use the exact plan guards within ten minutes. Deletion removes the project's actual current and retained historical environments, data identities, files, deployments, schedules, stored SQL exports and platform-owned mail/DNS resources. A Free project with only Prod needs no Dev environment. The project's deployed addresses stop serving. It cannot be undone: download a [SQL export](/backups) first if needed, and remember it contains no files. MCP uses `delete_plan` and `delete_execute`. Keep the original key after uncertainty; a terminal failure needs its stated action and a fresh reviewed plan once no operation is running.
 
 [Schema migrations](/migrations) · [Database sizes](/database) · [Dev access](/cli#verify-progress-and-the-application).
+
+## When Paid ends or returns
+
+When effective Paid access ends, Dev access and new Dev work stop immediately. Dev-only runtime resources and data become eligible for retirement; source commits, Prod and data or files still shared with Prod are retained. Temporary previews using Dev stop rather than switching their writes to Prod.
+
+If the previous Dev was retired, a later explicit Paid Dev action starts fresh Dev configuration and resource identities. It does not restore deleted app data/users or copy secrets or configuration from Prod. Required secrets and callback setup may need to be supplied again. Prod remains available under its own data and credit rules.

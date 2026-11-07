@@ -1,0 +1,63 @@
+---
+title: "Commit previews"
+description: "Run a saved Git commit for up to 60 minutes, use the selected real data and deploy only when you choose."
+---
+
+Save a Git commit, open a temporary preview, then deliberately deploy the version you want. A preview runs the app without creating a permanent Dev or Prod deployment.
+
+## Choose the data target
+
+| Workspace | Preview data | Permanent deployment |
+| --- | --- | --- |
+| Free | Prod | Prod only |
+| Paid | Dev by default, or explicitly Prod | Dev or Prod, explicitly selected |
+
+The preview uses the selected environment's real database and configured services. Login, form submissions and allowed API calls behave as application requests: successful writes and sent messages remain after the preview ends. When Dev and Prod share data, a Dev preview reaches that shared data too. Read the returned `data_environment` and `shared_data` before testing.
+
+Existing feature entitlements still apply. Configured application-owned Better Auth or WorkOS may work on Free; Native Auth remains Paid. A missing table, application secret or provider callback configuration is a setup requirement, not a successful signup.
+
+## Create and inspect a preview
+
+Use the full committed SHA from the project's saved managed source or selected GitHub repository. Saving source and previewing do not publish to Prod.
+
+```sh
+ohmyhost preview create --project "$PROJECT_ID" --commit "$COMMIT_SHA" --idempotency-key "$PREVIEW_REQUEST_KEY" --wait --json
+ohmyhost preview get --project "$PROJECT_ID" --preview "$PREVIEW_ID" --json
+ohmyhost preview list --project "$PROJECT_ID" --json
+```
+
+Paid may add `--data-environment prod` or `--data-environment dev`. Free uses Prod and cannot request Dev. Keep one request key after a network uncertainty and observe the returned preview; do not create replacements merely because preparation is still running.
+
+MCP uses `preview_create`, `preview_get`, `preview_list` and `preview_stop`. The create fields are `project_id`, `commit_sha`, optional `data_environment`, and `idempotency_key`. `preview_get` uses the returned `preview_id`. Poll the same preview while queued or starting; a queued result is not a working link. If it is sleeping, request its original returned URL once to wake it, then observe the same preview until ready or terminal and verify the app. Status reads alone do not wake compute. The first wake request can return a temporary 503 while starting; keep the same preview and original expiry instead of creating a replacement.
+
+Only share a URL after the app is ready. Verify navigation, configured login and a real stored submission or read/write where the feature needs one. A confirmation message alone does not prove that an email address was saved. Your application's login remains separate from the platform account.
+
+## Lifetime, sleep and replacement
+
+A preview expires at its server-created time plus at most 60 minutes. Reloading, status reads and open connections do not extend that limit. The same live commit and data target reuse the original preview and expiry; a different commit or target replaces it. A project has one active preview.
+
+After five minutes without actual HTTP or WebSocket traffic, the runtime can sleep. An open connection without traffic does not keep it running. A request can wake a sleeping preview only within its original lifetime. Once expired, its URL stays dead; creating another preview is a new metered operation.
+
+Stop it earlier when finished:
+
+```sh
+ohmyhost preview stop --project "$PROJECT_ID" --preview "$PREVIEW_ID" --idempotency-key "$STOP_REQUEST_KEY" --json
+```
+
+Stopping or expiry ends the preview runtime and its temporary access. It does not delete the Git commit or undo application writes to the real target.
+
+## Apply schema as a separate action
+
+Preview startup never applies your migration files automatically. When the schema change is authorized, first inspect the exact preview commit and data target, then run:
+
+```sh
+ohmyhost preview migrate --project "$PROJECT_ID" --preview "$PREVIEW_ID" --idempotency-key "$MIGRATION_REQUEST_KEY" --yes --wait --json
+```
+
+MCP uses `preview_migrations_apply` with `project_id`, `preview_id`, `confirmed: true` and the saved `idempotency_key`. The platform reads that committed version's validated migrations; you supply no SQL or alternate database target. Follow the original operation with `operation_get` until terminal, then verify the real form/database behavior. An accepted migration can finish after preview expiry. Keep its key after uncertainty; an unknown COMMIT must be resolved before another schema or data-assignment action.
+
+## Credits and deployment
+
+Previews use existing workspace credits and project budgets. `compute_quote` identifies the server's active card, instance class and rolling reservation, including `reserved_seconds` and `credit_micros`. A reservation covers at most 60 seconds and settles actual compute. An intentional deployment retains its ordinary build reservation. Database, files, mail and AI retain their own rates and entitlements. No funded next interval means execution stops. [Rates](/pricing) and [budgets](/budgets).
+
+When you want a permanent deployment, explicitly select Prod on Free, or Dev or Prod on Paid. The agent shows the normal deployment plan and verifies the resulting operation and app. Preview creation never silently deploys both. Direct Prod deployment does not require a Dev predecessor, including projects with shared data. [Deployment and data environments](/environments).

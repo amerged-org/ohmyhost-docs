@@ -31,13 +31,15 @@ ohmyhost init --dry-run --json
 ohmyhost project list --json
 ```
 
-Resolve actual hosted blockers. Without a root `ohmyhost.yaml`, run `ohmyhost init --json` once blockers are resolved; `--root DIR` selects a nested app and `--region eu` prepares EU storage. Save the file in your managed version, or commit and push it for a GitHub source. Init never overwrites an existing configuration. Reuse an existing project, or create one after choosing isolated or shared data, protected or public Dev access, and setting `HOSTING_REGION` to the chosen `us` or `eu`:
+Resolve actual hosted blockers. Without a root `ohmyhost.yaml`, run `ohmyhost init --json` once blockers are resolved; `--root DIR` selects a nested app and `--region eu` prepares EU storage. Save the file in your managed version, or commit and push it for a GitHub source. Init never overwrites an existing configuration. Reuse an existing project, or create one after selecting `HOSTING_REGION` as `us` or `eu`. Free has Prod and previews against Prod data. Isolated/shared data and protected/public long-lived Dev choices apply to Paid Dev deployments:
 
 ```sh
-ohmyhost project create --organization "$ORGANIZATION_ID" --name "My app" --data-mode isolated --dev-access-mode protected --region "$HOSTING_REGION" --idempotency-key "$PROJECT_REQUEST_KEY" --json
+ohmyhost project create --organization "$ORGANIZATION_ID" --name "My app" --region "$HOSTING_REGION" --idempotency-key "$PROJECT_REQUEST_KEY" --json
 ohmyhost operation get "$PROJECT_OPERATION_ID" --json
 ohmyhost project list --json
 ```
+
+On Paid, add `--data-mode isolated` or `--data-mode shared` and choose `--dev-access-mode protected` or `--dev-access-mode public` when configuring Dev. Omit those Dev choices on Free.
 
 `ORGANIZATION_ID` comes from `whoami`. Create a unique `PROJECT_REQUEST_KEY` once and retain it for retries. `PROJECT_OPERATION_ID` is the creation response's `operation.id`. After success, select the created project's ID from the list as `PROJECT_ID`.
 
@@ -85,14 +87,26 @@ Set `GITHUB_OWNER` and `GITHUB_REPOSITORY` to a repository covered by that insta
 ohmyhost link --project "$PROJECT_ID" --repository-owner "$GITHUB_OWNER" --repository-name "$GITHUB_REPOSITORY" --idempotency-key "$SOURCE_REQUEST_KEY" --json
 ```
 
-Observe the returned source-link operation; it needs no second browser authorization for a covered repository. Missing access is repaired through `github.connection.settings_url` returned by GitHub status, then the same link command/key. No build starts until you deploy a plan. From the repository root, link also records `.ohmyhost/` and adds `/.ohmyhost/` to `.gitignore`. Later commands may omit `--project`; the CLI names the selected project on stderr. A checkout keeps one link per organization: when several match, supply `--project` or `--profile-name` (`linked_project_selection_required`).
+Observe the returned source-link operation; it needs no second browser authorization for a covered repository. Missing access is repaired through `github.connection.settings_url` returned by GitHub status, then the same link command/key. Linking starts neither a preview nor a deployment. From the repository root, link also records `.ohmyhost/` and adds `/.ohmyhost/` to `.gitignore`. Later commands may omit `--project`; the CLI names the selected project on stderr. A checkout keeps one link per organization: when several match, supply `--project` or `--profile-name` (`linked_project_selection_required`).
 
-### Deploy the saved commit
+### Preview the saved commit
 
 Use the full SHA of the saved managed version or pushed GitHub commit as `COMMIT_SHA`:
 
 ```sh
-ohmyhost plan --project "$PROJECT_ID" --commit "$COMMIT_SHA" --json
+ohmyhost preview create --project "$PROJECT_ID" --commit "$COMMIT_SHA" --idempotency-key "$PREVIEW_REQUEST_KEY" --wait --json
+ohmyhost preview get --project "$PROJECT_ID" --preview "$PREVIEW_ID" --json
+ohmyhost preview list --project "$PROJECT_ID" --json
+```
+
+Free uses real Prod data. Paid defaults to Dev or adds `--data-environment prod` explicitly. Observe the returned preview until ready or terminal; its fixed expiry is at most 60 minutes and a new read does not renew it. Test actual app behavior and stored data. Schema changes need the separate authorized `preview migrate` action; preview creation does not apply them. [Commands and data effects](/previews).
+
+### Deploy the saved commit intentionally
+
+When you request a permanent deployment, use the full saved managed or pushed GitHub SHA as `COMMIT_SHA` and explicitly select Prod on Free, or Dev/Prod on Paid:
+
+```sh
+ohmyhost plan --project "$PROJECT_ID" --commit "$COMMIT_SHA" --environment prod --json
 ```
 
 Read the plan, its requirements and credit effects. Set application [runtime secrets](/secrets) if required. Take `PLAN_ID` from `plan.id`, retain a new `DEPLOY_REQUEST_KEY`, and execute the approved plan:
@@ -106,10 +120,9 @@ ohmyhost deploy --project "$PROJECT_ID" --plan-id "$PLAN_ID" --idempotency-key "
 ```sh
 ohmyhost operation get "$OPERATION_ID" --json
 ohmyhost project status --project "$PROJECT_ID" --json
-ohmyhost project dev-share link --project "$PROJECT_ID" --json
 ```
 
-`OPERATION_ID` is the deploy response's `operation.id`. A wait timeout leaves the accepted operation running; inspect it without submitting another deployment. Follow returned polling guidance. If `dev_access_mode` is `protected`, the clean URL answers 404 without a session: open the reusable `share_url` first, then test the clean Dev URL. If it is `public`, open the clean Dev URL directly. Keep the share link out of logs and project notes. The Owner can change the mode with `ohmyhost project dev-access mode`, replace the link with `ohmyhost project dev-share rotate`, or revoke it with `ohmyhost project dev-share revoke`.
+`OPERATION_ID` is the deploy response's `operation.id`. A wait timeout leaves the accepted operation running; inspect it without submitting another deployment. Follow returned polling guidance. For an intentionally deployed Paid Dev environment, `project dev-share link --project "$PROJECT_ID" --json` reads its protected link. If `dev_access_mode` is `protected`, the clean Dev URL answers 404 without a session: open the reusable `share_url` first, then test the clean Dev URL. If it is `public`, open the clean Dev URL directly. Keep the share link out of logs and project notes. The Owner can change the mode with `ohmyhost project dev-access mode`, replace the link with `ohmyhost project dev-share rotate`, or revoke it with `ohmyhost project dev-share revoke`.
 
 ## Common follow-ups
 

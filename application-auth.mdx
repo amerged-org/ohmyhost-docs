@@ -1,9 +1,19 @@
 ---
-title: "Bring your application’s auth"
-description: "Keep application users and sessions separate from your hosting account."
+title: "Application authentication"
+description: "Choose application authentication separately from your hosting account."
 ---
 
 Your ohmyho.st login authorizes hosting operations. Your application chooses its own users, sessions and auth provider. A deliberately public app requires no application login.
+
+## Built-in Native Auth candidate
+
+The password-first Native Auth option is being prepared for hosted qualification. It gives an application an ohmyho.st-managed end-user directory while the application owns its sign-in forms and authorization of its business data. Availability is not yet established by this documentation. Existing customer-owned providers remain an option; selecting Native Auth is an explicit choice, not an automatic migration.
+
+The candidate requires a current Owner, a Paid project, and your own verified sender authorized for that project. The verified application identity and sender must share the same registrable main domain. Configure an approved application origin and form paths for each environment, then check readiness. Dev and Prod have separate Native user directories, even when application data is shared. The Auth database is separate and metered; Native Auth alone does not require an application database.
+
+Password sign-in is the initial path. Google and GitHub sign-in are disabled server-side for this launch. The app reserves `/api/auth/v1` for Native Auth and validates sessions on the server before applying its own access rules. Do not treat a static page as protected merely because the app declares Native Auth. Verify sign-up, email verification, sign-in, protected access, reset and sign-out on the actual hosted environment once it is available.
+
+The [application build Skill](https://ohmyho.st/skills/ohmyhost-build-portable-app/references/stack-contracts.md) describes the candidate configuration and browser and server contracts. [Email](/email) and [shared senders](/shared-mail) explain sender verification and authorization.
 
 To enforce a verified user's row permissions in PostgreSQL, use [backend row-level security](/row-level-security). Validate the server session before calling `database.withRls`; pass only selected authorization claims from trusted membership or administrator data. Application auth and RLS remain explicit choices, and authentication tables are not automatically protected.
 
@@ -17,11 +27,11 @@ Better Auth has retained integration proof; customer-owned WorkOS Next.js has ho
 
 For application-owned Better Auth with `auth.provider: none`, use an application secret such as `APP_AUTH_SECRET` and pass it explicitly to Better Auth's `secret` option. `BETTER_AUTH_SECRET` is reserved for the optional platform-managed integration; the customer secret command intentionally rejects that name. Keeping your own auth does not select managed mail or auth.
 
-To choose the managed bridge, set `auth.provider: better-auth` and `database.enabled: true`, and pin Better Auth exactly to `1.7.1`. Managed mail is optional for existing verified-user sign-in, sessions and token validation. The managed bridge's verification/reset send actions use ohmyho.st Mail and need `mail.enabled: true`, Paid access and your verified sender. For your own Resend callback or sender, keep an application-owned Better Auth handler with `auth.provider: none`; this leaves Better Auth and application login enabled. SDK package detection alone enables no capability. The platform supplies the managed `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL`.
+To choose the managed bridge, set `auth.provider: better-auth` and `database.enabled: true`, and pin Better Auth exactly to `1.7.7`. Managed mail is optional for existing verified-user sign-in, sessions and token validation. The managed bridge's verification/reset send actions use ohmyho.st Mail and need `mail.enabled: true`, Paid access and your verified sender. For your own Resend callback or sender, keep an application-owned Better Auth handler with `auth.provider: none`; this leaves Better Auth and application login enabled. SDK package detection alone enables no capability. The platform supplies the managed `BETTER_AUTH_SECRET` and `BETTER_AUTH_URL`.
 
 The public `@amerged/ohmyhost-auth` helper accepts an optional `email.send` callback, including your own Resend sender. Initialization, existing verified-user sign-in, sessions and validation of an already issued token need no sender. Sign-up, resend verification and password-reset requests need one; its final reset also sends a password-change notification. Missing sender returns `503 AUTH_EMAIL_SENDER_NOT_CONFIGURED` before those operations write. Email verification stays required; without a sender, unverified sign-in returns `403 EMAIL_NOT_VERIFIED` and sends no email. The helper's pg-pool constructor is not a Workers RPC adapter; use the actual database integration for your application.
 
-The optional [Kysely dialect](/database#optional-kysely-dialect) implements the leased transaction protocol. For application-owned Better Auth `1.7.1`, use its own migrated schema, normally `public`: `database: { db: db.withSchema("public"), type: "postgres", transaction: true }` with that Kysely instance. This is separate from the managed auth-lane bridge; `auth.provider: none` provisions no auth tables. Library transaction behavior does not establish hosted signup or mail delivery; verify those application flows. Do not assume an unverified Drizzle or pg-proxy adapter supplies equivalent transactions.
+The optional [Kysely dialect](/database#optional-kysely-dialect) implements the leased transaction protocol. For application-owned Better Auth `1.7.7`, use its own migrated schema, normally `public`: `database: { db: db.withSchema("public"), type: "postgres", transaction: true }` with that Kysely instance. This is separate from the managed auth-lane bridge; `auth.provider: none` provisions no auth tables. Library transaction behavior does not establish hosted signup or mail delivery; verify those application flows. Do not assume an unverified Drizzle or pg-proxy adapter supplies equivalent transactions.
 
 ## Set up an environment
 

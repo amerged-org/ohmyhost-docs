@@ -1,13 +1,13 @@
 ---
-title: "Your first deployment"
-description: "Save a managed or GitHub version, deploy one app and verify its Dev URL."
+title: "Your first preview"
+description: "Save a Git commit, verify a temporary app preview and choose an explicit deployment."
 ---
 
-Start with the app you want to deploy, in a local checkout or a connected chat. Continue its saved managed or GitHub source. A new app developed entirely in chat uses managed source; a local checkout without a saved binding can use managed source or GitHub. Signing up is open. [Sources and versions](/sources).
+Start with the app you want to build or update, in a local checkout or a connected chat. Continue its saved managed or GitHub source. A new app developed entirely in chat uses managed source; a local checkout without a saved binding can use managed source or GitHub. Signing up is open. [Sources and versions](/sources).
 
 ## 1. Give your agent the task
 
-> Read https://ohmyho.st/llms.txt and https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md. Connect this agent to ohmyho.st and deploy this app using only the capabilities it needs. Keep its existing source binding, or choose managed source or GitHub if it is unbound. Follow the deployment Skill, preserve my project decisions and verify the app.
+> Read https://ohmyho.st/llms.txt and https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md. Connect this agent to ohmyho.st, build or update this app, save its Git commit and show me a temporary preview. Keep its existing source binding and project decisions. Use only the capabilities it needs, verify real form storage where needed, and deploy Dev or Prod only when I explicitly request that target.
 
 Your agent uses the [get-started Skill](https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md). A local agent first checks what is installed and whether you are signed in, installs the current CLI/MCP only if required, and gives you a sign-in link when needed. Open it, check the confirmation code, sign in or create your account on that page, and tell the agent when you are done. It confirms the result with `identity_get` or `ohmyhost whoami --json`.
 
@@ -29,42 +29,56 @@ In a connected chat, the agent reads the selected project's source and context b
 
 Upgrade local CLI and MCP clients to the [current release](/cli) first. When the inspection reports `runtime.packages.customerRuntime` for any framework (also exposed under companion/worker packages), install the application runtime under its import name as exactly that npm alias, for example `"@ohmyhost/customer-runtime": "npm:@amerged/ohmyhost-runtime@<version>"` in `package.json`, then refresh and save the lockfile with the source. Every `@ohmyhost/customer-runtime/*` import stays unchanged. A bare `@ohmyhost/customer-runtime` version fails the platform build. Replace a runtime pinned to an `ohmyho.st/releases/` URL with the alias: only the current release is served there, and older versions carry no compatibility promise.
 
-For data-backed apps, choose isolated Dev/Prod databases and files or shared data. Creation defaults to shared when `data_mode` is omitted; later guarded [data changes](/environments#change-data-assignments) never copy data. Isolation is recommended; two databases consume credits independently. [How environments work](/environments).
+Free has Prod and uses real Prod data for previews. Paid previews default to Dev and may explicitly select Prod; Paid projects may use isolated Dev/Prod data or shared data. Shared mode means writes can affect both. The optional creation default is shared; later guarded [data changes](/environments#change-data-assignments) never copy records. Separate databases consume credits independently. [Preview data](/previews).
 
-For a new project, choose whether the Dev URL should be protected by a reusable share link (the default) or public without a platform token. The agent records the choice and preserves existing project decisions.
+For Paid projects that will intentionally deploy Dev, choose protected or public Dev access; protected is the default. This long-lived Dev setting is separate from the temporary preview's deadline. Free has no Dev deployment.
 
 For a new project, choose **US or EU** before creation. An explicit choice overrides any browser-location suggestion; an existing project's region is preserved. US is the API default when no region is supplied. New projects provision their PGCF database, new files and builds in the selected US or EU region. Existing projects moved to US with their owner's authorization use US databases. Read `database compute get` for the actual database region. Existing R2 object locations remain recorded through database migration. The customer API cannot change the region later and prices are identical. Preserve an existing `storage.jurisdiction`: the recorded R2 bucket or reservation location remains authoritative after an operator project-region migration. Only new storage without a recorded bucket uses the current project region. Transactional mail is processed in the US by the platform's mail provider, whatever the project's region. A cloud agent's own IP address does not establish your preferred hosting region.
 
 ## 3. Save or connect the selected source
 
-Managed source saves the intended application files as a version on the same project. A local agent uses `source publish`; a connected chat uses the remote source tools. No GitHub account or installation is required. Saving a version starts no build. The agent observes the accepted source operation and keeps its exact committed SHA for deployment. [Save current local files](/sources#save-current-local-files).
+Managed source saves the intended application files as a version on the same project. A local agent uses `source publish`; a connected chat uses the remote source tools. No GitHub account or installation is required. Saving a version starts no build. The agent observes the accepted source operation and keeps its exact committed SHA for preview or an explicit deployment. [Save current local files](/sources#save-current-local-files).
 
 For a GitHub source, the agent reads the selected workspace's `github_status`. If needed, `github_connect` provides one browser link for the installation/user authorization. Open it in the GitHub account that has repository access. The agent repeats that same connect request/key after consent until the connection is confirmed.
 
 It then creates or selects the project and uses `source_link` for a covered repository. This returns a normal operation without another browser authorization and does not start a build. If the repository is missing, add it through `connection.settings_url` from GitHub status and repeat the same source-link request/key. [Exact CLI sequence](/cli#connect-and-deploy).
 
-## 4. Review and deploy
+## 4. Open and verify the preview
 
-If you want a custom domain, the agent can [reserve it and obtain Cloudflare consent](/domains) now. A reservation waits in `awaiting_deployment` without DNS changes, certificates or custom-hostname charges. Prod can deploy on its existing ohmyho.st hosting address before your own DNS is changed.
+The agent creates a preview from the exact saved commit and observes it until ready or terminal. A local agent uses:
 
-The agent plans the exact saved managed commit or pushed GitHub commit and shows the required services, estimated credit effects and missing configuration. A local agent sets private application secrets through stdin; a connected chat uses `secret_input_request` and its private portal handoff, then verifies `connection_status` and delivery metadata. Values stay outside chat and source. It executes the plan with one saved idempotency key. Hosting needs no mail domain; if the plan returns `mail_domain_required`, the app declares `mail.enabled`, so either set up [your own sender domain](/email) or set it to false when the app sends no mail through ohmyho.st. [Published usage rates](/pricing) explain what each measured resource costs.
+```sh
+ohmyhost preview create --project "$PROJECT_ID" --commit "$COMMIT_SHA" --idempotency-key "$PREVIEW_REQUEST_KEY" --wait --json
+```
 
-The response supplies an operation ID. The agent observes that operation until it succeeds or returns an actionable error. A network timeout does not cancel it and is not a reason to create another project or deployment.
+A connected chat uses `preview_create`, then `preview_get` for the returned ID. Free uses Prod data; Paid defaults to Dev or explicitly selects Prod. The URL lasts at most 60 minutes. A ready page alone does not prove that a form stored data: check navigation, applicable login and an actual saved read/write. [Preview lifetime, sleep and commands](/previews).
 
-## 5. Verify the app
+Set required private application values through local stdin or `secret_input_request` and its protected portal, never chat or source. A preview does not apply migrations automatically. If tables are missing and you authorize the schema change, apply that saved commit's migrations with the separate [preview migration action](/previews#apply-schema-as-a-separate-action), follow its operation and verify storage again.
 
-The agent reads `dev_access_mode` and the URL from project status. For protected Dev it obtains the persistent owner-only share link; for public Dev it opens the clean URL directly. Check navigation and, where used, application login and a real data read/write. A successful build alone is not the finished app.
+## 5. Deploy when you intend to
 
-When you request publication, the agent checks current authorization, creates a promotion plan and publishes the verified artifact to Prod. Isolated promotion applies migrations without copying Dev records into Prod. Prod receives its own private secret inputs. With isolated data, the agent can also build a commit straight into Prod; a project whose Dev and Prod share a database always deploys to Dev and promotes. [Deploy to Prod](/environments#deploy-to-prod).
+After reviewing the preview, explicitly request Prod on Free, or Dev or Prod on Paid. Existing explicit deployment instructions do not need another permission question. The agent plans the selected commit for that target, explains its required services and credit effects, and executes with one saved key. It never silently deploys both.
 
-Managed source keeps version history across chats. Restoring an earlier source version creates a new commit; it is separate from deployment rollback and does not roll back database migrations. [Restore a version](/sources).
+```sh
+ohmyhost plan --project "$PROJECT_ID" --commit "$COMMIT_SHA" --environment prod --json
+```
 
-After Prod works on its hosting address, the agent repeats the original domain apply with the saved hostname and key, then checks DNS, HTTPS and the application on the final domain. Cloudflare consent and successful deployment do not activate a reserved domain automatically.
+Review the returned plan and use its `plan.id` as `PLAN_ID`, then execute that approved plan with a saved key:
+
+```sh
+ohmyhost deploy --project "$PROJECT_ID" --plan-id "$PLAN_ID" --idempotency-key "$DEPLOY_REQUEST_KEY" --yes --wait --json
+```
+
+The accepted deployment returns an operation ID. Observe it until success or an actionable error, then read project status and test the actual target URL. A timeout does not cancel the accepted work. Direct Prod deployment works without a Dev predecessor, including shared-data projects. Paid may instead promote an existing verified Dev artifact. [Dev and Prod](/environments#deploy-to-prod).
+
+If you want a custom domain, [reserve it and obtain Cloudflare consent](/domains), verify Prod on its hosting address, then repeat the original domain apply with the saved hostname and key. Consent or a successful deployment does not activate a reserved domain automatically.
+
+Managed source keeps Git history across chats. A forward source restoration creates another commit; it does not roll back the database. [Sources and versions](/sources).
 
 ## If something needs time
 
-- Build or deployment pending: follow the operation's returned polling interval.
+- Source setup, save, preview or deployment pending: continue observing its original ID until ready or terminal. Do not require another user status prompt or describe a queued preview as working.
 - DNS or mail verification pending: apply the exact records and check again after the returned interval; mail status currently returns 60 seconds; hostname status has no hint, so check DNS/TLS after sixty minutes.
 - An error without a useful next action: use the [troubleshooting Skill](/troubleshooting) and report the operation through [feedback](/feedback).
 
-You finish with a verified application URL, deployed commit and any clearly stated pending action.
+You finish with a verified preview URL, its exact commit, selected real data environment and expiry. A permanent deployment happens only for the explicitly chosen target.

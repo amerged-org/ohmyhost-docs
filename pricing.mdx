@@ -30,17 +30,23 @@ Every workspace also has a referral link: `ohmyhost referral link --organization
 
 [Become an affiliate](/affiliate) for the signup prompt, your personal code and link, and the optional flag setup.
 
+## Preview and deployment choices
+
+Free includes temporary previews against real Prod data and explicit Prod deployment; it has no Dev environment. Paid previews default to Dev and can explicitly use Prod, and Paid can deliberately deploy either permanent environment. Previews use existing credits and budgets rather than adding a second credit allowance. Existing Native Auth, mail and AI entitlements remain. [Preview behavior](/previews).
+
 ## Usage rates
 
 The table is generated from the same price contract as the website. Credits are the charge for the stated quantity, not a flat charge every time a feature is enabled. Usage is valued at the rate in effect when it happened. `ohmyhost credits balance --organization "$ORGANIZATION_ID" --json` (MCP `organization_credits_get`) reports active meters and their versioned rate cards; historical published cards can include meters that no longer charge usage.
 
 <CreditPricingTable />
 
+Preview compute uses the server-returned `compute_quote`, which identifies its active rate card, instance resources and rolling reservation of at most 60 seconds. Actual compute settles the interval and releases unused reserved credits. Intentional deployment builds retain their ordinary reservation. The preview expires within 60 minutes and can sleep after five minutes without actual network traffic; the selected real database, files and allowed APIs retain their ordinary rates.
+
 Builds use the measured seconds of the current build sandbox. The historical CodeBuild minute rate is no longer used. A deployment reserves 16.86912 credits for 840 build seconds; after the build, only measured seconds are charged and unused reserved credits are released. A deployment that ends before its build starts releases the entire reservation. Starting the sandbox is not billed.
 
 Database usage is selected RAM multiplied by active time: 256 MiB, 512 MiB, 1 GiB, 2 GiB and 4 GiB cost 10, 20, 40, 80 and 160 credits per active hour, prorated. Free supports 256 MiB with 500 MiB total disk; larger sizes require Paid and include 1, 2, 4 or 8 GiB disk. Total disk includes PostgreSQL/WAL overhead. Seven-day backups are included, with no separate database CPU, network or connection charges. After 300 idle seconds the database sleeps and incurs no active-RAM charge. Customer files and retained Worker resources keep their separate rates. Isolated Dev/Prod databases are metered independently; shared data uses one area. [Inspect or change database capacity](/database). Older rate cards can still list meters of the retired previous database provider (`neon.*`); they describe historical usage only and never apply to a PGCF database.
 
-Functions and crons use the Worker request and CPU meters. Workers bandwidth and SQL exports have no separate charge. Each deployment or promotion that goes live retains an immutable script for rollback; every retained script is charged at `wfp.script`, so its total grows with deployments even without traffic. Scripts remain until project deletion, or until a Dev reset/share action removes Dev-only scripts. `mail.sent` is charged per sent recipient and `mail.received` per received message; webhook retries do not add another mail charge.
+Functions and crons use the Worker request and CPU meters. Workers bandwidth and SQL exports have no separate charge. Each deployment or promotion that goes live retains an immutable script for rollback; every retained script is charged at `wfp.script`, so its total grows with deployments even without traffic. Scripts remain until their cleanup, project deletion, a Dev reset/share action or the retirement of Dev-only resources after loss of Paid. Temporary previews do not create retained deployment scripts. `mail.sent` is charged per sent recipient and `mail.received` per received message; webhook retries do not add another mail charge.
 
 ## Read charges correctly
 
