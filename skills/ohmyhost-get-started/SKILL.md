@@ -17,8 +17,8 @@ verify the app, and promote a tested Dev artifact when appropriate. Dev is prote
 the deployment Skill handles public Dev, data choices and the shared-database promotion rule.
 You can also give the app Postgres, private runtime secrets, Cloudflare R2 files, optional
 transactional mail, LLMs, images, speech, classifiers and OCR through an OpenAI-compatible gateway, and a custom domain, export its database as an encrypted SQL ZIP, and read
-usage, credits and project budgets. The customer chooses application authentication; the unreleased
-Native Auth option does not imply a provider migration or a hosted acceptance claim. Its password-first launch candidate requires Paid access and the customer's own authorized, verified sender; social sign-in is disabled server-side. See the [runtime contracts](../ohmyhost-build-portable-app/references/stack-contracts.md) for the application identity and setup requirements. Sign-up is open and free to start.
+usage, credits and project budgets. The customer chooses application authentication.
+Password-first Native Auth is released only for projects approved by the existing launch allowlist. Setup and administration require current Owner authority; the project needs Paid access, its own authorized verified sender and the approved application identity and origin. Check that project's readiness and actual hosted flow before claiming it is usable. Google and GitHub sign-in remain disabled, and general availability, performance and recovery qualification remain open. Choosing Native does not authorize a provider migration or copying users. See the [runtime contracts](../ohmyhost-build-portable-app/references/stack-contracts.md) for the requirements. Sign-up is open and free to start.
 
 The initial connection asks the customer to sign in and approve the access they want to give this
 agent. GitHub authorization is needed only for the GitHub source route. A working saved local login
@@ -149,7 +149,7 @@ exact rules.
 
 ## Step 1 — determine the state before doing anything
 
-Use CLI and local MCP version 0.1.48 or newer together. Older clients reject the credits and usage
+Use CLI and local MCP version 0.1.48 or newer together. Native Auth management commands and tools require version 0.1.50 or newer. Older clients reject the credits and usage
 responses that 0.1.41 and 0.1.43 changed (credits is now only the balance) with
 `response_contract_invalid`, the native `psql` access transport needs 0.1.39 or newer, the
 database webhook, schedule and executions commands and tools need 0.1.42 or newer, the
@@ -262,7 +262,7 @@ Compare the installed versions with <https://ohmyho.st/client-release.json>: `oh
 names the CLI, and `npm ls --global --depth=0` lists both packages (`ohmyhost-mcp` has no
 `--version` flag; it starts the server). When either is missing or older, install both from the
 source already in use: the current archive URLs from that guide, or npm
-(`npm install --global @amerged/ohmyhost-cli@0.1.47 @amerged/ohmyhost-mcp@0.1.47`). Both provide the same
+(`npm install --global @amerged/ohmyhost-cli @amerged/ohmyhost-mcp`). Both provide the same
 `ohmyhost` and `ohmyhost-mcp` commands, so uninstall one pair before switching to the other.
 An older client lacks commands and rejects newer server responses with `response_contract_invalid`;
 an older MCP server reports the same case as `client_request_failed` although connection and login
@@ -402,7 +402,7 @@ authorization; existing explicit cleanup authorization can cover that action wit
 question. Otherwise explain the failed save and obtain that authorization first. Never change
 an already working credential merely to make a replay return a new value.
 
-Native Auth management requires the separate `auth:read` or `auth:manage` permission in addition to current Owner authority. Existing tokens retain their recorded permissions; a token limited to environment secrets does not gain Native Auth access. Once Native is released and its provider permissions are ready, an Owner may explicitly authorize creation of a new Native-capable token. Never revoke or replace an existing token without the customer's scoped authorization.
+Native Auth management requires the separate `auth:read` or `auth:manage` permission in addition to current Owner authority. Existing tokens retain their recorded permissions; a token limited to environment secrets does not gain Native Auth access. For a project approved by the existing Native launch allowlist, a current Owner may explicitly authorize creation of a new Native-capable token with the needed permissions. Never revoke or replace an existing token without the customer's scoped authorization.
 
 `OHMYHOST_TOKEN` overrides the saved logins in any process where it is set. A token alone runs every
 command in these Skills except these, which need the interactive login: `login`, `logout` (including

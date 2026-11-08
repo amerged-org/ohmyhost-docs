@@ -5,6 +5,16 @@ description: "Keep application users and sessions separate from your hosting acc
 
 Your ohmyho.st login authorizes hosting operations. Your application chooses its own users, sessions and auth provider. A deliberately public app requires no application login.
 
+## Native password authentication
+
+Native Auth password flows are available only for explicitly approved projects on the existing launch allowlist. Selecting `auth.provider: omh-native` is an explicit choice; keep your current customer-owned provider unless you choose to change it. Native Auth management requires CLI and local MCP version `0.1.50` or newer.
+
+An Owner configures the approved canonical application origin and application-owned redirect, reset and invitation paths for each environment, then checks readiness. The project needs Paid access and your own verified sender authorized for that project. The verified application identity and sender must share the same registrable main domain. See [email](/email) and [shared senders](/shared-mail).
+
+Native Auth uses a separately metered Auth database and separate Dev and Prod user directories, even when business data is shared. A business database is not required. Your application supplies the forms, validates sessions on the server and authorizes access to its business records. Native Auth reserves `/api/auth/v1`; declaring it does not protect static files.
+
+Google and GitHub sign-in remain disabled. General availability, performance targets and full recovery and lifecycle qualification remain pending. Read customer-specific readiness and verify the required password flow on the actual application and environment before handing over access. The [application build Skill](https://ohmyho.st/skills/ohmyhost-build-portable-app/references/stack-contracts.md) describes the browser and server contracts.
+
 To enforce a verified user's row permissions in PostgreSQL, use [backend row-level security](/row-level-security). Validate the server session before calling `database.withRls`; pass only selected authorization claims from trusted membership or administrator data. Application auth and RLS remain explicit choices, and authentication tables are not automatically protected.
 
 ## Choose the integration your app already uses
