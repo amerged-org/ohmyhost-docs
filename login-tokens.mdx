@@ -17,7 +17,7 @@ Six commands require an interactive login: `organization create`, `organization 
 
 A native chat uses managed OAuth. The agent verifies `identity_get`, the intended workspace and existing project; current membership, role and any token restrictions determine access. An empty project list is not a reason to create a replacement app. [MCP connection](/agents/mcp).
 
-This access is separate from the local CLI device sign-in and a user API token. A connected chat needs no local CLI installation or copied device token. Keep private application credentials in the [portal input flow](/secrets#connected-chat-input), outside chat and tool arguments. The non-expiring API token policy does not change browser, CLI or OAuth session lifetimes.
+This access is separate from the local CLI device sign-in and a user API token. A connected chat needs no local CLI installation or copied device token. Set private application credentials through the [secret link](/secrets#set-a-secret-from-a-connected-chat), outside chat and tool arguments. The non-expiring API token policy does not change browser, CLI or OAuth session lifetimes.
 
 ## Check the current account
 
