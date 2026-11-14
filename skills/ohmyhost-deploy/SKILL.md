@@ -59,6 +59,9 @@ to plan and deploy. An upload is not itself a successful build or publication.
 If publication is pending, poll its saved `operation_get` and then run
 `ohmyhost source publish complete --project ULID --directory PATH --operation ULID --json`
 under the same login. This confirms the persisted version and finishes the local binding.
+If `operation_get` reports `managed_source_dispatch_failed`, the platform ended that publication
+because its dispatch never completed. Read `source_get` to confirm whether the change landed, then
+submit the change again with a new idempotency key if it did not.
 Resume a pending upload from `source inspect`'s `pending_publications`; preserve its operation
 and key. Completing an already authorized publication needs no second routing question.
 
@@ -143,11 +146,12 @@ dependency. Verify the connected account and workspace using the get-started Ski
    real costs/effects within the user's existing authorization, then `deployment_create` with
    the plan and one saved key. Follow the same `operation_get` until its terminal state; use
    `deployment_get` and `deployment_logs` for diagnosis. A running operation is not a reason
-   to start another build.
+   to start another build. A workspace has at most four open builds: `build_capacity_reached` (429)
+   means wait for one to finish, then start the deployment again with a new key.
 7. Read `project_status` for the Dev URL and access mode. Public Dev opens directly. For
    protected Dev, give the user the private reusable `share_url` from
    `project_dev_share_link_get`. To inspect it as the agent, use `project_dev_access_create`
-   and open its one-time `redeem_url`; do not issue another ticket while the first is unused.
+   and open its one-time `redeem_url`; do not issue another ticket while the first is unused. A repeated request revokes the unused ticket, and a key does not replay it.
    Then verify the clean preview URL. Keep these entry links out of notes, source and logs.
    Verify the app's meaningful
    interaction, expected content and any requested data flow before calling it ready. If the

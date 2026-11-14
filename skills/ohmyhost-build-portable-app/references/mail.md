@@ -34,6 +34,8 @@ without it deploys with no mail domain.
 4. Run `mail_webhook_verify` / `ohmyhost mail webhook verify` against the deployed Prod handler.
    A signed `email.webhook_test` must return 2xx without inserting a real message. Verification
    enables receiving and returns the required MX records. Read `mail_status` until ready.
+   Inbound mail is stored only after the domain's sending DNS records (DKIM and SPF) are verified,
+   so finish step 2 first; a received message that arrives earlier is not stored or billed.
 
 5. Set `mail.enabled: true` in every source deployment that sends mail.
    Promotion and rollback of a commit without it remove the mail runtime values even when the project
@@ -74,7 +76,7 @@ capability and redeploy, or use the current client's supported routes. Do not ad
 to the egress allow-list. `gateway_rate_limited` (429) and `gateway_unavailable` (503) are
 retryable; wait and preserve the original message and idempotency key. A malformed/non-JSON
 response is `gateway_response_invalid`, retaining the received status without upstream text.
-Do not call mail or storage from the health route; its deploy-time probe has no egress policy.
+Do not call mail or storage from the health route; the deploy-time probe runs under the same limits and egress policy as live traffic (50 ms CPU, 10 subrequests), and a health check must not send mail.
 
 ## Shared sender settings
 

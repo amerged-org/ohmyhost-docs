@@ -1,0 +1,12 @@
+---
+title: "Native user conflict"
+description: "What the `native_user_conflict` error means and what to do next."
+---
+
+The API, CLI and MCP return `native_user_conflict` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+The user already exists, or the user is not in the state this action needs (for example a pending user cannot be suspended, and only a pending invitation can be resent). Read the user with 'ohmyhost auth user get --project ULID --environment ULID --user UUID --json' and choose the action that matches its status.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

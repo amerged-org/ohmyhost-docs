@@ -1,0 +1,12 @@
+---
+title: "Build capacity reached"
+description: "What the `build_capacity_reached` error means and what to do next."
+---
+
+The API, CLI and MCP return `build_capacity_reached` with HTTP 429. Repeating the same request unchanged does not help.
+
+## What to do
+
+This organization already has its maximum number of open builds. Wait for an open deployment to finish, then start a new deployment with a new idempotency key.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

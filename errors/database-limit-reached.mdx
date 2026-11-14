@@ -1,0 +1,12 @@
+---
+title: "Database limit reached"
+description: "What the `database_limit_reached` error means and what to do next."
+---
+
+The API, CLI and MCP return `database_limit_reached` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Delete a database you no longer need, or the project whose database it is, then deploy again. The limit counts the organization's live databases.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

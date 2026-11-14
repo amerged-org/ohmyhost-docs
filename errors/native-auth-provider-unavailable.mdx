@@ -1,0 +1,12 @@
+---
+title: "Native auth provider unavailable"
+description: "What the `native_auth_provider_unavailable` error means and what to do next."
+---
+
+The API, CLI and MCP return `native_auth_provider_unavailable` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+This sign-in provider cannot be enabled for this project's current Native Auth state. Read the provider with 'ohmyhost auth provider get --project ULID --environment ULID --provider google|github --json' and complete the Native Auth configuration it reports. Repeating unchanged does not help.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

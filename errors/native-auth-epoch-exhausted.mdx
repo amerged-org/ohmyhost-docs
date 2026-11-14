@@ -1,0 +1,12 @@
+---
+title: "Native auth epoch exhausted"
+description: "What the `native_auth_epoch_exhausted` error means and what to do next."
+---
+
+The API, CLI and MCP return `native_auth_epoch_exhausted` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+This project's Native Auth policy has reached its revision limit, so no further policy change is accepted. Do not retry. Contact support with the request_id of this response.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

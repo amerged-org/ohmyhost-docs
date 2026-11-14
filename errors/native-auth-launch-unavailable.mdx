@@ -1,0 +1,12 @@
+---
+title: "Native auth launch unavailable"
+description: "What the `native_auth_launch_unavailable` error means and what to do next."
+---
+
+The API, CLI and MCP return `native_auth_launch_unavailable` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Read the Native Auth configuration with 'ohmyhost auth config get --project ULID --environment ULID --json'. Its readiness shows which requirement is missing: a Paid plan, a verified sender domain, an approved canonical origin or storage. Complete that requirement, then send the change again with a new idempotency key. Repeating unchanged does not help.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.
