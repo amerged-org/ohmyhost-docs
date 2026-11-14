@@ -106,6 +106,8 @@ dependency. Verify the connected account and workspace using the get-started Ski
    needs its recorded failure diagnosed. When `initialization_operation_id` is returned, follow
    that actual child operation with `operation_get`; otherwise use the returned
    `initialization_error_code`. An `authorization_changed` failure needs the current account, role and token access checked through **ohmyhost-get-started** before retrying the source action.
+   A `managed_source_dispatch_failed` failure means the platform ended the queued initialization before it ran, so no
+   child publication exists. Reread `source_get` to confirm the source is still unbound, then `source_initialize` may create the explicitly chosen template again with a new key.
    For an existing project with no source and no pending
    initialization, `source_initialize` can create the explicitly chosen template under the
    current generation and a saved key. Observe that accepted operation and reread `source_get`

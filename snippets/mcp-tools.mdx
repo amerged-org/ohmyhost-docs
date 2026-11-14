@@ -85,6 +85,9 @@
 | `project_dev_access_create` | `project_id` | Change or prepare a change |
 | `github_connect` | `organization_id`, `idempotency_key` | Change or prepare a change |
 | `github_status` | `organization_id` | Read |
+| `github_disconnect` | `organization_id`, `confirmed` | Change or prepare a change |
+| `organization_mcp_connections_list` | `organization_id` | Read |
+| `organization_mcp_connection_revoke` | `organization_id`, `connection_id`, `confirmed` | Change or prepare a change |
 | `source_link` | `project_id`, `repository_owner`, `repository_name`, `idempotency_key` | Change or prepare a change |
 | `source_get` | `project_id` | Read |
 | `deployment_plan` | `project_id`, `commit_sha` | Read |
@@ -118,6 +121,7 @@
 | `mail_webhook_set` | `project_id`, `environment_id`, `url`, `idempotency_key` | Change or prepare a change |
 | `mail_webhook_verify` | `project_id`, `environment_id`, `idempotency_key` | Change or prepare a change |
 | `mail_webhook_disable` | `project_id`, `environment_id`, `idempotency_key` | Change or prepare a change |
+| `mail_webhook_rotate` | `project_id`, `environment_id`, `idempotency_key`, `confirmed` | Change or prepare a change |
 | `mail_messages_list` | `project_id`, `environment_id` | Read |
 | `mail_message_get` | `project_id`, `environment_id`, `message_id` | Read |
 | `mail_message_retry` | `project_id`, `environment_id`, `message_id`, `idempotency_key` | Change or prepare a change |
