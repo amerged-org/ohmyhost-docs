@@ -27,7 +27,7 @@ project URLs and data remain, GitHub auto-deploy is disabled, and deployment is 
 The remote hosting connection cannot read GitHub files by itself: use the client's actual
 repository/file context or state the missing capability; never invent a replacement tree.
 
-To disconnect the workspace's GitHub connection, an Owner calls REST `DELETE /v1/organizations/{organization_id}/github` (no CLI or MCP command). It revokes the connection and every repository grant under it, so auto-deploy and linked sources stop at once; the GitHub App stays installed for other workspaces, and reconnecting starts a new connection.
+To disconnect the workspace's GitHub connection, an Owner runs `ohmyhost github disconnect --organization ULID --yes --json` (MCP `github_disconnect` with `confirmed: true`; REST `DELETE /v1/organizations/{organization_id}/github`). It revokes the connection and every repository grant under it, so auto-deploy and linked sources stop at once; the GitHub App stays installed for other workspaces, and `github connect` starts a new connection. Read `github_status` afterwards.
 
 ## Connected chat with a GitHub source
 

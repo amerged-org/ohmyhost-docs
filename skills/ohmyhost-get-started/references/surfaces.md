@@ -14,6 +14,7 @@ and follow the returned schema rather than guessing arguments.
 - `ohmyhost profile list` — ohmyhost profile list --json (saved logins on this computer: name, user and organization, never a token; pass --profile-name NAME or set OHMYHOST_PROFILE to choose one)
 - `ohmyhost github connect` — ohmyhost github connect --organization ULID --idempotency-key KEY --json (connect once, then link covered repositories without another browser consent)
 - `ohmyhost github status` — ohmyhost github status --organization ULID --json
+- `ohmyhost github disconnect` — ohmyhost github disconnect --organization ULID --yes --json (Owner only; revokes the workspace GitHub connection and every repository grant under it, so auto-deploy and linked sources stop at once; the GitHub App stays installed for other workspaces, and github connect starts a new connection)
 - `ohmyhost export create` — ohmyhost export create --project ULID --idempotency-key KEY --stdin --json (password on stdin only; one accepted SQL ZIP per project per 24 hours)
 - `ohmyhost export get` — ohmyhost export get EXPORT_ULID --project ULID --json (poll the original job: progress and error only, never a download URL; once it succeeds, run 'ohmyhost export download-link' for the signed 24-hour ZIP link)
 - `ohmyhost export download-link` — ohmyhost export download-link EXPORT_ULID --project ULID --json (signs one audited 24-hour link of a succeeded SQL ZIP; the URL is a secret, keep it out of files and notes; each call signs another link)
@@ -31,6 +32,8 @@ and follow the returned schema rather than guessing arguments.
 - `ohmyhost organization create` — ohmyhost organization create --name NAME --idempotency-key KEY [--source SOURCE] --json (SOURCE is optional attribution from a link's r value; a login without organization is bound to the new workspace, another login keeps its own)
 - `ohmyhost organization list` — ohmyhost organization list [--profile-name NAME] --json (the workspaces of the chosen login's user and the one that login is scoped to)
 - `ohmyhost organization use` — ohmyhost organization use --organization ULID [--profile-name NAME] --json (binds a login that has no organization yet; another organization needs its own login)
+- `ohmyhost organization mcp-connections list` — ohmyhost organization mcp-connections list --organization ULID --json (Owner only; lists each MCP client connected to this workspace and the member who connected it; disconnected consents are not listed)
+- `ohmyhost organization mcp-connections revoke` — ohmyhost organization mcp-connections revoke --organization ULID --connection UUID --yes --json (Owner only; disconnects one MCP client from this workspace only, and the member's other workspaces are unaffected; repeat until it answers revoked)
 - `ohmyhost operation get` — ohmyhost operation get OPERATION_ULID --json
 - `ohmyhost operation reconcile` — ohmyhost operation reconcile OPERATION_ULID --idempotency-key KEY --yes --json
 - `ohmyhost token create` — ohmyhost token create --organization ULID --name NAME --idempotency-key KEY --out .env.local --json
@@ -140,6 +143,7 @@ and follow the returned schema rather than guessing arguments.
 - `ohmyhost mail webhook set` — ohmyhost mail webhook set --project ULID --environment ULID --url HTTPS_URL --idempotency-key KEY --json
 - `ohmyhost mail webhook verify` — ohmyhost mail webhook verify --project ULID --environment ULID --idempotency-key KEY --json
 - `ohmyhost mail webhook disable` — ohmyhost mail webhook disable --project ULID --environment ULID --idempotency-key KEY --json
+- `ohmyhost mail webhook rotate` — ohmyhost mail webhook rotate --project ULID --environment ULID --idempotency-key KEY --yes --json (Owner only; issues a new signing secret for the same endpoint, stops the earlier secrets at once and ends receiving until the endpoint verifies the new one; the secret is returned once, so install it in Prod application secrets and never write it into files or notes)
 - `ohmyhost mail messages list` — ohmyhost mail messages list --project ULID --environment ULID [--after ULID] --json
 - `ohmyhost mail messages get` — ohmyhost mail messages get --project ULID --environment ULID --message ULID --json
 - `ohmyhost mail messages retry` — ohmyhost mail messages retry --project ULID --environment ULID --message ULID --idempotency-key KEY --json
@@ -234,6 +238,9 @@ and follow the returned schema rather than guessing arguments.
 - `project_dev_access_create` — Create an owner-only one-hour single-use access link for the protected Dev app.
 - `github_connect` — Owner or Admin: connect GitHub once for this workspace.
 - `github_status` — Read this workspace's GitHub connection.
+- `github_disconnect` — Owner only: disconnect this workspace's GitHub connection.
+- `organization_mcp_connections_list` — Owner only: list the MCP clients connected to this workspace and the member who connected each, one entry per member, client and consent.
+- `organization_mcp_connection_revoke` — Owner only: disconnect one MCP client from this workspace only; the member's other workspaces are unaffected.
 - `source_link` — Link a repository covered by the workspace GitHub connection.
 - `source_get` — Get linked source status.
 - `deployment_plan` — Plan an immutable deployment.
@@ -267,6 +274,7 @@ and follow the returned schema rather than guessing arguments.
 - `mail_webhook_set` — Set the required HTTPS endpoint on the project's Prod application using its Prod environment ID.
 - `mail_webhook_verify` — Send a signed test to the Prod application endpoint and enable receiving after it accepts the event.
 - `mail_webhook_disable` — Disable receiving on the project's Prod mail domain and remove its webhook; existing message content becomes inaccessible.
+- `mail_webhook_rotate` — Owner only: issue a new server-only signing secret for the project's Prod mail webhook endpoint.
 - `mail_messages_list` — List the Prod environment's owned handoff metadata younger than 72 hours.
 - `mail_message_get` — Read only this project's Prod-received message before the hard 72-hour expiry.
 - `mail_message_retry` — Retry the Prod customer webhook within its shared budget: initial attempt plus at most three retries, all before 72 hours from receipt.

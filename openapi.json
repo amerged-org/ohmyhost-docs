@@ -8867,6 +8867,69 @@
         "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
       }
     },
+    "/v1/projects/{project_id}/environments/{environment_id}/secrets/{secret_name}/rotate": {
+      "post": {
+        "operationId": "rotateEnvironmentSecret",
+        "summary": "Rotate an installed platform key",
+        "description": "Replaces the value of an installed platform key (OHMYHOST_AI_KEY, OHMYHOST_MAIL_KEY, OHMYHOST_STORAGE_KEY or BETTER_AUTH_SECRET) with a value the platform generates. The request has no body and the value is never returned. The earlier value stops authorizing at once, and the new value reaches the running environment without a deployment. Other names answer 400; an installed key the environment does not hold answers 404. Repeating the same idempotency key replays the stored metadata.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          },
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/EnvironmentId"
+          },
+          {
+            "$ref": "#/components/parameters/SecretName"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Rotated secret metadata. The value is never returned.",
+            "headers": {
+              "X-Request-Id": {
+                "$ref": "#/components/headers/XRequestId"
+              }
+            },
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/EnvironmentSecret"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "403": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/IdempotencyConflict"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
     "/v1/operations/{operation_id}": {
       "get": {
         "operationId": "getOperation",
@@ -12488,7 +12551,7 @@
       },
       "PaidDomain": {
         "type": "object",
-        "description": "awaiting_deployment means the requested hostname is declared but not provisioned. Its hostname is present, suspension_reason, custom_hostname_status, ssl_status and url are null, and validation_records is empty. Authorize Cloudflare, deploy to Prod, then repeat the same apply.",
+        "description": "awaiting_deployment means the requested hostname is declared but not provisioned. Its hostname is present, suspension_reason, custom_hostname_status, ssl_status and url are null. validation_records holds only the _omh-project TXT ownership record while the hostname is not yet proven, and is empty once it is proven. Publish that record, authorize Cloudflare, deploy to Prod, then repeat the same apply.",
         "additionalProperties": false,
         "required": [
           "status",

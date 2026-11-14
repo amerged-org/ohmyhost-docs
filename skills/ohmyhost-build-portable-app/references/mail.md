@@ -31,6 +31,7 @@ without it deploys with no mail domain.
    `ohmyhost mail webhook set`. The protected Dev URL is not an inbound mail target.
    Install the returned `signing_secret` under an application-owned name such as `APP_MAIL_WEBHOOK_SECRET`
    using the existing secret-delivery flow. Never put it in source, logs or browser code.
+   To replace that secret later, the Owner runs `ohmyhost mail webhook rotate --project ULID --environment PROD_ULID --idempotency-key KEY --yes --json` (MCP `mail_webhook_rotate` with `confirmed: true`). Its answer carries a new `signing_secret` once; earlier secrets stop verifying at once, and receiving stays off until `mail_webhook_verify` succeeds with the new one.
 4. Run `mail_webhook_verify` / `ohmyhost mail webhook verify` against the deployed Prod handler.
    A signed `email.webhook_test` must return 2xx without inserting a real message. Verification
    enables receiving and returns the required MX records. Read `mail_status` until ready.
