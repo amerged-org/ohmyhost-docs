@@ -1,0 +1,12 @@
+---
+title: "Domain ownership required"
+description: "What the `domain_ownership_required` error means and what to do next."
+---
+
+The API, CLI and MCP return `domain_ownership_required` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+This hostname is not verified for this project yet. Run application_domain_identity_declare (CLI: ohmyhost mail identity declare --project ULID --hostname HOST --idempotency-key KEY --json) and add the _omh-project.HOST TXT record it returns; then application_domain_identity_verify (CLI: ohmyhost mail identity verify --project ULID --expected-revision N --idempotency-key KEY --json), then apply again. Repeating before then cannot work.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

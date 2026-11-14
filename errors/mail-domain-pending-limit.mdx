@@ -1,0 +1,12 @@
+---
+title: "Mail domain pending limit"
+description: "What the `mail_domain_pending_limit` error means and what to do next."
+---
+
+The API, CLI and MCP return `mail_domain_pending_limit` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+This organization already holds the maximum number of unverified workspace mail domains. Verify one of them, or retire an unused one, and then add this domain again.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

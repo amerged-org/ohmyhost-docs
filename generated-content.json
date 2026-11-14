@@ -1,7 +1,7 @@
 {
-  "source_commit": "937bb37c1d60c39241eeb425368649ec97ca0e56",
+  "source_commit": "63be6795088d6740b355eb742bd470b6ba69202b",
   "source_dirty": false,
-  "release": "0.1.54",
+  "release": "0.1.55",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -22,6 +22,10 @@
     {
       "path": "errors/billing-recharge-conflict.mdx",
       "sha256": "f58f409c4a32741c5ee3414e775c84efdadda5e1a2cf8ab5f6b0135033632da6"
+    },
+    {
+      "path": "errors/build-capacity-reached.mdx",
+      "sha256": "b65e62451c759ae3a8c97dccc52a9738539c9ecf5b3e8021ce56d95063619c99"
     },
     {
       "path": "errors/cloudflare-authorization-closed.mdx",
@@ -78,6 +82,10 @@
     {
       "path": "errors/database-access-limit.mdx",
       "sha256": "3eb2f39041ea354605b2d4d7d89ce6c60cfeaedadf8dc8809b2e39165f061669"
+    },
+    {
+      "path": "errors/database-limit-reached.mdx",
+      "sha256": "f58f28949ce4ac74241c7ed570dd306cebd42b6a87a9a25a866c0aa0473e11b7"
     },
     {
       "path": "errors/database-schedule-limit.mdx",
@@ -141,7 +149,11 @@
     },
     {
       "path": "errors/domain-hostname-taken.mdx",
-      "sha256": "8f1a8612bc981e46e007f5c0dc221ef4440d409eab53f131de1da8e2091060bc"
+      "sha256": "51e6c85fa209385ca27288e84935440ce3b6f71da8d3e6234d324dcf8e01042a"
+    },
+    {
+      "path": "errors/domain-ownership-required.mdx",
+      "sha256": "8462e3204b2c0cfd280833cee1fe55b8e9fd8ee0f1326e24b810b1dacf0baf06"
     },
     {
       "path": "errors/environment-secret-mutation-blocked.mdx",
@@ -192,6 +204,10 @@
       "sha256": "6356b67654253f5d5130c5fc786e517e060c64d0a933c443d8b51218bb5639f1"
     },
     {
+      "path": "errors/mail-domain-pending-limit.mdx",
+      "sha256": "bad44b48f1e6344853d70c21f92b9d4f397f338a1e71fac1d2da32f7caf0ae19"
+    },
+    {
       "path": "errors/mail-domain-required.mdx",
       "sha256": "6cb9c9419236b18f756106fa30c104c11d46a570f34e956322149a73fb5dd15b"
     },
@@ -200,8 +216,24 @@
       "sha256": "75f513f247d7608e6ff277ca3f5d061fe048b72e0dc03c2b3bd705c22a6f3b6a"
     },
     {
+      "path": "errors/native-auth-epoch-exhausted.mdx",
+      "sha256": "b675682a3b21d764fd4dfe90a1f625c47f42052c9dc15522a0b6f70aa150d138"
+    },
+    {
+      "path": "errors/native-auth-launch-unavailable.mdx",
+      "sha256": "0fd9066244adcd10df62ef396755c7c6f9ee4351daec353f5138fed837e5ec4f"
+    },
+    {
+      "path": "errors/native-auth-provider-unavailable.mdx",
+      "sha256": "073ed878567cca07bab5d47ab308fd0c6ff9b8555063bfb37fd6f78bc5d53266"
+    },
+    {
       "path": "errors/native-domain-sync-pending.mdx",
       "sha256": "fcd49ebc25c8d398a49e09a3a04dd72fa6cacbaa33e7c7690fa4d545321855d5"
+    },
+    {
+      "path": "errors/native-user-conflict.mdx",
+      "sha256": "f2287cbd201a249a67408f350db0c28fc1ada212a1beb8705baedf796c8aedcc"
     },
     {
       "path": "errors/organization-required.mdx",
@@ -230,6 +262,10 @@
     {
       "path": "errors/project-domain-delete-required.mdx",
       "sha256": "ff872c85788a183f82f3211636bb1269b4413bc30e220c0b272ca0ce3a416fa2"
+    },
+    {
+      "path": "errors/project-domains-conflict.mdx",
+      "sha256": "2127c725e8801da8c2bafaf7d5b22c58d03bd2438cbba141c1a36fa6d67e40d9"
     },
     {
       "path": "errors/project-export-not-ready.mdx",
@@ -282,6 +318,10 @@
     {
       "path": "errors/reconciliation-exhausted.mdx",
       "sha256": "77ddb535b9df64df363e42f7525604335f8243a999b781904f1505267f5abf0c"
+    },
+    {
+      "path": "errors/reconciliation-not-pending.mdx",
+      "sha256": "2bf741714f3c10386e35f0151d1a1d12ee72598a87a5783ad3e09ef8c63cc875"
     },
     {
       "path": "errors/repository-configuration-missing.mdx",
@@ -353,7 +393,7 @@
     },
     {
       "path": "snippets/error-codes.mdx",
-      "sha256": "5f5f7f65a79d4950eba1e8b9e977fba24ca0fcd2208a4100901259a5d0f933c7"
+      "sha256": "20ba7e0c4ec8dde17403fdc443d98743bd97c9e0bfd1597804e9798c3fe8dc6f"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/SKILL.md",
@@ -365,7 +405,7 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/cli-deploy.md",
-      "sha256": "d00cbcb5328a822e89cac6c594c7069913db1264a023fdab1ecb871891f14374"
+      "sha256": "d67bac9b0d5d23614bfaadb7775ac99e17a81b92eb5799f25793568371f6919c"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/database-runtime.md",
@@ -373,35 +413,35 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/mail.md",
-      "sha256": "daaec294be35caaacc8d7b28a6c98e13d5d7ad9d8af6d88b77dfcd090658486f"
+      "sha256": "0096cbe68c3843b6a63ee5a95ad4f27135b1bda48719955d6437405062dadbbb"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/row-level-security.md",
-      "sha256": "395e7eb7d430126c6a9402cc1b57c64251080e5966580422dc5ab80708f09126"
+      "sha256": "a286b93099b8ec38609042db979a5ff578176b107153e327724c636dc59d1060"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/stack-contracts.md",
-      "sha256": "019ed55b95c6e6e17ef832ccf5bebc5574929b37037d2bf6a7e67a0fd7ad0ad6"
+      "sha256": "e4bbe134b03e5774954d3d75ce21409bc6b4c49ef8146a50511eed0bc27e0d38"
     },
     {
       "path": "skills/ohmyhost-deploy-github/SKILL.md",
-      "sha256": "402739d4408f3e8ef98c7abca3632975437bfc128303ae0a1aeb9b14529707fd"
+      "sha256": "f6d172c07dd8a1d6303ee59855fcdf71cf2b249975f009a0cae6fd55771f964a"
     },
     {
       "path": "skills/ohmyhost-deploy/SKILL.md",
-      "sha256": "6052d0137db2ae04411374b5899e65fe1315c9ac4079f8470da801877d4fd8a7"
+      "sha256": "10f82175f6677d895ed0950fd141feb6c052ea0e5b8181ece3aad39efc7c7c09"
     },
     {
       "path": "skills/ohmyhost-domains-and-mail/SKILL.md",
-      "sha256": "02567739672ddbf8b54b01771ad5955097c7a00ee9d4a1b027916f6f5a338ea0"
+      "sha256": "1752c2551208deefaae77cb2ca815bfc32462a9b5553f0fddde52677c755e69b"
     },
     {
       "path": "skills/ohmyhost-export-database/SKILL.md",
-      "sha256": "1e355e03d130c47caa4a6725749cfb31c72f15fc6c88519b567704acc37463ff"
+      "sha256": "c5a79e223df2fd7b2e4ff48cd57e669477c7a1319cc4d0f3b124bdf3e66c5235"
     },
     {
       "path": "skills/ohmyhost-get-started/SKILL.md",
-      "sha256": "e88494ce8c1c1ee556adaaed0fc052ef93fca90fb411e62812fee1376bf47db1"
+      "sha256": "b0bb2496deb26fad9424dc489bb1441286004b80d5c7246e559421b44126fa18"
     },
     {
       "path": "skills/ohmyhost-get-started/references/harness-setup.md",
@@ -409,11 +449,11 @@
     },
     {
       "path": "skills/ohmyhost-get-started/references/surfaces.md",
-      "sha256": "7aba7a1e49ae08aaec20ffa96377cef5d7b24e3724543435c87656d2aeebffc5"
+      "sha256": "a65fd7652bf087fb09c37dc64e6b2007bf6c2985d57bc6082902fdfa9c33a926"
     },
     {
       "path": "skills/ohmyhost-manage-database/SKILL.md",
-      "sha256": "9b7cf83280e2d293807757b289a6767e0108c91f006928eb7c79ca7323a509ea"
+      "sha256": "4f8d92b1da676dd03aae19d885289cc634e480c32dc775146749b0907f14bd6d"
     },
     {
       "path": "skills/ohmyhost-migrate-supabase-postgres/SKILL.md",
@@ -433,23 +473,23 @@
     },
     {
       "path": "skills/ohmyhost-troubleshoot-deployment/SKILL.md",
-      "sha256": "1c8300ca20aa81cf012bd81132113e97f04b4f58e777e50b7c43a993ecfd000b"
+      "sha256": "fa60e703889e6c4c81103b06986676a80cf986fdd36401f1f580a12f9e877bcf"
     },
     {
       "path": "skills/ohmyhost-usage-and-budgets/SKILL.md",
-      "sha256": "90daf7b8507816c0ea7c5d4a951b2d2952cb39c1ea9e861f12894f39ba0d5e54"
+      "sha256": "36b934cb49cbdcfa7a3a555d8d1f6b62fe46707d5cd9b36568191ae2510690ef"
     },
     {
       "path": "openapi.yaml",
-      "sha256": "67b1573390a4338924155e5868557e2b5131ab3e5b776e1b4a6c0e4f95ee90c6"
+      "sha256": "ed34b781eecc7e7f4ac91ea281fd2b0f69f2a7b50bc9cdb9d0a479db238f0da5"
     },
     {
       "path": "openapi.json",
-      "sha256": "43123368669b35730152e5f01754c886600ee2f0ec348a31148bde99b667b6cb"
+      "sha256": "0bed5e162bf49b48f45ca6c0c088787cb93146db674816dc979bf26e56738626"
     },
     {
       "path": "mcp-tools.json",
-      "sha256": "70f773542ff0ca7c0b954f3cf580c44930d7f17b84d144fb224573e9322a399d"
+      "sha256": "8c78f7aa54d05fc3466059dc8f8b03325c5bcae9cbdb8b0f67ea93ef551ab8b4"
     },
     {
       "path": "mcp.json",
@@ -457,19 +497,19 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "c93e595b4f0bb4c311eb5a4bfcc7ac4575c2a009236bb28b06e85e2e5635ca6d"
+      "sha256": "dd0e8e36df6a5e3420b5684bea17bbe97c7ccd198e44bafb2699e9e3b57a2d31"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "b3735b9d427599f90a667e0509721e2cc70fbaafd9621198e8a54cc86662510a"
+      "sha256": "ad960e0d2bf50f54730812042848229fff1797515b20f4b6e29695502c684a3b"
     },
     {
       "path": "snippets/skill-catalog.mdx",
-      "sha256": "502053f3abe565108d940781ce6e354a6cc94b6d31d9f9e9cf4dead57e413e66"
+      "sha256": "8b304b85297778b3efc473f0765a52695ab80da10f24160eae8186e0a3403722"
     },
     {
       "path": "snippets/mcp-tools.mdx",
-      "sha256": "da775c9bf9a2900ca9bbafbb926fc7c93b5d3801b0478df05e67cda2ca9a270f"
+      "sha256": "ed0e233d6f7c9652db3e014f73e69335befadf3c130f18f2a58a5115f942cd1f"
     },
     {
       "path": "logo/light.svg",

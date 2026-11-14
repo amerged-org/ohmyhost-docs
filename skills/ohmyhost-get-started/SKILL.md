@@ -1,6 +1,6 @@
 ---
 name: ohmyhost-get-started
-description: Connect a customer agent or native chat to ohmyho.st, verify the intended account and workspace, and continue an application from its saved source. Use managed OAuth for a remote chat and the existing local login for a terminal agent. Also use for account selection, customer support, or private automation credentials, and to route LLM, image, speech, classifier or OCR requests to the app Skill; use ohmyhost-deploy once access is ready.
+description: Connect a customer agent or native chat to ohmyho.st, verify the intended account and workspace, and continue an application from its saved source. Use managed OAuth for a remote chat and the existing local login for a terminal agent. Also use for account selection, customer support, private automation credentials, or an Owner reviewing or disconnecting the MCP clients connected to a workspace, and to route LLM, image, speech, classifier or OCR requests to the app Skill; use ohmyhost-deploy once access is ready.
 ---
 
 # Start with ohmyho.st
@@ -378,7 +378,7 @@ ohmyhost whoami --json
 - Creating a workspace selects it immediately for a login that had none; `whoami` or `identity_get` confirms the selection before you create a project. A login already in another workspace keeps it, and the response names the `login` that adds one for the new workspace.
 - Over MCP, `organization_create`, `organization_list` and `organization_use` do the same and report the same `selected` workspace.
 - Creating, listing and selecting a workspace need the interactive login. An API token can do none of them, and says so.
-- Never create another workspace on your own when the customer already has one.
+- Never create another workspace on your own when the customer already has one. One user can start at most five new workspaces per hour; a sixth request answers `forbidden`, so reuse an existing workspace instead of retrying.
 - A session that selected none lists no projects: `projects_list` and `ohmyhost project list` answer `organization_required` instead of an empty page. Select a workspace, then read the list again.
 
 ## Step 5 — keep access for later
@@ -411,6 +411,8 @@ an already working credential merely to make a replay return a new value.
 
 Native Auth management requires the separate `auth:read` or `auth:manage` permission in addition to current Owner authority. Existing tokens retain their recorded permissions; a token limited to environment secrets does not gain Native Auth access. For a project approved by the existing Native launch allowlist, a current Owner may explicitly authorize creation of a new Native-capable token with the needed permissions. Never revoke or replace an existing token without the customer's scoped authorization.
 
+A workspace Owner can see which MCP clients are connected to the workspace and disconnect one from that workspace only: REST `GET /v1/organizations/{organization_id}/mcp-connections` lists them, and `DELETE /v1/organizations/{organization_id}/mcp-connections/{connection_id}` disconnects one (no CLI or MCP command). The member's other workspaces are unaffected; a disconnect answers `pending` while an active use drains, so repeat it until it answers `revoked`.
+
 `OHMYHOST_TOKEN` overrides the saved logins in any process where it is set. A token alone runs every
 command in these Skills except these, which need the interactive login: `login`, `logout` (including
 `logout --revoke`), `organization create|list|use`, and `token create|list|revoke`. Run those in a
@@ -432,7 +434,7 @@ ohmyhost github status --organization "$ORGANIZATION_ID" --json
 ohmyhost github connect --organization "$ORGANIZATION_ID" --idempotency-key "$GITHUB_CONNECT_KEY" --json
 ```
 
-The one link handles the required installation/user authorization. Do not construct a second installation link, replay OAuth callbacks, or ask for an installation ID or provider token. Use the intended GitHub browser profile. A connected installation covers only its selected repositories; if one is missing, open `connection.settings_url` from status, add the repository and repeat its original source-link request/key.
+The one link handles the required installation/user authorization, and whoever completes it must be signed in to the ohmyho.st portal as the same person who started it (otherwise the page says the link does not belong to an active request and nothing is consumed). Do not construct a second installation link, replay OAuth callbacks, or ask for an installation ID or provider token. Use the intended GitHub browser profile. A connected installation covers only its selected repositories; if one is missing, open `connection.settings_url` from status, add the repository and repeat its original source-link request/key.
 
 MCP/REST returns these objects directly. CLI JSON wraps the handoff in `authorization` and status
 in `github`: read `authorization.authorization_url` and `github.connection.settings_url`.

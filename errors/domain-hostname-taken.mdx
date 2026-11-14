@@ -7,6 +7,6 @@ The API, CLI and MCP return `domain_hostname_taken` with HTTP 409. Repeating the
 
 ## What to do
 
-A live project connection already holds this hostname. Remove it from the project you manage with 'ohmyhost domain paid delete --project ULID --hostname HOST --yes --json', then apply it to the new project. Repeating while that connection remains cannot work; report the request_id if you cannot manage its owning project.
+A live connection holds it; its holder removes it with ohmyhost domain paid delete --project ULID --hostname HOST --yes --json. To connect it here, run application_domain_identity_declare (CLI: ohmyhost mail identity declare --project ULID --hostname HOST --idempotency-key KEY --json), add the _omh-project.HOST TXT record it returns, run application_domain_identity_verify (CLI: ohmyhost mail identity verify --project ULID --expected-revision N --idempotency-key KEY --json), then apply again.
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

@@ -1,0 +1,12 @@
+---
+title: "Reconciliation not pending"
+description: "What the `reconciliation_not_pending` error means and what to do next."
+---
+
+The API, CLI and MCP return `reconciliation_not_pending` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Do not repeat this reconciliation: no uncertain delivery or provider mutation is pending for this operation. If the operation still does not finish, submit feedback with this operation ID.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

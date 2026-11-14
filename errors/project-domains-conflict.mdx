@@ -1,0 +1,12 @@
+---
+title: "Project domains conflict"
+description: "What the `project_domains_conflict` error means and what to do next."
+---
+
+The API, CLI and MCP return `project_domains_conflict` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+The domains of this project were configured under another project handle. Read the project with 'ohmyhost project status --project ULID --json' to see its current handle, then repeat the domain configuration with a new idempotency key. Do not replay the earlier request.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

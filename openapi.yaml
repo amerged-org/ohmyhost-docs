@@ -1344,6 +1344,89 @@ paths:
         "429": { $ref: "#/components/responses/Problem" }
         "503": { $ref: "#/components/responses/Problem" }
       x-ohmyhost-resource-disclosure: indistinguishable-not-found
+    delete:
+      operationId: disconnectGithubOrganization
+      summary: Disconnect the workspace GitHub connection
+      description:
+        Owner only. Revokes the workspace connection and every GitHub repository grant under it, so
+        auto-deploy and linked sources stop at once. The GitHub App stays installed for other
+        workspaces; reconnecting starts a new connection.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+      responses:
+        "200":
+          description: The connection after disconnect, revoked or not connected.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/GithubOrganizationConnectionStatus" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/organizations/{organization_id}/mcp-connections:
+    get:
+      operationId: listOrganizationMcpConnections
+      summary: List the MCP clients connected to the workspace
+      description:
+        Owner only. Lists each connected MCP client and the member who connected it, once per
+        member, client and consent. Consents already disconnected are not listed.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+      responses:
+        "200":
+          description: The live MCP connections of the workspace.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OrganizationMcpConnectionList" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/organizations/{organization_id}/mcp-connections/{connection_id}:
+    delete:
+      operationId: revokeOrganizationMcpConnection
+      summary: Disconnect an MCP client from the workspace
+      description:
+        Owner only. Disconnects the client's consent from this workspace only; the member's other
+        workspaces are unaffected. Answers pending while an active provider use of the consent
+        drains. Repeat the request until it answers revoked.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+        - name: connection_id
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        "200":
+          description: The disconnect state.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/OrganizationMcpConnectionRevocation" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
   /v1/organizations/{organization_id}/referral:
     get:
       operationId: getOrganizationReferral
@@ -1717,12 +1800,14 @@ paths:
       operationId: completeGithubSourceAuthorization
       summary: Complete the bound GitHub browser authorization
       description:
-        Browser callback only. Revalidates the original user session or user API key, workspace
-        Owner/Admin authority and authorization expiry, then privately verifies the GitHub account
-        and installation. A valid installation callback without an OAuth code continues
-        automatically through OAuth. Completion records the workspace connection without building or
-        returning provider credentials. Previously issued project authorizations remain supported
-        during rollout.
+        Browser callback only. Requires the portal session of the same user who started the
+        authorization (a browser with no session, another user's session or an unknown state is
+        answered as an unknown state and consumes nothing). Revalidates the original user session
+        or user API key, workspace Owner/Admin authority and authorization expiry, then privately
+        verifies the GitHub account and installation. A valid installation callback without an
+        OAuth code continues automatically through OAuth. Completion records the workspace
+        connection without building or returning provider credentials. Previously issued project
+        authorizations remain supported during rollout.
       security: []
       parameters:
         - name: state
@@ -1761,11 +1846,15 @@ paths:
         "403":
           description:
             The authorizing GitHub account lacks the required installation access or account
-            authority.
+            authority. It is also the answer, for a machine client, to an unknown state, to another
+            user's portal session and to a missing portal session; a browser is sent to the
+            unknown-state page instead.
           content:
             application/problem+json:
               schema:
                 $ref: "#/components/schemas/ProblemDetails"
+        "409":
+          $ref: "#/components/responses/Problem"
         "429":
           $ref: "#/components/responses/Problem"
         "503":
@@ -1776,10 +1865,12 @@ paths:
       summary: Complete one Cloudflare DNS authorization
       description:
         Successful callbacks require code and state and complete one previously authenticated
-        project authorization. Provider rejection instead supplies error and optional
-        error_description, error_uri and state; it returns a static actionable problem without
-        completing authorization or reflecting provider input. Success and error parameters cannot
-        be combined. This callback grants no general unauthenticated product access.
+        project authorization, only in a browser signed in to the portal as the user who started
+        it; without that session the callback answers a confirmation problem and consumes nothing.
+        Provider rejection instead supplies error and optional error_description, error_uri and
+        state; it returns a static actionable problem without completing authorization or
+        reflecting provider input. Success and error parameters cannot be combined. This callback
+        grants no general unauthenticated product access.
       security: []
       parameters:
         - name: code
@@ -1824,6 +1915,8 @@ paths:
               schema:
                 type: string
         "400":
+          $ref: "#/components/responses/Problem"
+        "409":
           $ref: "#/components/responses/Problem"
         "429":
           $ref: "#/components/responses/Problem"
@@ -2243,12 +2336,12 @@ paths:
               properties:
                 password:
                   type: string
-                  minLength: 1
+                  minLength: 12
                   maxLength: 1024
                   writeOnly: true
                   description:
-                    Non-blank user-controlled ZIP password, at most 1024 UTF-8 bytes. Never include it in
-                    logs or command-line arguments.
+                    User-controlled ZIP password of at least 12 characters and at most 1024 UTF-8 bytes,
+                    not blank. Never include it in logs or command-line arguments.
       responses:
         "202": { $ref: "#/components/responses/AcceptedOperation" }
         "400": { $ref: "#/components/responses/Problem" }
@@ -2271,11 +2364,10 @@ paths:
       operationId: getProjectExport
       summary: Read export progress and its verified 24-hour download capability
       description: Owner-only, including at zero credits. Poll queued/running jobs after
-        next_poll_after_seconds. A verified SQL ZIP is retained seven days. Its signed download URL
-        is valid 24 hours and is issued only with at least 24 hours of retention left; otherwise
-        download fields are null. Treat the URL as a secret bearer capability. Neither the password
-        nor any permanent storage credential can be retrieved. Generic operation reads never contain
-        this capability.
+        next_poll_after_seconds. A verified SQL ZIP is retained seven days. This read never signs a
+        download URL, so download_url and download_expires_at are always null here. Request a link with
+        POST download-links. Neither the password nor any permanent storage credential can be
+        retrieved. Generic operation reads never contain a download capability.
       parameters:
         - $ref: "#/components/parameters/ProjectId"
         - $ref: "#/components/parameters/RequestId"
@@ -2292,6 +2384,45 @@ paths:
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+  /v1/projects/{project_id}/exports/{export_id}/download-links:
+    post:
+      operationId: createProjectExportDownloadLink
+      summary: Sign one 24-hour download link of a ready SQL export
+      description: Owner-only. Each link is audited under the caller before it is signed, and an
+        organization may take six links a minute; a seventh is refused with 429 and a retry after 60
+        seconds. Treat the returned URL as a secret bearer capability; never store it in files, notes
+        or source. The link is not idempotent, so a repeated request signs another link and is audited
+        again. Requires at least 24 hours of retention left on the archive, otherwise 409.
+      parameters:
+        - $ref: "#/components/parameters/ProjectId"
+        - $ref: "#/components/parameters/RequestId"
+        - name: export_id
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+      responses:
+        "200":
+          description: The signed download URL and its expiry.
+          headers:
+            Cache-Control:
+              schema: { type: string, const: no-store }
+          content:
+            application/json:
+              schema:
+                type: object
+                additionalProperties: false
+                required: [id, project_id, download_url, download_expires_at]
+                properties:
+                  id: { $ref: "#/components/schemas/Ulid" }
+                  project_id: { $ref: "#/components/schemas/Ulid" }
+                  download_url: { type: string, format: uri }
+                  download_expires_at: { type: string, format: date-time }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "409": { $ref: "#/components/responses/Problem" }
         "429": { $ref: "#/components/responses/Problem" }
         "503": { $ref: "#/components/responses/Problem" }
   /v1/projects/{project_id}/credit-budget:
@@ -2781,6 +2912,16 @@ paths:
         origin. A new ticket revokes unused tickets previously issued to the same principal.
       parameters:
         - $ref: "#/components/parameters/RequestId"
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description:
+            Optional and ignored. This route does not replay a stored answer, so a repeated request
+            issues another ticket and revokes the unused one.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
         - $ref: "#/components/parameters/ProjectId"
       responses:
         "201":
@@ -4041,15 +4182,27 @@ paths:
       summary: Issue one time-bound PostgreSQL credential for Dev or Prod
       description: Owner-authorized direct PostgreSQL login for the project's own database, returned
         exactly once and never retrievable again. Mode read joins the read-only role, mode write
-        joins the same restricted runtime role the application uses; neither can change schema, and
-        application row-level security policies remain effective. The lifetime is 5 minutes to 24
-        hours (3600 seconds by default) and PostgreSQL refuses new logins after it; the platform
-        ends remaining sessions within 15 minutes after expiry, at the latest. At most three active
+        joins the same restricted runtime role the application uses; neither can change schema. The
+        login gets no implicit row bypass, but its holder can set ohmyhost.request_claims and so act
+        as any application user; treat a credential as read (or write) access to all application
+        rows. The lifetime is 5 minutes to 24 hours (3600 seconds by default) and PostgreSQL refuses
+        new logins after it; the platform ends remaining sessions within 15 minutes after expiry, at
+        the latest. At most three active
         credentials exist per project environment. Database compute wakes and is metered normally,
         and existing credit grace and Stop budgets apply. Revoke the credential as soon as the work
         is finished and never store the connection URI in files, notes or source.
       parameters:
         - $ref: "#/components/parameters/RequestId"
+        - name: Idempotency-Key
+          in: header
+          required: false
+          description:
+            Optional and ignored. This route does not replay a stored answer, so a repeated request
+            issues another credential.
+          schema:
+            type: string
+            minLength: 1
+            maxLength: 128
         - $ref: "#/components/parameters/ProjectId"
       requestBody:
         required: true
@@ -4236,7 +4389,7 @@ paths:
     get:
       operationId: listProjectDatabaseWatches
       summary: List the project's database watches
-      description: Returns every watch of the selected environment. Listing wakes a sleeping database.
+      description: Returns every watch of the selected environment. Listing wakes a sleeping database, so while the project's Stop budget is reached it is refused with 402, as create and delete are.
       parameters:
         - $ref: "#/components/parameters/RequestId"
         - $ref: "#/components/parameters/ProjectId"
@@ -4249,6 +4402,7 @@ paths:
               schema: { $ref: "#/components/schemas/DatabaseWatchPage" }
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
+        "402": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/ResourceNotFound" }
         "429": { $ref: "#/components/responses/Problem" }
         "503": { $ref: "#/components/responses/Problem" }
@@ -4328,7 +4482,7 @@ paths:
     get:
       operationId: listProjectDatabaseWebhooks
       summary: List the project's database webhooks
-      description: Returns every webhook of the selected environment without signing secrets.
+      description: Returns every webhook of the selected environment without signing secrets. Callers without projects:write see only the origin of each receiver URL.
       parameters:
         - $ref: "#/components/parameters/RequestId"
         - $ref: "#/components/parameters/ProjectId"
@@ -4349,7 +4503,7 @@ paths:
     get:
       operationId: getProjectDatabaseWebhook
       summary: Read one database webhook
-      description: Returns one webhook without its signing secret.
+      description: Returns one webhook without its signing secret. Callers without projects:write see only the origin of the receiver URL.
       parameters:
         - $ref: "#/components/parameters/RequestId"
         - $ref: "#/components/parameters/ProjectId"
@@ -4371,9 +4525,11 @@ paths:
       operationId: deleteProjectDatabaseWebhook
       summary: Delete one database webhook
       description: Stops deliveries to the webhook. Deleting an already deleted webhook answers
-        not found.
+        not found. A retry with the same Idempotency-Key and request returns the stored answer;
+        the same key with another request answers 409 idempotency_key_reused.
       parameters:
         - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/IdempotencyKey"
         - $ref: "#/components/parameters/ProjectId"
         - $ref: "#/components/parameters/DatabaseWebhookId"
         - $ref: "#/components/parameters/DatabaseEnvironment"
@@ -4386,18 +4542,25 @@ paths:
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "409": { $ref: "#/components/responses/Problem" }
         "429": { $ref: "#/components/responses/Problem" }
         "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-idempotency:
+        canonicalRequestVersion: v1
+        identicalRequest: replay-stored-response
+        changedRequest: 409-idempotency-key-reused
       x-ohmyhost-resource-disclosure: indistinguishable-not-found
   /v1/projects/{project_id}/database/webhooks/{webhook_id}/test:
     post:
       operationId: testProjectDatabaseWebhook
       summary: Send one test delivery to a database webhook
       description: Sends one signed test request to the webhook URL and reports the outcome
-        synchronously. Each call sends one request; the platform allows one test per webhook every
-        five seconds.
+        synchronously. A retry with the same Idempotency-Key and request returns the stored outcome
+        without sending again; a new key sends another request. The platform allows one test per
+        webhook every five seconds.
       parameters:
         - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/IdempotencyKey"
         - $ref: "#/components/parameters/ProjectId"
         - $ref: "#/components/parameters/DatabaseWebhookId"
         - $ref: "#/components/parameters/DatabaseEnvironment"
@@ -4410,8 +4573,13 @@ paths:
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "409": { $ref: "#/components/responses/Problem" }
         "429": { $ref: "#/components/responses/Problem" }
         "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-idempotency:
+        canonicalRequestVersion: v1
+        identicalRequest: replay-stored-response
+        changedRequest: 409-idempotency-key-reused
       x-ohmyhost-resource-disclosure: indistinguishable-not-found
   /v1/projects/{project_id}/database/webhook-deliveries:
     get:
@@ -4463,11 +4631,13 @@ paths:
     post:
       operationId: replayProjectDatabaseWebhookDelivery
       summary: Replay one database webhook delivery
-      description: Queues a new attempt for a delivery that is no longer being retried. Each call
-        queues one more attempt, and the delivery returns to pending until it is delivered or
+      description: Queues a new attempt for a delivery that is no longer being retried. A retry with
+        the same Idempotency-Key and request returns the stored answer without queuing again; a new
+        key queues one more attempt, and the delivery returns to pending until it is delivered or
         dead-lettered again.
       parameters:
         - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/IdempotencyKey"
         - $ref: "#/components/parameters/ProjectId"
         - $ref: "#/components/parameters/DatabaseWebhookDeliveryId"
         - $ref: "#/components/parameters/DatabaseEnvironment"
@@ -4483,12 +4653,18 @@ paths:
         "409": { $ref: "#/components/responses/Problem" }
         "429": { $ref: "#/components/responses/Problem" }
         "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-idempotency:
+        canonicalRequestVersion: v1
+        identicalRequest: replay-stored-response
+        changedRequest: 409-idempotency-key-reused
       x-ohmyhost-resource-disclosure: indistinguishable-not-found
   /v1/projects/{project_id}/database/schedules:
     get:
       operationId: listProjectDatabaseSchedules
       summary: List the project's database schedules
-      description: Returns every schedule of the selected environment.
+      description:
+        Returns every schedule of the selected environment. Callers without projects:write
+        see a sha256 digest of each statement instead of its SQL text.
       parameters:
         - $ref: "#/components/parameters/RequestId"
         - $ref: "#/components/parameters/ProjectId"
@@ -4615,11 +4791,13 @@ paths:
       operationId: runProjectDatabaseSchedule
       summary: Queue one immediate run of a database schedule
       description: Queues one manual run. The run is refused while the schedule is disabled or
-        while a run is already queued.
+        while a run is already queued. A retry with the same Idempotency-Key and request returns the
+        stored answer without queuing a second run.
         A reached Stop budget (or exhausted credit past its grace) refuses the run with
         project_budget_exceeded (402).
       parameters:
         - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/IdempotencyKey"
         - $ref: "#/components/parameters/ProjectId"
         - $ref: "#/components/parameters/DatabaseScheduleName"
         - $ref: "#/components/parameters/DatabaseEnvironment"
@@ -4636,6 +4814,10 @@ paths:
         "409": { $ref: "#/components/responses/Problem" }
         "429": { $ref: "#/components/responses/Problem" }
         "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-idempotency:
+        canonicalRequestVersion: v1
+        identicalRequest: replay-stored-response
+        changedRequest: 409-idempotency-key-reused
       x-ohmyhost-resource-disclosure: indistinguishable-not-found
   /v1/projects/{project_id}/database/execution-usage:
     get:
@@ -5023,7 +5205,8 @@ paths:
         delivery or provider mutation. The control plane derives the exact recovery decision,
         including any deterministic internal Workflow handoff; the request has no body. Exhausted
         lifecycle recovery returns reconciliation_exhausted (409, retryable false); stop retries and
-        report the original operation through feedback.
+        report the original operation through feedback. An operation with no uncertain delivery or
+        provider mutation pending returns reconciliation_not_pending (409, retryable false).
       parameters:
         - $ref: "#/components/parameters/RequestId"
         - $ref: "#/components/parameters/IdempotencyKey"
@@ -5297,6 +5480,39 @@ paths:
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ManagedMailDisabled" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "403": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/Problem" }
+        "409": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/projects/{project_id}/environments/{environment_id}/mail-webhook:rotate:
+    post:
+      operationId: rotateManagedMailWebhookSecret
+      summary: Rotate the customer webhook signing secret
+      description:
+        Owner-only. Issues a new signing secret for the same endpoint and ends receiving until the
+        endpoint verifies the new secret. Earlier secrets stop verifying at once. Repeating the same
+        idempotency key after an uncertain response returns the current secret.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - $ref: "#/components/parameters/IdempotencyKey"
+        - name: project_id
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+        - name: environment_id
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+      responses:
+        "200":
+          description: Authorized mail result with the new signing secret.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ManagedMailWebhook" }
         "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
         "403": { $ref: "#/components/responses/Problem" }
@@ -6850,8 +7066,10 @@ components:
     CloudflareDnsAuthorizationStatus:
       type: object
       description: Credential-free project authorization state. Without an authorization, status is
-        not_authorized, zone and expires_at are null, and scopes is empty. All other states name the
-        actual customer zone; no platform or customer zone is inferred.
+        not_authorized, zone and expires_at are null, and scopes is empty. When the consenting user
+        no longer holds project write authority, status is reauthorization_required, which names the
+        zone while scopes is empty and expires_at is null until the owner authorizes the zone again.
+        All other states name the actual customer zone; no platform or customer zone is inferred.
       additionalProperties: false
       required:
         - status
@@ -6865,6 +7083,7 @@ components:
             - not_authorized
             - pending
             - authorized
+            - reauthorization_required
             - expired
             - revoked
         zone:
@@ -7222,6 +7441,29 @@ components:
           oneOf:
             - $ref: "#/components/schemas/GithubOrganizationConnection"
             - type: "null"
+    OrganizationMcpConnection:
+      type: object
+      additionalProperties: false
+      required: [connection_id, client_id, user_id, connected_at]
+      properties:
+        connection_id: { type: string, format: uuid }
+        client_id: { type: string, minLength: 1, maxLength: 2048 }
+        user_id: { type: string }
+        connected_at: { type: string, format: date-time }
+    OrganizationMcpConnectionList:
+      type: object
+      additionalProperties: false
+      required: [connections]
+      properties:
+        connections:
+          type: array
+          items: { $ref: "#/components/schemas/OrganizationMcpConnection" }
+    OrganizationMcpConnectionRevocation:
+      type: object
+      additionalProperties: false
+      required: [state]
+      properties:
+        state: { type: string, enum: [pending, revoked] }
     GithubConnectionAuthorization:
       type: object
       additionalProperties: false
@@ -7675,7 +7917,7 @@ components:
         deployment_id: { $ref: "#/components/schemas/Ulid" }
         cron: { type: string, maxLength: 64 }
         scheduled_at: { type: string, format: date-time }
-        state: { type: string, enum: [due, running, retry, succeeded, failed] }
+        state: { type: string, enum: [due, running, retry, succeeded, failed, skipped] }
         attempt: { type: integer, minimum: 0, maximum: 3 }
         status_code: { type: [integer, "null"], minimum: 100, maximum: 599 }
         started_at: { type: [string, "null"], format: date-time }
@@ -8205,7 +8447,11 @@ components:
           type: string
           pattern: ^whk_[a-z0-9]{20}$
         environment: { type: string, enum: [dev, prod] }
-        url: { type: string, maxLength: 2048, pattern: ^https:// }
+        url:
+          type: string
+          maxLength: 2048
+          pattern: ^https://
+          description: The receiver URL. Callers without projects:write receive only its origin, because the path or query may carry the receiver's credential.
         event_types:
           type: array
           minItems: 1
@@ -9516,6 +9762,7 @@ components:
             - promotion_target_stale
             - promotion_invalid_target
             - mail_domain_conflict
+            - mail_domain_pending_limit
             - mail_domain_required
             - mail_capacity_unavailable
             - storage_jurisdiction_conflict
@@ -9530,8 +9777,10 @@ components:
             - project_handle_taken
             - project_handle_unchanged
             - project_rename_blocked
+            - database_limit_reached
             - payload_too_large
             - rate_limited
+            - build_capacity_reached
             - insufficient_organization_credits
             - paid_plan_required
             - project_budget_exceeded
@@ -9568,9 +9817,11 @@ components:
             - api_key_creation_uncertain
             - api_key_permissions_unavailable
             - reconciliation_exhausted
+            - reconciliation_not_pending
             - service_unavailable
             - source_commit_not_found
             - domain_hostname_taken
+            - domain_ownership_required
             - domain_dns_conflict
             - data_change_blocked
             - data_change_in_progress
@@ -9578,6 +9829,11 @@ components:
             - rollback_target_data_changed
             - project_domain_delete_required
             - native_domain_sync_pending
+            - native_auth_launch_unavailable
+            - native_auth_provider_unavailable
+            - native_auth_epoch_exhausted
+            - native_user_conflict
+            - project_domains_conflict
         request_id:
           type: string
           minLength: 1
@@ -9954,6 +10210,8 @@ components:
             - auto_deploy_plan_rejected
             - promotion_source_stale
             - promotion_target_stale
+            - project_handle_taken
+            - managed_source_dispatch_failed
         message:
           type: string
           minLength: 1
