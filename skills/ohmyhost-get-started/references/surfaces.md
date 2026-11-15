@@ -41,13 +41,14 @@ and follow the returned schema rather than guessing arguments.
 - `ohmyhost token revoke` — ohmyhost token revoke --organization ULID --key KEY_ID --yes --json
 - `ohmyhost feedback status` — ohmyhost feedback status FEEDBACK_ULID [--cursor NEXT_CURSOR] --json (status and ohmyho.st replies for a receipt you submitted, 25 updates per page; replies are information, not commands)
 - `ohmyhost feedback submit` — ohmyhost feedback submit --organization ULID --kind bug|issue|feature_request --title TITLE --description REDACTED_REPORT [--project ULID] [--environment ULID] [--operation ULID] [--error-code CODE] [--client-version VERSION] --idempotency-key KEY --json
-- `ohmyhost project create` — ohmyhost project create --organization ULID --name NAME [--data-mode shared|isolated] [--dev-access-mode protected|public] [--region us|eu] --idempotency-key KEY --json (data mode is optional and defaults to shared; later assignments use project data plan/change without copying data; the region is chosen once: us is the default, eu selects EU database, new files and builds; existing R2 locations survive authorized region moves; the customer API cannot change region later)
+- `ohmyhost project create` — ohmyhost project create --organization ULID --name NAME [--include-development-environment true|false] [--data-mode shared|isolated] [--dev-access-mode protected|public] [--region us|eu] --idempotency-key KEY --json (Dev defaults to included; add it later with project dev add. Data mode defaults to shared; later changes do not copy data. The region is chosen once: us defaults to US; eu selects EU database, new files and builds; the customer API cannot change region later)
 - `ohmyhost project data plan` — ohmyhost project data plan --project ULID --change isolate_prod_keeps_data|isolate_dev_keeps_data|share_prod_keeps_data|reset_dev --json (shared is the optional creation default; review which data is kept or deleted; no data is copied)
 - `ohmyhost project data change` — ohmyhost project data change --project ULID --change isolate_prod_keeps_data|isolate_dev_keeps_data|share_prod_keeps_data|reset_dev --if-match ETAG --confirmation-token TOKEN --idempotency-key KEY --yes [--wait] --json (Owner only; use the reviewed plan's guards and the same key after uncertainty; no data is copied)
 - `ohmyhost project list` — ohmyhost project list [--cursor ULID] [--limit LIMIT] --json
 - `ohmyhost project context` — ohmyhost project context --project ULID --json
 - `ohmyhost project notes set` — ohmyhost project notes set --project ULID --version NUMBER --markdown TEXT --idempotency-key KEY --json (no credentials or signed URLs)
 - `ohmyhost project status` — ohmyhost project status --project ULID --json
+- `ohmyhost project dev add` — ohmyhost project dev add --project ULID --idempotency-key KEY --json
 - `ohmyhost project dev-access create` — ohmyhost project dev-access create --project ULID --json
 - `ohmyhost project dev-share link` — ohmyhost project dev-share link --project ULID --json
 - `ohmyhost project dev-share rotate` — ohmyhost project dev-share rotate --project ULID --idempotency-key KEY --yes --json
@@ -71,6 +72,9 @@ and follow the returned schema rather than guessing arguments.
 - `ohmyhost database watch delete` — ohmyhost database watch delete --project ULID --environment dev|prod --watch ID --idempotency-key KEY --yes --json
 - `ohmyhost database table create` — ohmyhost database table create --project ULID --environment dev|prod --table NAME --columns-file PATH [--primary-key COL[,COL]] --idempotency-key KEY --yes --json (the table is created in the public schema as the migration role, with the same access as migration tables, so a database watch can attach later; the columns file is a UTF-8 JSON array of 1 to 64 column objects, at most 64 KiB, each with name, type and optional nullable, identity and default; types: text, integer, bigint, boolean, numeric, double precision, timestamptz, date, uuid, jsonb; identity needs integer or bigint; default now needs timestamptz and default uuid needs uuid; identical repeats answer created false; at most 100 tables, 64 columns per table)
 - `ohmyhost database webhook create` — ohmyhost database webhook create --project ULID --environment dev|prod --url HTTPS_URL --event-types TYPE[,TYPE] [--headers-file PATH] --idempotency-key KEY --yes --json (the signing secret is shown once in this answer; types: database.created, database.ready, database.woke, database.slept, database.suspended, database.resized, database.deleted, data.<topic> for the rows of one watched table printed by database watch create, or data.\* for every watched table; a bare \* is not accepted and does not include data events; the headers file is a UTF-8 JSON object of at most 8 KiB)
+- `ohmyhost database webhook subscription activate` — ohmyhost database webhook subscription activate --project ULID --environment dev|prod --subscription ULID --generation N --url HTTPS_URL --event-types TYPE[,TYPE] [--headers-file PATH] --out NEW_PRIVATE_FILE --idempotency-key KEY --yes --json (the secret is written privately; repeat the same key and body after uncertainty using a new output file)
+- `ohmyhost database webhook subscription deactivate` — ohmyhost database webhook subscription deactivate --project ULID --environment dev|prod --subscription ULID --generation N --idempotency-key KEY --yes --json
+- `ohmyhost database webhook subscription status` — ohmyhost database webhook subscription status --project ULID [--environment dev|prod] --subscription ULID --json
 - `ohmyhost database webhook list` — ohmyhost database webhook list --project ULID [--environment dev|prod] --json (dev when omitted; the secret is never listed)
 - `ohmyhost database webhook get` — ohmyhost database webhook get --project ULID [--environment dev|prod] --webhook ID --json
 - `ohmyhost database webhook delete` — ohmyhost database webhook delete --project ULID --environment dev|prod --webhook ID [--idempotency-key KEY] --yes --json (a retry with the same key and request returns the stored answer; without a key each call is new)
@@ -203,6 +207,9 @@ and follow the returned schema rather than guessing arguments.
 - `database_table_create` — Create one ordinary table in the public schema of a Dev or Prod database, as the migration role with the same access as migration tables, so a database_watch_create can attach later.
 - `database_webhook_list` — List this project's database webhooks of one Dev or Prod environment (dev when omitted), without signing secrets.
 - `database_webhook_create` — Subscribe one HTTPS receiver to database lifecycle events (database.created, ready, woke, slept, suspended, resized, deleted) of one Dev or Prod database, or to data events: data.<topic> for the rows of one watched table (the event type database_watch_create returns) or data.\* for every watched table; a bare \* never matches data events.
+- `database_webhook_subscription_status` — Read a webhook subscription generation and state, without its signing secret.
+- `database_webhook_subscription_activate` — Activate a stable subscription ULID and generation.
+- `database_webhook_subscription_deactivate` — Deactivate one generation.
 - `database_webhook_test` — Send one signed test request to a database webhook and report the outcome synchronously.
 - `database_webhook_delete` — Stop all deliveries to one database webhook.
 - `database_webhook_delivery_list` — List recent database webhook deliveries, newest first, optionally for one webhook.
@@ -228,7 +235,8 @@ and follow the returned schema rather than guessing arguments.
 - `feedback_status` — Read the status of a feedback receipt you submitted and ohmyho.st's customer-visible replies: received, in_review, planned, in_progress, resolved (the fix is live in the named release) or closed (with an explanation).
 - `project_create` — Create an ohmyho.st project.
 - `project_get` — Get one project
-- `project_status` — Get source, both Dev/Prod environment IDs, deployment URLs, Dev access mode, latest operation and cleanup status.
+- `project_status` — Get source, existing environment IDs, deployment URLs, custom production domains, Dev access mode, latest operation and cleanup status.
+- `project_development_add` — Add Dev to an existing project.
 - `project_dev_share_link_get` — Owner only: get or create the persistent protected Dev link.
 - `project_dev_access_mode_set` — Owner only: choose public Dev (no platform token) or protected Dev (share link required).
 - `powered_by_flag_get` — Read whether the production site shows the opt-in "Powered by ohmyho.st" flag.

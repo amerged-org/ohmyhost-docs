@@ -1,11 +1,11 @@
 {
-  "source_commit": "f2ae1e97149a019ad284db80bf211bdc34960fb5",
+  "source_commit": "b439b6d66cedab950d08954fe4df7a8ee211dd07",
   "source_dirty": false,
-  "release": "0.1.56",
+  "release": "0.1.57",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
-      "sha256": "7d26451cb9478e2cd8bb18a0c5f7ca2062220b80f730a174b21db2fa191a6959"
+      "sha256": "e4064ccb06f757a120598ee50021645e69008e2cf7f40ff621fc1ca31b4dac53"
     },
     {
       "path": "errors/api-key-creation-uncertain.mdx",
@@ -142,6 +142,14 @@
     {
       "path": "errors/deployment-plan-incompatible.mdx",
       "sha256": "91fae220ebb24f0da0f8e1268d22fc59cbc9c836e97222eea5f855fbacebc55a"
+    },
+    {
+      "path": "errors/development-environment-exists.mdx",
+      "sha256": "ac8249f962565f26d767ccfeb6aef7ed266aad09c551246fa98e96d0c34aeba9"
+    },
+    {
+      "path": "errors/development-environment-missing.mdx",
+      "sha256": "00d719196fbee6967a2d27150d80368ff4100de4bea38e01df9e19ba7bb0364f"
     },
     {
       "path": "errors/domain-dns-conflict.mdx",
@@ -345,7 +353,7 @@
     },
     {
       "path": "errors/shared-data-requires-promotion.mdx",
-      "sha256": "1f389f776cd517972723b6c2b2a9538844f63f50e16d64fc32c8f93c7863ede7"
+      "sha256": "422ac3b73a9dd9bfbd9b2a6f74cd9e7802df5cc8a72502db3e03351e4bae54d8"
     },
     {
       "path": "errors/source-commit-conflict.mdx",
@@ -393,19 +401,23 @@
     },
     {
       "path": "snippets/error-codes.mdx",
-      "sha256": "20ba7e0c4ec8dde17403fdc443d98743bd97c9e0bfd1597804e9798c3fe8dc6f"
+      "sha256": "5c2c58a6780e605bea882c570bf44b85c4ffce54d8791c41488f41653a9ab624"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/SKILL.md",
-      "sha256": "8d9b9b21fdf1267f30a826598fde190c43c3055c37ca82aef80d3b2937010a9a"
+      "sha256": "d3edc5ce72af003efd4ba9158fdd4a2b358876737dc4be91c834773824bcd981"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/ai.md",
       "sha256": "94baed63820ef2137bd0b453b5b1b2f926c6db555fbd4f4397426392ad6a9fb6"
     },
     {
+      "path": "skills/ohmyhost-build-portable-app/references/browser-pdf.md",
+      "sha256": "b335ca1b13fb27cddabd594d9c3987df4be4be74b45a59265da481f89b581d0a"
+    },
+    {
       "path": "skills/ohmyhost-build-portable-app/references/cli-deploy.md",
-      "sha256": "6461ca301940a49e8dc8cde442577006b30d5ebec3445d44718546acce07396d"
+      "sha256": "be8e9f98a569d7919bd20ed2e53ef52d1d30ef16acebcaac3057657ad13e4a24"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/database-runtime.md",
@@ -421,15 +433,15 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/stack-contracts.md",
-      "sha256": "e4bbe134b03e5774954d3d75ce21409bc6b4c49ef8146a50511eed0bc27e0d38"
+      "sha256": "afada6c11310ae439b78c95788ef3ff4f5a7e116294db11fba294d2534904f01"
     },
     {
       "path": "skills/ohmyhost-deploy-github/SKILL.md",
-      "sha256": "ee36108ae3cad714e45095dcffda7c0d2dee721a5e576a060dfe3511975abea4"
+      "sha256": "98ee857c64d72925767c739631af450b5cb957787a405505dbabe28e8b4c59e0"
     },
     {
       "path": "skills/ohmyhost-deploy/SKILL.md",
-      "sha256": "f184abd4bacdb4c69d175934e3faf280f9a003bd962906a017e8ea8a5bf2d189"
+      "sha256": "10ed296505f67507ca0d69ba86c65c982640fc364778cb5083e242bb8336489a"
     },
     {
       "path": "skills/ohmyhost-domains-and-mail/SKILL.md",
@@ -441,7 +453,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/SKILL.md",
-      "sha256": "efef7e660c2833e2213171ee8eb22bfeff705b158a876037cfbc49f105147162"
+      "sha256": "4085968021876f07d7fce3c239acddb6f2a5d3904f941ad4f552866532a3179b"
     },
     {
       "path": "skills/ohmyhost-get-started/references/harness-setup.md",
@@ -449,7 +461,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/references/surfaces.md",
-      "sha256": "b9a81b83f99e72964707d53a5507cdfb6f739edf6098509dfa3351ebcfdb623d"
+      "sha256": "9a0f9895dd0b7cba4d398e9a70806714fba7f1c4ee1d8d812cb9d4adfefe5860"
     },
     {
       "path": "skills/ohmyhost-manage-database/SKILL.md",
@@ -473,23 +485,23 @@
     },
     {
       "path": "skills/ohmyhost-troubleshoot-deployment/SKILL.md",
-      "sha256": "fa60e703889e6c4c81103b06986676a80cf986fdd36401f1f580a12f9e877bcf"
+      "sha256": "c6184ad7c2753b386fff6a731f5b225ec4cbcb9834eb149b3e23dd0ab4f15abe"
     },
     {
       "path": "skills/ohmyhost-usage-and-budgets/SKILL.md",
-      "sha256": "36b934cb49cbdcfa7a3a555d8d1f6b62fe46707d5cd9b36568191ae2510690ef"
+      "sha256": "7e2336151372287b57a3812197f8fe9842e75f2e0a47629c8a20960f2c9cbea3"
     },
     {
       "path": "openapi.yaml",
-      "sha256": "c0212a3480508319beb917b1ebba9a0801ee7391c7638bd3a53cccf271bc612a"
+      "sha256": "253ef9a8b6dfa59057df21d1ca34d9f5f7a17f5f2b2764bf2b005910592d16f9"
     },
     {
       "path": "openapi.json",
-      "sha256": "14004c4f9b32c36b9f6b564a993f7656163b384712d3d90a3964598cfc8c37fe"
+      "sha256": "2d3d344680a5dfe08ce475acc8e5550ba527881b773f2a2b3353ed336c139137"
     },
     {
       "path": "mcp-tools.json",
-      "sha256": "5150c7f4350b4c1ec2fccb9d707d6bb823e15da9592d508752580c42e9902c4e"
+      "sha256": "a5d2dd1a244a88204d2c31029a05723eea37ec6a74a38dd54148c3b2c5d4dc02"
     },
     {
       "path": "mcp.json",
@@ -497,11 +509,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "550ab60314841cbf06e6df6fb9dce32db943ba826163016db12c6434b7eaa620"
+      "sha256": "57f29254c3ae59797ba4dc2308a04644259ca2496bf0760be212242912b79458"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "19a0b5b0dd4cc3392394054654e1593c2186802dbe1d085c655701ae50b8aacb"
+      "sha256": "8d8fe33321feb93dec14a84bf6c8376792bdd28ab765bb8f64c0fdb657d560df"
     },
     {
       "path": "snippets/skill-catalog.mdx",
@@ -509,7 +521,7 @@
     },
     {
       "path": "snippets/mcp-tools.mdx",
-      "sha256": "478854b36db1e00b0294ea500ea583fc1a5885b9bf9f7eeed95bc1e7e8d1969f"
+      "sha256": "c38a1fa30314926582a2b27f437c7362c416fea6230244cd63f55ce83dfc971b"
     },
     {
       "path": "logo/light.svg",

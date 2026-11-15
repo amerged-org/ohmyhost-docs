@@ -7,6 +7,6 @@ The API, CLI and MCP return `shared_data_requires_promotion` with HTTP 409. Repe
 
 ## What to do
 
-Plan and deploy this commit to Dev, then run 'ohmyhost deployment promote plan' to reach Prod.
+This is a legacy deployment restriction. Update the CLI and MCP to the current release, then plan with environment prod. The current platform permits direct Prod deployment with shared data; its migrations affect both environments when Dev exists. If the restriction persists, report the request ID.
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

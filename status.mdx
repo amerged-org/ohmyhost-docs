@@ -9,7 +9,9 @@ ohmyhost project status --project "$PROJECT_ID" --json
 ohmyhost operation get "$OPERATION_ID" --json
 ```
 
-Use the operation ID returned by the mutation. `queued` or `running` means work remains; `succeeded`, `failed` and `cancelled` are terminal. Project status supplies actual environments, deployment heads and URLs.
+Use the operation ID returned by the mutation. `queued` or `running` means work remains; `succeeded`, `failed` and `cancelled` are terminal. Project status supplies existing environments, a deployment head and URLs.
+
+With client 0.1.57 or newer, `custom_domains` lists this project's production hostnames with `hostname`, `environment` and configuration `state`: `awaiting_deployment`, `pending`, `active` or `deleting`. The hosting `prod_url` remains separate. For DNS and HTTPS readiness, read `ohmyhost domain paid status --project "$PROJECT_ID" --json`; see [Connect a domain](/domains).
 
 A queued operation with `blocking_operation_id` waits for that operation of the same project to end; inspect it instead of submitting again.
 

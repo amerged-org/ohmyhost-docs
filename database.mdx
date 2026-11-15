@@ -65,11 +65,7 @@ await db.transaction().execute(async (trx) => {
     .where("id", "=", itemId)
     .executeTakeFirst();
   if (row)
-    await trx
-      .updateTable("items")
-      .set({ title: nextTitle })
-      .where("id", "=", row.id)
-      .execute();
+    await trx.updateTable("items").set({ title: nextTitle }).where("id", "=", row.id).execute();
 });
 ```
 
@@ -196,19 +192,32 @@ The write endpoint is `POST /v1/projects/{project_id}/database/write`; supply th
 
 Client 0.1.42 or newer manages three things per Dev or Prod database. All of them are tied to the one database of the selected environment; another project's webhook, schedule or delivery answers `resource_not_found`.
 
-**Webhooks** send a signed HTTPS `POST` when the database changes state: `database.created`, `database.ready`, `database.woke`, `database.slept`, `database.suspended`, `database.resized` and `database.deleted`. The data events `data.<topic>` come from [table watches](#table-watches) instead. A project environment can have five. The signing secret appears once in the answer of `create`; store it in your receiver.
+**Webhooks** send a signed HTTPS `POST` when the database changes state: `database.created`, `database.ready`, `database.woke`, `database.slept`, `database.suspended`, `database.resized` and `database.deleted`. The data events `data.<topic>` come from [table watches](#table-watches) instead. Each resolved database can have five webhooks, so shared Dev and Prod use the same limit.
+
+With client 0.1.57 or newer, choose a new subscription ULID and activate generation 1. Choose an existing private directory outside the repository, or a Git-ignored directory, and a new output filename. The CLI creates an owner-private file for the signing secret; it returns the path as `secret_file` without printing the secret. Install it securely in your receiver and keep it out of chat, logs and source.
 
 ```sh
-printf '{"x-tenant":"acme"}' > headers.json
-ohmyhost database webhook create --project "$PROJECT_ID" --environment dev \
+ohmyhost database webhook subscription activate --project "$PROJECT_ID" --environment dev \
+  --subscription "$SUBSCRIPTION_ID" --generation 1 \
   --url https://example.com/hooks/database --event-types database.woke,database.slept \
-  --headers-file headers.json --idempotency-key "$KEY" --yes --json
+  --out "$PRIVATE_DIR/database-webhook-1.secret" --idempotency-key "$ACTIVATION_KEY" --yes --json
+ohmyhost database webhook subscription status --project "$PROJECT_ID" --environment dev \
+  --subscription "$SUBSCRIPTION_ID" --json
+```
+
+Status returns the generation, state and `provider_id`, but never the secret. Use `provider_id` as the webhook ID when testing. If the activation answer is lost, retry the identical URL, event types and optional headers with the same subscription, generation and idempotency key, but choose a new output filename. Existing files and links are never replaced. An unresolved provider activation can remain pending; keep its original identity while checking status.
+
+```sh
 ohmyhost database webhook test --project "$PROJECT_ID" --environment dev --webhook "$WEBHOOK_ID" --yes --json
 ohmyhost database webhook deliveries --project "$PROJECT_ID" --json
 ohmyhost database webhook replay --project "$PROJECT_ID" --environment dev --delivery "$DELIVERY_ID" --yes --json
 ```
 
-Every request carries `PGCF-Signature: t=<unix seconds>,v1=<hex>`, where `v1` is the HMAC-SHA256 of `<t>.<raw body>` with the secret. Reject a signature older than five minutes, compare in constant time, and answer a 2xx status within a few seconds. `PGCF-Event-Id` and `PGCF-Delivery-Id` identify the event and the attempt; a retried delivery repeats the event id, so deduplicate on it. A failed delivery is retried with growing delays for up to 24 hours, then it stays visible as dead-lettered for a week and can be replayed. `webhook test` sends one signed request and stores nothing; it is limited to one call per five seconds.
+To deactivate a generation, use `ohmyhost database webhook subscription deactivate --project "$PROJECT_ID" --environment dev --subscription "$SUBSCRIPTION_ID" --generation 1 --idempotency-key "$DEACTIVATION_KEY" --yes --json`. After uncertainty, retry the same deactivation key. Only after the previous generation is confirmed inactive may you activate the next generation with the same subscription ULID, a new key and a new output file. Pending deliveries are not guaranteed during or after deactivation.
+
+Local MCP offers `database_webhook_subscription_activate` and `database_webhook_subscription_deactivate` with `confirmed: true`; activation takes `out_file` and, if needed, an absolute owner-private `headers_file`. Local and remote MCP provide `database_webhook_subscription_status`. The older `database webhook create` returns its signing secret in the response and cannot recover it through this lifecycle; an exact retry can be refused at the webhook limit. Use a stable subscription for a new integration.
+
+Every request carries `PGCF-Signature: t=<unix seconds>,v1=<hex>`, where `v1` is the HMAC-SHA256 of `<t>.<raw body>` with the secret. Reject a signature more than five minutes from the current time, compare in constant time, and answer a 2xx status within a few seconds. `PGCF-Event-Id` and `PGCF-Delivery-Id` identify the event and the attempt; a retried delivery repeats the event id, so deduplicate on it. A failed delivery is retried with growing delays for up to 24 hours, then it stays visible as dead-lettered for a week and can be replayed. `webhook test` sends one signed request and stores nothing; it is limited to one call per five seconds.
 
 **Schedules** run SQL on a timer, in the database, as the runtime role of your application, so [row-level security](/row-level-security) applies and schema changes are refused. A schedule has a cron expression (five fields, UTC) or an interval of 60 to 2,678,400 seconds, one to twenty statements that run in one transaction, and a timeout of 1,000 to 30,000 milliseconds.
 
@@ -231,7 +240,7 @@ ohmyhost database executions --project "$PROJECT_ID" --from 2026-10-31T00:00:00.
 
 An hour is `final` once it is complete. They are counters without a separate price; the cost of a run is the time its database is awake.
 
-MCP offers the same operations as `database_webhook_*`, `database_schedule_*` and `database_execution_usage_get` (the remote server offers the five read tools; changes need the local server or the CLI). REST uses `/v1/projects/{project_id}/database/webhooks`, `/database/schedules`, `/database/execution-usage`, `/database/watches` ([table watches](#table-watches)) and `/database/tables` ([create a table](#create-a-table)); see the [OpenAPI schema](/openapi.json). Retrying a lost `webhook create` with the same idempotency key returns the same webhook. The other changes have no key: after a lost answer read the list first, then repeat.
+MCP offers these operations as `database_webhook_*`, `database_schedule_*` and `database_execution_usage_get`; the remote server offers supported reads, while database event changes need the local server or the CLI. REST reads a subscription at `/v1/projects/{project_id}/database/webhook-subscriptions/{subscription_id}` and activates or deactivates `/activations/{generation}` under it. The other paths include `/database/webhooks`, `/database/schedules`, `/database/execution-usage`, `/database/watches` ([table watches](#table-watches)) and `/database/tables` ([create a table](#create-a-table)); see the [OpenAPI schema](/openapi.json).
 
 ## Table watches
 

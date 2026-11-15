@@ -3,7 +3,7 @@ title: "Dev and Prod"
 description: "Choose shared or isolated data, change assignments or reset Dev, select US or EU and Dev access, then deploy, promote, roll back or delete."
 ---
 
-Each project has Dev and Prod under one organization credit balance. Choose `isolated` or `shared` data when creating the project (`--data-mode`); the optional default is `shared`. [Confirmed assignment changes](#change-data-assignments) can change it later without copying data.
+Each project has Prod and, by default, Dev under one organization credit balance. Create a Prod-only project with `--include-development-environment false` (`include_development_environment: false` in REST/MCP). Add Dev later with `ohmyhost project dev add --project "$PROJECT_ID" --idempotency-key "$KEY" --json` or MCP `project_development_add`, then follow its operation. Existing projects keep their environments; an explicit Dev request never falls back to Prod. Choose `isolated` or `shared` data when creating the project (`--data-mode`); the optional default is `shared`. [Confirmed assignment changes](#change-data-assignments) can change it later without copying data.
 
 | Mode     | Databases and files             | Implication                                                  |
 | -------- | ------------------------------- | ------------------------------------------------------------ |
@@ -39,14 +39,14 @@ Use the returned environment IDs for secrets and the returned logical environmen
 
 Prod first runs at the hosting address returned by `ohmyhost project status`, such as `HANDLE.check.omh.st`. Its DNS is already managed by ohmyho.st, so deploying needs no DNS changes to your own domain. You can [reserve a custom domain and authorize Cloudflare](/domains) beforehand; activate it with the original domain apply after verifying Prod.
 
-A deployment builds into Dev unless you name Prod. Unless Dev and Prod share a database, you can build one commit straight into Prod without a Dev deployment:
+For deployment plan/create, an omitted environment selects Dev when it exists, otherwise Prod. Use `--environment prod` explicitly for other operations on a Prod-only project; some database reads still default to Dev. You can explicitly build one commit straight into Prod, including when data is shared:
 
 ```sh
 ohmyhost plan --project "$PROJECT_ID" --commit "$COMMIT_SHA" --environment prod --json
 ohmyhost deploy --project "$PROJECT_ID" --commit "$COMMIT_SHA" --environment prod --idempotency-key "$DEPLOY_REQUEST_KEY" --yes --json
 ```
 
-MCP `deployment_plan` takes the same `environment: "prod"`. A project whose Dev and Prod share a database is refused a Prod plan with [`shared_data_requires_promotion`](/errors/shared-data-requires-promotion), because both environments use that one database. Deploy it to Dev and promote the verified artifact instead.
+MCP `deployment_plan` takes the same `environment: "prod"`. A direct Prod build uses the usual migration and health checks. With shared data, its schema changes affect Dev too. To reuse an already verified Dev artifact instead of rebuilding, use promotion below. GitHub auto-deploy targets Dev and requires Dev to exist; it does not silently deploy pushes to a Prod-only project.
 
 ## Promote after verification
 

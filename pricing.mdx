@@ -42,6 +42,8 @@ Database usage is selected RAM multiplied by active time: 256 MiB, 512 MiB, 1 Gi
 
 Functions and crons use the Worker request and CPU meters. Workers bandwidth and SQL exports have no separate charge. Each deployment or promotion that goes live retains an immutable script for rollback; every retained script is charged at `wfp.script`, so its total grows with deployments even without traffic. Scripts remain until project deletion, or until a Dev reset/share action removes Dev-only scripts. `mail.sent` is charged per sent recipient and `mail.received` per received message; webhook retries do not add another mail charge.
 
+Browser PDF is charged at exactly twice the published variable provider browser cost, using the provider's measured duration, including fractional milliseconds. There is no additional general margin. Each call keeps its admission price. Missing duration is charged zero; measured work already dispatched can settle after a client timeout. See [Browser PDF](/browser-pdf) for limits and handling.
+
 ## Read charges correctly
 
 One credit is 1,000,000 microcredits. Charges round up to the next microcredit with no minimum charge. Displayed rounding never changes the deduction. A zero-provider-cost unit has no credit charge; shared provider allowances do not create a separate customer allowance.
