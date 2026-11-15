@@ -15,6 +15,10 @@ A connected chat uses managed OAuth and verifies the intended account, workspace
 
 Reuse the workspace for this app. A local agent reads the organizations returned by `whoami` and follows the get-started Skill if none exists. A connected chat with no workspace uses the `workspace_setup` portal handoff and verifies its identity again. If you already have projects, select the existing project instead of creating another.
 
+### Campaign links
+
+Browser sign-in links can include optional `utm_*` campaign parameters, including campaign names that have not been registered with ohmyho.st. Valid parameters follow website navigation and browser sign-in; the first explicit campaign snapshot is associated with the signed-in account. Invalid or excessive tracking metadata is discarded without blocking sign-in. This attribution does not grant referral credit or affect workspace access. A separate agent sign-in started after copying a prompt has no automatic connection to the earlier browser campaign.
+
 ## 2. Inspect the application
 
 For a local checkout:
