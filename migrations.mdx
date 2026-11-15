@@ -11,7 +11,9 @@ The coordinated 0.1.30 or later release adds a bounded [RLS policy lifecycle](/r
 
 Existing tables gain only nullable columns without defaults and non-unique indexes. Constraints, foreign keys, triggers and unique indexes may attach only to tables created within the same pending migration run. All pending files apply atomically with a thirty-second statement and five-second lock timeout; CREATE INDEX CONCURRENTLY therefore fails. Applied files are immutable: never edit, rename or remove one; every new timestamp follows the applied catalog. Maximum 128 files,256 KiB each,2 MiB total, UTF-8/LF without BOM.
 
-Source planning checks canonical filenames, not complete SQL admission. Run init before paying for a build; execution/catalog validation may still fail as `database_migration_failed`, with none of the new files applied. Read `DATABASE_MIGRATION_FAILED`'s file and reason: `MIGRATION_CHANGED_EXISTING_SCHEMA`, `MIGRATION_EXECUTION_FAILED`, `APPLIED_MIGRATION_CHANGED` or `MIGRATION_SQL_NOT_ADMITTED`. Fix the cause and plan the new commit; never reset to repair a failed migration.
+Source planning checks canonical filenames, not complete SQL admission. Run init before paying for a build; execution/catalog validation may still fail as `database_migration_failed`, with none of the new files applied. Read the original operation with `ohmyhost operation get "$OPERATION_ID" --json` or MCP `operation_get`. With client 0.1.57 or newer, `error.migration` may include a `reason` and canonical `file`; the file can be null. For a definite PostgreSQL statement error after confirmed rollback, it also gives `statement_index` (one-based within that file) and the five-character `sqlstate`. These two fields appear together; SQL, parameters and the PostgreSQL message are not included. Admission, catalog and ledger errors may have no statement index. An uncertain outcome remains under reconciliation rather than being reported as a definite statement failure.
+
+Deployment logs can also show a `DATABASE_MIGRATION_FAILED` item with a catalog reason. Fix the named cause and plan the new commit; never reset to repair a failed migration.
 
 ## Make an additive change
 

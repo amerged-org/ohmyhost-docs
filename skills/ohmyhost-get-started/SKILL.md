@@ -14,7 +14,7 @@ module with HTTP handlers and optional cron schedules. A coding agent uses the l
 CLI; a connected native chat uses the remote MCP server. Both use the same product REST contract.
 Source can be a connected GitHub repository or an ohmyho.st-managed repository. Deploy an exact commit to Dev or Prod,
 verify the app, and promote a tested Dev artifact when appropriate. Dev is protected by default;
-the deployment Skill handles public Dev, data choices and the shared-database promotion rule.
+the deployment Skill handles public Dev, data choices and the effects of shared databases.
 You can also give the app Postgres, private runtime secrets, Cloudflare R2 files, optional
 transactional mail, LLMs, images, speech, classifiers and OCR through an OpenAI-compatible gateway, and a custom domain, export its database as an encrypted SQL ZIP, and read
 usage, credits and project budgets. The customer chooses application authentication.
@@ -146,11 +146,15 @@ cache, public assets, Worker modules, migrations and archive metadata together m
 deployment artifact ceilings of 30 MiB compressed and 64 MiB expanded. Choose a cache capacity
 that leaves room for the other archive contents. See the
 [portable-app runtime contracts](https://ohmyho.st/skills/ohmyhost-build-portable-app/references/stack-contracts.md)
-before changing a limit. Cache storage has provider cost 0, so cost × 1.5 is still 0 credits; build and
-runtime charges continue unchanged. New deployments replace this build-time cache; time-based
-and on-demand revalidation are not supported. Cache Components and `"use cache"` are supported:
+before changing a limit. The immutable build-time cache has provider cost 0; writable cache backing
+is platform-owned and has no separate customer file-storage charge. Build and runtime charges
+continue unchanged. By default, new deployments replace this read-only cache and
+on-demand revalidation is refused. An app on Next.js 16.4.1 may opt into the bounded writable cache
+with `build.next_revalidate_path: true` for `revalidatePath` in Server Actions or Route Handlers;
+the runtime contracts describe its response buffering and limits. Time-based ISR, `revalidateTag`
+and revalidation deferred until after the response remain unsupported. Cache Components and `"use cache"` are supported:
 request-time `"use cache"` values are never stored, build-time values stay until the next
-deployment, and each dynamic page needs a static shell. A CLI older than 0.1.33 still refuses Cache
+deployment in the default mode, and each dynamic page needs a static shell. A CLI older than 0.1.33 still refuses Cache
 Components in `ohmyhost init`; upgrade it instead of removing them. The runtime contracts list the
 exact rules.
 

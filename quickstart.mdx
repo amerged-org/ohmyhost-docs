@@ -55,7 +55,7 @@ The response supplies an operation ID. The agent observes that operation until i
 
 The agent reads `dev_access_mode` and the URL from project status. For protected Dev it obtains the persistent owner-only share link; for public Dev it opens the clean URL directly. Check navigation and, where used, application login and a real data read/write. A successful build alone is not the finished app.
 
-When you request publication, the agent checks current authorization, creates a promotion plan and publishes the verified artifact to Prod. Isolated promotion applies migrations without copying Dev records into Prod. Prod receives its own private secret inputs. With isolated data, the agent can also build a commit straight into Prod; a project whose Dev and Prod share a database always deploys to Dev and promotes. [Deploy to Prod](/environments#deploy-to-prod).
+When you request publication, the agent checks current authorization, creates a promotion plan and publishes the verified artifact to Prod. Isolated promotion applies migrations without copying Dev records into Prod. Prod receives its own private secret inputs. The agent can also build a commit straight into Prod, including with shared data. With shared data, schema changes affect Dev too. For a Prod-only project, an omitted deployment environment selects Prod; explicit Dev requires Dev to exist. [Deploy to Prod](/environments#deploy-to-prod).
 
 Managed source keeps version history across chats. Restoring an earlier source version creates a new commit; it is separate from deployment rollback and does not roll back database migrations. [Restore a version](/sources).
 

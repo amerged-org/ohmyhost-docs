@@ -208,7 +208,7 @@ ohmyho.st. Choosing a larger capacity does not add a storage fee. Build compute 
 request/CPU charges remain unchanged; a cached page can still execute Worker code. See
 [Cloudflare Static Assets billing](https://developers.cloudflare.com/workers/static-assets/billing-and-limitations/).
 
-This cache is refreshed by a new deployment. Time-based or on-demand revalidation is unsupported;
+The default cache is refreshed by a new deployment. Time-based revalidation remains unsupported; on-demand `revalidatePath` requires the explicit writable mode below.
 Cache Components follow the rules below. Preserve existing static pages; do not force every page to
 render dynamically to work around a platform packaging error. If the build log begins a diagnostic
 with `ohmyho.st platform:`, report its operation ID through feedback. An `ohmyho.st packaging:`
@@ -231,7 +231,7 @@ or re-exported by name: `cacheLife`, `cacheTag`, `unstable_cacheLife`, `unstable
   `cacheLife` profile, including the default, revalidates, so the build refuses such a value unless
   it uses `cacheLife({ revalidate: Infinity, expire: Infinity })`. Otherwise call the cached
   function inside a Suspense boundary after reading request data (for example `await connection()`).
-- Every other `next/cache` use is refused, including `revalidateTag`, `revalidatePath`,
+- In the default read-only mode, every other `next/cache` use is refused, including `revalidateTag`, `revalidatePath`,
   `updateTag`, `unstable_expireTag`, `unstable_expirePath`, `unstable_cache`, default and
   namespace imports and `export *`. So are `res.revalidate`, fetch `next.revalidate` values other
   than `0` or `false`, and time-based revalidation of prerendered pages and route handlers.
@@ -253,3 +253,9 @@ commit, push and deploy the new commit. These lines begin:
 ## Completion
 
 Verify each requested capability through the customer's supported interfaces and the protected Dev application. Run promotion/rollback/deletion only within their authorized scope; repeated deletion and absence proofs are for explicitly disposable acceptance projects. A root HTTP `200` alone does not prove application authentication or other required flows.
+
+### Opt-in Next.js path revalidation
+
+For an application that needs `revalidatePath`, declare `build.next_revalidate_path: true` in `ohmyhost.yaml`. The platform supplies the private writable cache and its OpenNext overlay; do not install or configure provider bindings. The initial qualified fixture is Next.js 16.4.1 with the platform-pinned OpenNext. Use `revalidatePath` during a Server Action or Route Handler, including page and layout invalidation. `revalidateTag`, timed ISR and revalidation deliberately deferred until after the response (`after`/`waitUntil`) are outside this v1 scope.
+
+This opt-in buffers responses before success so a failed invalidation returns an error: at most 12 MiB and 30 seconds. The default mode keeps streaming. Cache data is separated by project, environment and deployment; promotion and rollback retain separate scopes. A concurrent invalidation can refuse a stale in-flight cache write, including one for another path, so handle a transient unavailable response. Verify fresh content after the mutation and a working error path with the cache unavailable.

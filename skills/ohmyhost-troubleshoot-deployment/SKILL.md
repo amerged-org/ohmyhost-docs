@@ -28,9 +28,10 @@ A completed reconciliation receipt is not the application result. Verify the ori
 
 These gateway answers identify a platform check or runtime failure:
 
-- Empty `404`: protected Dev without a share-link session, or an address no project answers on,
-  such as the old address after a rename. An ordinary application `stage` or `ticket` query
-  parameter is allowed.
+- `404` with access guidance and `x-ohmyhost-gateway: shared-v1`: protected Dev without a
+  share-link session, or an address no project answers on, such as the old address after a
+  rename. Both receive the same generic answer. Read project status and use the owner's current
+  Dev share link. An ordinary application `stage` or `ticket` query parameter is allowed.
 - Redirect to <https://ohmyho.st/> on protected Dev: the share link was rotated or revoked.
   Open the current `share_url` from `project_dev_share_link_get`.
 - `402 Project execution paused`: a Stop budget was reached, credits stayed exhausted past the

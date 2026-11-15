@@ -93,12 +93,15 @@ This workflow needs the authenticated remote tools; it has no local filesystem o
 dependency. Verify the connected account and workspace using the get-started Skill before project actions.
 
 1. Reuse the chosen project via `project_list`/`project_get` and read `project_context_get`. For a new
-   app, use `project_create` with its approved organization, name, region, data mode and Dev
-   access mode, `source_provider: "managed"` and the intended `template`. Choose `vite-react`
+   app, use `project_create` with its approved organization, name, region, data mode and, when
+   Dev is included, its access mode, `source_provider: "managed"` and the intended `template`. Choose `vite-react`
    for a basic web app, or `empty` for a specifically chosen supported stack. Preserve an
    existing project's region and data; do not infer region from an
-   agent's IP. Shared Dev/Prod data requires Dev followed by promotion; isolated data permits
-   independent environments and incurs separate database usage.
+   agent's IP. Dev and Prod are created by default; set `include_development_environment: false`
+   only for an explicitly requested Prod-only project, and use `project_development_add` to add
+   Dev later. Both shared and isolated data allow a direct Prod deployment. Shared data means
+   database migrations and writes also affect Dev when it exists; isolated environments incur
+   separate database usage.
 2. Follow the accepted project operation, then read `source_get` with `include_binding: true` until its managed source is
    `ready` and has a persisted commit. Creation queues source initialization after the project
    is provisioned; a completed project operation can still have `source.status: "pending"`.
@@ -144,24 +147,27 @@ dependency. Verify the connected account and workspace using the get-started Ski
    unused link past its hour. `secrets_list` shows metadata only. Keep the link out of notes,
    source and logs. Never put a password, model API key or runtime secret into a tool argument,
    source file, commit, project note or chat message.
-6. Call `deployment_plan` for the exact accepted commit and `environment: "dev"`; review its
+6. Call `deployment_plan` for the exact accepted commit and the requested environment (`dev` for
+   a preview or `prod` for a direct production deployment); review its
    real costs/effects within the user's existing authorization, then `deployment_create` with
    the plan and one saved key. Follow the same `operation_get` until its terminal state; use
    `deployment_get` and `deployment_logs` for diagnosis. A running operation is not a reason
    to start another build. A workspace has at most four open builds: `build_capacity_reached` (429)
    means wait for one to finish, then start the deployment again with a new key.
-7. Read `project_status` for the Dev URL and access mode. Public Dev opens directly. For
+7. Read `project_status` for the selected URL. For Dev, check its access mode: public Dev opens directly. For
    protected Dev, give the user the private reusable `share_url` from
    `project_dev_share_link_get`. To inspect it as the agent, use `project_dev_access_create`
    and open its one-time `redeem_url`; do not issue another ticket while the first is unused. A repeated request revokes the unused ticket, and a key does not replay it.
-   Then verify the clean preview URL. Keep these entry links out of notes, source and logs.
+   Then verify the clean preview URL; for a direct Prod deployment verify the Prod URL instead.
+   Keep these entry links out of notes, source and logs.
    Verify the app's meaningful
    interaction, expected content and any requested data flow before calling it ready. If the
    chat cannot inspect the preview, say exactly what remains unverified and keep the same project.
-8. Publish only when requested and authorized by the current role and token. Use
+8. If step 6 already deployed to Prod, verify that operation and do not create another deployment.
+   Otherwise publish only when requested and authorized by the current role and token. Use
    `promotion_plan` then `deployment_promote` for the verified Dev deployment, including the
    exact ETag, confirmation and idempotency guards. Alternatively plan an exact commit into
-   isolated Prod when that is the requested supported route. Prod needs its own secret inputs;
+   Prod when that is the requested route, including with shared data. Prod needs its own secret inputs;
    they are not copied from Dev. Poll the accepted operation and verify the public result.
 
 Return the project's working address, exact commit and verification result, plus any required

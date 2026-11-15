@@ -19,7 +19,7 @@ The service-owned Next.js bundle uses `keep_names: false` to prevent injected na
 
 ## Build-time static pages and cache limits
 
-Pages and route responses prerendered during the build use an immutable cache carried with that deployment. Ordinary request-time rendering and route handlers remain available. A new deployment refreshes the cache. Time-based ISR and on-demand revalidation are unsupported; keep existing static pages when addressing a packaging error.
+Pages and route responses prerendered during the build use an immutable cache carried with that deployment. Ordinary request-time rendering and route handlers remain available. A new deployment refreshes the cache. Time-based ISR and on-demand revalidation are unsupported by default; keep existing static pages when addressing a packaging error. The explicit request-time `revalidatePath` mode below is a separate opt-in.
 
 ## Cache Components
 
@@ -27,7 +27,7 @@ Next.js 16 Cache Components (`cacheComponents: true`, also with `partialPrefetch
 
 - The cache is read-only: request-time `"use cache"` values are never stored, so a later request computes them again. A cached function must depend on request data only through its arguments.
 - A `"use cache"` value in a static shell would stay frozen until the next deployment, and every built-in `cacheLife` profile revalidates. The build refuses it unless it uses `cacheLife({ revalidate: Infinity, expire: Infinity })`; otherwise call the cached function inside a Suspense boundary after reading request data, for example `await connection()`.
-- `revalidateTag`, `revalidatePath`, `updateTag`, `unstable_expireTag`, `unstable_expirePath`, `unstable_cache` and other `next/cache` uses stay refused.
+- `revalidateTag`, `updateTag`, `unstable_expireTag`, `unstable_expirePath`, `unstable_cache` and other unsupported `next/cache` uses stay refused. `revalidatePath` is refused unless the explicit mode below is enabled.
 - Each dynamic page needs a static shell: read `params` inside a Suspense boundary, without `ensureStatic` and without a root layout inside a dynamic segment. With `partialPrefetching: true`, dynamic pages must not use `generateStaticParams`.
 
 A refused build ends with one `ohmyho.st packaging:` line that names the fix; apply it, then deploy the new commit.
@@ -53,6 +53,14 @@ Selecting 64 MiB of cache capacity leaves those combined limits in place. Leave 
 Cache storage costs **0 credits per 100 MB-month**: its provider storage cost is zero, so cost plus 50% remains zero. Unused capacity is not charged. Normal build and Worker request/CPU charges still apply, including when a cached page executes Worker code. [Pricing](/pricing)
 
 The cache payloads are private. Direct requests to their reserved paths must return 404; the application serves the rendered pages through their normal URLs.
+
+## Opt into request-time revalidatePath
+
+With client 0.1.57 or newer and installed Next.js exactly `16.4.1`, add `build.next_revalidate_path: true` to `ohmyhost.yaml`. The service supplies a private writable incremental/tag cache; no customer R2 bucket or Wrangler configuration is needed. Keep your other build settings.
+
+Call `revalidatePath` from an authorized Route Handler or Server Action during that request. Both page and layout invalidation are supported. Time-based ISR, `revalidateTag` and invalidation deliberately deferred until after the response remain outside this mode.
+
+Responses are buffered up to 12 MiB within 30 seconds so a successful response waits for its registered cache writes and invalidation. Oversized responses, deadlines or cache failures return an error; default streaming behavior is unchanged when the opt-in is absent. A cache scope holds at most 64 MiB, 8,192 cache entries and 8,192 tags. It is isolated by project, environment and deployment, follows the project region, and retained rollback artifacts keep their own scope. Managed cache storage is a platform expense, not customer file storage usage. Verify fresh content after invalidation through the deployed app, including its login and concurrent requests.
 
 ## Keep the app portable
 
@@ -99,8 +107,8 @@ export function ThemeProvider({ children, ...props }: ThemeProviderProps) {
   const [documentNonce] = useState<string | undefined>(() => {
     if (typeof document === "undefined") return undefined;
     return (
-      document.head.querySelector<HTMLMetaElement>('meta[property="csp-nonce"]')
-        ?.content || undefined
+      document.head.querySelector<HTMLMetaElement>('meta[property="csp-nonce"]')?.content ||
+      undefined
     );
   });
 
