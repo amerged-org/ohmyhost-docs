@@ -44,6 +44,10 @@ Functions and crons use the Worker request and CPU meters. Workers bandwidth and
 
 Browser PDF is charged at exactly twice the published variable provider browser cost, using the provider's measured duration, including fractional milliseconds. There is no additional general margin. Each call keeps its admission price. Missing duration is charged zero; measured work already dispatched can settle after a client timeout. See [Browser PDF](/browser-pdf) for limits and handling.
 
+## Live previews
+
+Dev and Prod previews use the same awake-time rate. The provider cost is `wall_ms × 21120 + cpu_ms × 20000` pico-USD, converted using the credit formula above and rounded up to the next microcredit. Sleeping has no compute charge; retained dependency backups are included. Cloudflare CPU observations can arrive later and be revised upward, so the current balance may not yet include the final awake usage. [Open or stop a preview](/previews).
+
 ## Read charges correctly
 
 One credit is 1,000,000 microcredits. Charges round up to the next microcredit with no minimum charge. Displayed rounding never changes the deduction. A zero-provider-cost unit has no credit charge; shared provider allowances do not create a separate customer allowance.

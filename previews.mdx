@@ -1,0 +1,68 @@
+---
+title: "Live previews"
+description: "Open a stable preview and see saved source changes through your framework's development server."
+---
+
+A live preview runs your app's development server at a stable URL. Save a version through [managed source](/sources), or push to the selected [GitHub branch](/github), to update an awake preview. Code changes use the framework's hot reload. Package, lockfile or runtime-configuration changes can restart its server.
+
+Cloudflare selects the location of preview compute; the project region selects its data services.
+
+Choose the project environment explicitly. A Dev preview uses Dev data; a Prod preview uses Prod data, including when you write through the app. Free projects have a Prod preview. Paid projects can have a separate Dev preview and Prod preview.
+
+## Open the preview
+
+Use your current [CLI login](/cli) and the intended project. Retrieving or managing its private preview link requires project write permission; viewers use a link shared with them:
+
+```sh
+ohmyhost project preview open --project "$PROJECT_ID" --environment prod --json
+ohmyhost project preview get --project "$PROJECT_ID" --environment prod --json
+```
+
+Open the returned `url` in your browser. `status` is `cold`, `starting`, `ready` or `sleeping`. The URL shows progress while the app starts. Keep the preview open, save the next source version, and wait for the framework to apply the change. The URL stays the same.
+
+Anyone with this URL can view and use the app without a platform login. Share it only with intended viewers. Application login, when configured, still applies.
+
+## Save and continue
+
+Use the normal [source publication flow](/sources#save-current-local-files) for local files, or the connected chat's `source_changes` and `source_upload_*` tools. Follow the save operation until it succeeds. An accepted upload that has not committed yet is not a saved version.
+
+An awake preview applies the accepted files. A sleeping preview keeps the latest target and applies it when opened again. Ordinary code edits retain the running development server; framework hot reload determines which component state can be preserved.
+
+Preview startup does not run customer migrations. Apply an intended schema change through the explicit [migration flow](/migrations). To publish a checked production artifact, continue through the normal [deployment flow](/environments).
+
+## Sleep and reopen
+
+A preview sleeps after ten minutes without meaningful use. An idle tab, hot-reload connection or automatic polling does not keep it awake. Open the URL or use its wake action to continue.
+
+Dependencies are retained for thirty days after the last preview use. After that, the next open prepares them again. Sleeping has no compute charge; awake usage follows [the preview rate](/pricing).
+
+## Stop or replace the link
+
+Stop clears the current runtime and dependency cache. A later open prepares the saved source at the same URL:
+
+```sh
+ohmyhost project preview stop --project "$PROJECT_ID" --environment prod \
+  --idempotency-key "$STOP_REQUEST_KEY" --yes --json
+```
+
+Rotate when you want a new link. The old URL stops working and its open connections close:
+
+```sh
+ohmyhost project preview rotate --project "$PROJECT_ID" --environment prod \
+  --idempotency-key "$ROTATE_REQUEST_KEY" --yes --json
+```
+
+Keep each request's original key after an uncertain response. Rotation also invalidates that preview's previous login sessions.
+
+## Use MCP or REST
+
+Local and remote MCP expose `preview_get`, `preview_open`, `preview_stop` and `preview_rotate`. Pass the project and `environment` returned by your current tool schema. The corresponding REST operations are:
+
+| Operation                   | Endpoint                                                             |
+| --------------------------- | -------------------------------------------------------------------- |
+| `getProjectPreview`         | `GET /v1/projects/{project_id}/preview?environment=dev\|prod`        |
+| `openProjectPreview`        | `POST /v1/projects/{project_id}/preview?environment=dev\|prod`       |
+| `stopProjectPreview`        | `DELETE /v1/projects/{project_id}/preview?environment=dev\|prod`     |
+| `rotateProjectPreviewToken` | `POST /v1/projects/{project_id}/preview/token?environment=dev\|prod` |
+
+Use the generated SDK or published API schema for request headers and authorization. Keep capability URLs out of public logs and source files.
