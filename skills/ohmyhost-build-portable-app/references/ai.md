@@ -134,17 +134,20 @@ at most eight unresolved AI calls; a ninth answers `429 ai_rate_limited` with
 
 ## Realtime voice
 
-The `/realtime` WebSocket route is implemented and tested locally. Live acceptance
-is still pending: authenticated upstream sessions closed with code `1011` before
-messages or audio. Do not claim voice works until a real hosted session passes.
+The `/realtime` WebSocket route works. A real hosted session on Development and
+Production opened, received `session.created`, streamed the model's audio and
+transcript events through `response.done` and closed cleanly with code `1000`; the
+cost orq recorded was charged at the active `ai.cost` factor. Audio arrives as JSON
+`response.output_audio.delta` events, not as binary frames.
 
 Connect from server code with the injected Bearer key. A browser WebSocket cannot
 set that header; keep the upstream socket in an authenticated application server
 route. Use exactly one `model` query parameter and `Upgrade: websocket`; extra or
 repeated parameters answer `400 invalid_request`. A session ends after five
-minutes, after one minute without messages in either direction, or when either
-peer closes or fails. Verify actual voice input, audio output and closure through
-the hosted application.
+minutes at most, or when either peer closes or fails. The provider sends a
+keepalive `ping` event about every ten seconds, so an idle session is not closed
+early: close it yourself when the conversation is over. Verify actual voice input,
+audio output and closure through the hosted application.
 
 ## Credit and failures
 
