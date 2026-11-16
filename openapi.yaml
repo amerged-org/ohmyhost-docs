@@ -12,6 +12,175 @@ servers:
 security:
   - BearerAuth: []
 paths:
+  /v1/organizations/{organization_id}/connections:
+    get:
+      operationId: listConnections
+      summary: List connection grants
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+      responses:
+        "200":
+          description: Connection result.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConnectionGrantList" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/organizations/{organization_id}/connections/providers:
+    get:
+      operationId: listConnectionProviders
+      summary: List available connection providers
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+      responses:
+        "200":
+          description: Connection result.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConnectionProviders" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/organizations/{organization_id}/connections/begin:
+    post:
+      operationId: beginConnection
+      summary: Start an owner consent handoff
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+        - $ref: "#/components/parameters/IdempotencyKey"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/ConnectionBegin" }
+      responses:
+        "201":
+          description: Connection result.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConnectionHandoff" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "409": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/organizations/{organization_id}/connections/requests/{request_id}:
+    get:
+      operationId: getConnectionRequest
+      summary: Read a consent handoff status
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+        - name: request_id
+          in: path
+          required: true
+          schema: { type: string }
+      responses:
+        "200":
+          description: Connection result.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConnectionRequestStatus" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/organizations/{organization_id}/connections/{grant_id}/catalog:
+    get:
+      operationId: discoverConnection
+      summary: Discover organizations, teams and connections
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+        - name: grant_id
+          in: path
+          required: true
+          schema: { type: string }
+        - name: project_id
+          in: query
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+        - name: environment_id
+          in: query
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+        - name: provider_organization_id
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1 }
+        - name: team_id
+          in: query
+          required: false
+          schema: { type: integer, minimum: 1 }
+      responses:
+        "200":
+          description: Connection result.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConnectionDiscovery" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/organizations/{organization_id}/connections/{grant_id}:
+    delete:
+      operationId: disconnectConnection
+      summary: Disconnect a connection grant
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+        - name: grant_id
+          in: path
+          required: true
+          schema: { type: string }
+        - $ref: "#/components/parameters/IdempotencyKey"
+      responses:
+        "200":
+          description: Connection result.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/ConnectionDisconnection" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "409": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
   /v1/projects/{project_id}/environments/{environment_id}/auth:
     get:
       operationId: getNativeAuthConfiguration
@@ -6293,6 +6462,84 @@ components:
         organization and restricted to their enabled product permissions. Session-only onboarding
         and session revocation require an interactive access JWT. No cookie session is assumed.
   schemas:
+    ConnectionBegin:
+      type: object
+      additionalProperties: false
+      required: [provider, project_id, environment_id]
+      properties:
+        provider: { const: make }
+        project_id: { $ref: "#/components/schemas/Ulid" }
+        environment_id: { $ref: "#/components/schemas/Ulid" }
+    ConnectionHandoff:
+      type: object
+      additionalProperties: false
+      required: [request_id, url, expires_at]
+      properties:
+        request_id: { type: string, pattern: "^[a-f0-9]{64}$" }
+        url: { type: string, format: uri }
+        expires_at: { type: string, format: date-time }
+    ConnectionRequestStatus:
+      type: object
+      additionalProperties: false
+      required: [state, expires_at]
+      properties:
+        state: { enum: [pending, consumed, expired] }
+        expires_at: { type: string, format: date-time }
+    ConnectionDisconnection:
+      type: object
+      additionalProperties: false
+      required: [state]
+      properties:
+        state: { enum: [disconnected, revocation_pending] }
+    ConnectionGrant:
+      type: object
+      additionalProperties: false
+      required: [id, provider, state, created_at]
+      properties:
+        id: { $ref: "#/components/schemas/Ulid" }
+        provider: { const: make }
+        state: { enum: [active, refreshing, reconnect_required, disconnecting, disconnected] }
+        created_at: { type: string, format: date-time }
+    ConnectionGrantList:
+      type: object
+      additionalProperties: false
+      required: [connections]
+      properties:
+        connections:
+          type: array
+          items: { $ref: "#/components/schemas/ConnectionGrant" }
+    ConnectionProviders:
+      type: object
+      additionalProperties: false
+      required: [providers, catalog_available]
+      properties:
+        providers:
+          type: array
+          items:
+            type: object
+            additionalProperties: false
+            required: [provider, status]
+            properties:
+              provider: { const: make }
+              status: { enum: [available, unavailable] }
+        catalog_available: { type: boolean }
+    ConnectionDiscoveryItem:
+      type: object
+      additionalProperties: false
+      required: [id, name]
+      properties:
+        id: { type: integer, minimum: 1 }
+        name: { type: string, minLength: 1, maxLength: 1024 }
+    ConnectionDiscovery:
+      type: object
+      additionalProperties: false
+      required: [organizations, teams, connections]
+      properties:
+        organizations:
+          { type: array, items: { $ref: "#/components/schemas/ConnectionDiscoveryItem" } }
+        teams: { type: array, items: { $ref: "#/components/schemas/ConnectionDiscoveryItem" } }
+        connections:
+          { type: array, items: { $ref: "#/components/schemas/ConnectionDiscoveryItem" } }
     NativeAuthConfiguration:
       type: object
       additionalProperties: false
