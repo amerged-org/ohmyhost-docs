@@ -52,7 +52,7 @@ ohmyhost project preview rotate --project "$PROJECT_ID" --environment prod \
   --idempotency-key "$ROTATE_REQUEST_KEY" --yes --json
 ```
 
-Keep each request's original key after an uncertain response. Rotation also invalidates that preview's previous login sessions.
+Keep each request's original key after an uncertain response. With managed Native Auth, rotation also invalidates that preview's previous login sessions.
 
 ## Use MCP or REST
 

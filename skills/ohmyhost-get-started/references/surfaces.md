@@ -49,6 +49,10 @@ and follow the returned schema rather than guessing arguments.
 - `ohmyhost project notes set` — ohmyhost project notes set --project ULID --version NUMBER --markdown TEXT --idempotency-key KEY --json (no credentials or signed URLs)
 - `ohmyhost project status` — ohmyhost project status --project ULID --json
 - `ohmyhost project dev add` — ohmyhost project dev add --project ULID --idempotency-key KEY --json
+- `ohmyhost project preview get` — ohmyhost project preview get --project ULID --environment dev|prod --json
+- `ohmyhost project preview open` — ohmyhost project preview open --project ULID --environment dev|prod --json
+- `ohmyhost project preview stop` — ohmyhost project preview stop --project ULID --environment dev|prod --idempotency-key KEY --yes --json
+- `ohmyhost project preview rotate` — ohmyhost project preview rotate --project ULID --environment dev|prod --idempotency-key KEY --yes --json
 - `ohmyhost project dev-access create` — ohmyhost project dev-access create --project ULID --json
 - `ohmyhost project dev-share link` — ohmyhost project dev-share link --project ULID --json
 - `ohmyhost project dev-share rotate` — ohmyhost project dev-share rotate --project ULID --idempotency-key KEY --yes --json
@@ -237,6 +241,10 @@ and follow the returned schema rather than guessing arguments.
 - `project_get` — Get one project
 - `project_status` — Get source, existing environment IDs, deployment URLs, custom production domains, Dev access mode, latest operation and cleanup status.
 - `project_development_add` — Add Dev to an existing project.
+- `preview_get` — Read the private stable preview URL and source state for this project environment.
+- `preview_open` — Open or create a private stable preview URL.
+- `preview_stop` — Stop the preview and remove backups while preserving its URL.
+- `preview_rotate` — Rotate the preview URL and close old connections.
 - `project_dev_share_link_get` — Owner only: get or create the persistent protected Dev link.
 - `project_dev_access_mode_set` — Owner only: choose public Dev (no platform token) or protected Dev (share link required).
 - `powered_by_flag_get` — Read whether the production site shows the opt-in "Powered by ohmyho.st" flag.

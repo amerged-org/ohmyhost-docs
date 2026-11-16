@@ -22,6 +22,170 @@
     }
   ],
   "paths": {
+    "/v1/projects/{project_id}/preview": {
+      "get": {
+        "operationId": "getProjectPreview",
+        "summary": "Read the preview for a project environment",
+        "description": "Requires project write permission to retrieve the private capability URL. Free projects have Prod; Paid projects can also have Dev.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/PreviewEnvironment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Preview"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      },
+      "post": {
+        "operationId": "openProjectPreview",
+        "summary": "Open or create a project environment preview",
+        "description": "Requires project write permission. Returns the existing stable URL or creates one. Opening its URL starts a sleeping preview; source saves update it independently of deployments.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/PreviewEnvironment"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Preview"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      },
+      "delete": {
+        "operationId": "stopProjectPreview",
+        "summary": "Stop a project environment preview",
+        "description": "Stops the runtime and removes its backups while preserving the stable URL. Repeat uncertain calls with the same idempotency key.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/PreviewEnvironment"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Preview"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
+    "/v1/projects/{project_id}/preview/token": {
+      "post": {
+        "operationId": "rotateProjectPreviewToken",
+        "summary": "Rotate a preview capability URL",
+        "description": "Invalidates the previous URL and closes its existing connections before returning the new URL. Repeat uncertain calls with the same idempotency key.",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/ProjectId"
+          },
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "$ref": "#/components/parameters/PreviewEnvironment"
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "responses": {
+          "200": {
+            "$ref": "#/components/responses/Preview"
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
     "/v1/projects/{project_id}/environments/{environment_id}/auth": {
       "get": {
         "operationId": "getNativeAuthConfiguration",
@@ -10360,6 +10524,19 @@
       }
     },
     "parameters": {
+      "PreviewEnvironment": {
+        "name": "environment",
+        "in": "query",
+        "required": true,
+        "description": "The concrete project environment to preview.",
+        "schema": {
+          "type": "string",
+          "enum": [
+            "dev",
+            "prod"
+          ]
+        }
+      },
       "AuditCursor": {
         "name": "cursor",
         "in": "query",
@@ -10669,6 +10846,24 @@
       }
     },
     "responses": {
+      "Preview": {
+        "description": "The authorized preview and its private capability URL. Do not cache or publish the URL.",
+        "headers": {
+          "Cache-Control": {
+            "schema": {
+              "type": "string",
+              "const": "no-store"
+            }
+          }
+        },
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/Preview"
+            }
+          }
+        }
+      },
       "AcceptedOperation": {
         "description": "The mutation was accepted for asynchronous processing.",
         "headers": {
@@ -10772,6 +10967,72 @@
       }
     },
     "schemas": {
+      "Preview": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "project_id",
+          "environment",
+          "status",
+          "url",
+          "source"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Ulid"
+          },
+          "project_id": {
+            "$ref": "#/components/schemas/Ulid"
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "prod"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "cold",
+              "starting",
+              "ready",
+              "sleeping"
+            ]
+          },
+          "url": {
+            "type": "string",
+            "format": "uri",
+            "description": "Stable private capability URL without an expiration time."
+          },
+          "source": {
+            "oneOf": [
+              {
+                "type": "null"
+              },
+              {
+                "type": "object",
+                "additionalProperties": false,
+                "required": [
+                  "sequence",
+                  "commit_sha"
+                ],
+                "properties": {
+                  "sequence": {
+                    "type": "integer",
+                    "minimum": 1
+                  },
+                  "commit_sha": {
+                    "type": "string",
+                    "pattern": "^[0-9a-f]{40}$"
+                  }
+                }
+              }
+            ]
+          }
+        }
+      },
       "NativeAuthConfiguration": {
         "type": "object",
         "additionalProperties": false,

@@ -3578,6 +3578,162 @@
       }
     },
     {
+      "name": "preview_get",
+      "description": "Read the private stable preview URL and source state for this project environment.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "prod"
+            ]
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "preview_open",
+      "description": "Open or create a private stable preview URL. Saved source updates it without deploying; the URL has no expiry until rotated.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "prod"
+            ]
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "preview_stop",
+      "description": "Stop the preview and remove backups while preserving its URL. Retry uncertain requests with the same key.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "prod"
+            ]
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment",
+          "idempotency_key"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "preview_rotate",
+      "description": "Rotate the preview URL and close old connections. Retry uncertain requests with the same key.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment": {
+            "type": "string",
+            "enum": [
+              "dev",
+              "prod"
+            ]
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment",
+          "idempotency_key"
+        ]
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true
+      }
+    },
+    {
       "name": "project_dev_share_link_get",
       "description": "Owner only: get or create the persistent protected Dev link. The same link works for multiple visitors and has no automatic expiry. Keep it out of notes and logs.",
       "inputSchema": {

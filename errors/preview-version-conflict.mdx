@@ -1,10 +1,12 @@
 ---
-title: "Preview changed"
-description: "What the preview_version_conflict error means and how to retry safely."
+title: "Preview version conflict"
+description: "What the `preview_version_conflict` error means and what to do next."
 ---
 
-The API, CLI and MCP return `preview_version_conflict` with HTTP 409 when a concurrent preview change supersedes the state used by your request.
+The API, CLI and MCP return `preview_version_conflict` with HTTP 409. Repeating the same request, with the same idempotency key, after a wait can succeed.
 
-Read the preview state, then repeat the original request with the same idempotency key. Keep that key after an uncertain response.
+## What to do
 
-If the problem continues, [report it](/feedback) with the `request_id`.
+Read the preview state, then repeat the original request with the same idempotency key.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.
