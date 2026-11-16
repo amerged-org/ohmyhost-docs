@@ -1,7 +1,7 @@
 {
-  "source_commit": "02c8391de8bf501c7a35acb7eeec1fde13cf7430",
+  "source_commit": "a961d598dac8b513d6f9009d9e5917b83b65eb8c",
   "source_dirty": false,
-  "release": "0.1.58",
+  "release": "0.1.59",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -405,11 +405,11 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/SKILL.md",
-      "sha256": "d3edc5ce72af003efd4ba9158fdd4a2b358876737dc4be91c834773824bcd981"
+      "sha256": "e4d46c285017db4b68f8ae1333900e3fa9003b02b8c517c518e1fe98bffb5a6f"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/ai.md",
-      "sha256": "94baed63820ef2137bd0b453b5b1b2f926c6db555fbd4f4397426392ad6a9fb6"
+      "sha256": "feb236e133cea87a9e99d4e823a2a4b5a19130e5c02993922706d27bc547d078"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/browser-pdf.md",
@@ -509,11 +509,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "62c4cafceec94cb19df226093d7e9cceaaedfbaa064a44d29c100f7a6c13cb88"
+      "sha256": "059458836009334ac155c8e39894d00147aec609c8a1bbc41985412022c2e0e8"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "ec96106eb3a6bc69438ab50f94cfaed4bd0302954c3952e2aeb2d116ac156079"
+      "sha256": "4b0a55958242fac2eb14a46d3027bf2c1b825857205f49b396a7e3331bdd56a9"
     },
     {
       "path": "snippets/skill-catalog.mdx",

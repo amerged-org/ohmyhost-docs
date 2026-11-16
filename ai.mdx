@@ -5,7 +5,7 @@ description: "Use chat, images and audio through the ohmyho.st AI gateway with a
 
 <Note>
   The AI gateway was introduced in release 0.1.47. Calls require an active AI
-  rate card. Realtime voice still needs successful live provider acceptance.
+  rate card. Realtime voice runs through a server-side WebSocket route.
 </Note>
 
 The AI gateway serves the models [orq.ai offers](https://docs.orq.ai/ai-gateway/supported-models)
@@ -133,18 +133,21 @@ calls; another call answers `429 ai_rate_limited` with `Retry-After: 5`.
 
 ## Realtime voice
 
-The realtime route is implemented and tested locally. Live acceptance remains
-pending: the latest authenticated check found enabled voice models, but upstream
-sessions closed with code `1011` before any messages. Verify a real session through
-the deployed application before relying on voice input or output.
+A real hosted session on Development and Production opened, received
+`session.created`, streamed the model's audio and transcript events through
+`response.done` and closed cleanly with code `1000`. The cost orq recorded was
+charged at the active `ai.cost` factor. Audio arrives as JSON
+`response.output_audio.delta` events, not as binary frames.
 
 Connect from server code using the injected Bearer key. A browser WebSocket cannot
 set that header. Keep the upstream socket in an authenticated server route. The
 request requires `Upgrade: websocket` and exactly one `model` query parameter;
 extra or repeated parameters answer `400 invalid_request`.
 
-A session ends after five minutes, after one minute without messages in either
-direction, or when either peer closes or fails.
+A session ends after five minutes at most, or when either peer closes or fails.
+The provider sends a keepalive `ping` event about every ten seconds, so an idle
+session is not closed early: close it from your server when the conversation is
+over.
 
 ## Credits and budgets
 
