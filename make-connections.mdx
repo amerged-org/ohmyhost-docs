@@ -1,0 +1,71 @@
+---
+title: "Connect Make"
+description: "Link the app owner's Make account and inspect its organizations, teams and connections."
+---
+
+Connect Make from the ohmyho.st account that owns your project. Complete the protected portal handoff as the same person, then review and approve Make's consent screen. Your provider tokens stay in the connection service; responses to your agent contain safe status and discovery metadata.
+
+<Info>
+This release enables account linking and read-only discovery. Running app actions through Make Endpoints remains unavailable until it is separately qualified. Availability is reported by the connected environment.
+</Info>
+
+## Connect your account
+
+Ask your agent to connect Make for the selected workspace, project and environment. It uses `integration_connection_begin`, opens the returned protected link for you, and follows `integration_connection_status` after you finish consent. Both your initiating login and portal login must identify the same person. Current workspace role and explicit credential restrictions still apply.
+
+For the CLI, select your saved login and use the IDs returned by the project context:
+
+```sh
+ohmyhost connection begin \
+  --organization ORGANIZATION_ULID \
+  --project PROJECT_ULID \
+  --environment ENVIRONMENT_ULID \
+  --idempotency-key make-connect-1 \
+  --profile-name PROFILE_NAME --json
+```
+
+Open the returned URL privately and complete the two consent steps. Retain the returned request ID to check completion:
+
+```sh
+ohmyhost connection status \
+  --organization ORGANIZATION_ULID \
+  --request REQUEST_ID \
+  --profile-name PROFILE_NAME --json
+```
+
+This status tracks the protected handoff: `consumed` means the portal accepted it, even if Make consent has not finished. After completing consent and the final portal confirmation, use `connection list` to check for an `active` grant. Neither response returns an access token or refresh token. A human session's selected workspace is context; current target-workspace access and any explicit restrictions decide whether the request is allowed. An API key remains limited to its recorded workspace and permissions.
+
+## Inspect connections
+
+`integration_connection_list` lists your permitted grants. Use `integration_connection_discover` with the selected grant and project context to inspect Make organizations, teams and existing connections. Select only IDs returned by that discovery. This operation reads metadata and does not run scenarios, send email or change CRM records.
+
+```sh
+ohmyhost connection list \
+  --organization ORGANIZATION_ULID \
+  --profile-name PROFILE_NAME --json
+
+ohmyhost connection discover \
+  --organization ORGANIZATION_ULID \
+  --project PROJECT_ULID \
+  --environment ENVIRONMENT_ULID \
+  --grant GRANT_ULID \
+  --profile-name PROFILE_NAME --json
+```
+
+Discovery returns organizations first. Repeat it with `--provider-organization ID` to list that organization's teams, then add `--team ID` to inspect the team's connections.
+
+Make controls its OAuth token lifetimes. The service refreshes a valid grant as needed; a revoked or expired grant requires consent again. Ordinary portal logout does not disconnect a successfully linked account, while losing the linking owner's workspace rights suspends use.
+
+## Disconnect
+
+Use `integration_connection_disconnect`, or the CLI's `connection disconnect` command with its required confirmation. Disconnect immediately blocks local use and requests upstream revocation. It does not delete the third-party connections stored in your Make team. If revocation is still pending, retain that reported state and follow it rather than treating it as confirmed.
+
+```sh
+ohmyhost connection disconnect \
+  --organization ORGANIZATION_ULID \
+  --grant GRANT_ULID \
+  --idempotency-key make-disconnect-1 \
+  --yes --profile-name PROFILE_NAME --json
+```
+
+A refused or unavailable connection needs its reported account, permission or provider issue resolved. Repeating consent or changing client transport does not expand your access. [Sign-in and account selection](/login-tokens) explains saved logins and current workspace rights.
