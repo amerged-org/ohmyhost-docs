@@ -1,5 +1,5 @@
 {
-  "source_commit": "177a96b89f087ed86f9dce83ace9ff90508857fb",
+  "source_commit": "f9052a5d859f2357d497ffd971c281a138db12bc",
   "source_dirty": false,
   "release": "0.1.60",
   "files": [
@@ -437,7 +437,7 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/stack-contracts.md",
-      "sha256": "afada6c11310ae439b78c95788ef3ff4f5a7e116294db11fba294d2534904f01"
+      "sha256": "d8b9c232f26a6f5ff446c8b3ff522553029fe48607ca135d30680211505fe16a"
     },
     {
       "path": "skills/ohmyhost-deploy-github/SKILL.md",
@@ -457,7 +457,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/SKILL.md",
-      "sha256": "4085968021876f07d7fce3c239acddb6f2a5d3904f941ad4f552866532a3179b"
+      "sha256": "1f07e9ed050d3b68396a9083c99dbc60a6a9a9236804d91a9470688b24075e50"
     },
     {
       "path": "skills/ohmyhost-get-started/references/harness-setup.md",

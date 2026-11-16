@@ -7,7 +7,7 @@ Run `ohmyhost init --dry-run --json` in the Next.js project. Keep an exact packa
 
 ## Supported versions and build
 
-Next.js requires stable `16.4.1` or later. Every Next.js 15 release, Next.js 16.4.0 and older, and prereleases are refused. The security floor is enforced on new plans and builds in Dev and Prod; existing deployments need a rebuild to adopt an updated application dependency.
+Next.js requires stable `16.4.5` or later. Every Next.js 15 release, Next.js 16.4.4 and older, and prereleases are refused. The security floor is enforced on new plans and builds in Dev and Prod; existing deployments need a rebuild to adopt an updated application dependency.
 
 The version resolved by the committed `package-lock.json` or `pnpm-lock.yaml` decides; otherwise the exact version or `^`/`~` range in `package.json` does, and a range spanning the floor stays `pending` until the build checks the installed version. There is no upper version bound in that security check, but a newer release must still build: OpenNext refuses a Next.js major it does not support yet. Pin exact `react` and `react-dom` versions and commit the matching package-manager lockfile.
 
@@ -56,7 +56,7 @@ The cache payloads are private. Direct requests to their reserved paths must ret
 
 ## Opt into request-time revalidatePath
 
-With client 0.1.57 or newer and installed Next.js exactly `16.4.1`, add `build.next_revalidate_path: true` to `ohmyhost.yaml`. The service supplies a private writable incremental/tag cache; no customer R2 bucket or Wrangler configuration is needed. Keep your other build settings.
+With client 0.1.60 or newer and installed Next.js exactly `16.4.5`, add `build.next_revalidate_path: true` to `ohmyhost.yaml`. The service supplies a private writable incremental/tag cache; no customer R2 bucket or Wrangler configuration is needed. Keep your other build settings.
 
 Call `revalidatePath` from an authorized Route Handler or Server Action during that request. Both page and layout invalidation are supported. Time-based ISR, `revalidateTag` and invalidation deliberately deferred until after the response remain outside this mode.
 
