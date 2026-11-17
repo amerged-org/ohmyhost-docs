@@ -1,0 +1,12 @@
+---
+title: "Preview version conflict"
+description: "What the `preview_version_conflict` error means and what to do next."
+---
+
+The API, CLI and MCP return `preview_version_conflict` with HTTP 409. Repeating the same request, with the same idempotency key, after a wait can succeed.
+
+## What to do
+
+Read the preview state, then repeat the original request with the same idempotency key.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

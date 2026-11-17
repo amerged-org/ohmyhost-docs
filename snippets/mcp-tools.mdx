@@ -80,6 +80,10 @@
 | `project_get` | `project_id` | Read |
 | `project_status` | `project_id` | Read |
 | `project_development_add` | `project_id`, `idempotency_key` | Change or prepare a change |
+| `preview_get` | `project_id`, `environment` | Read |
+| `preview_open` | `project_id`, `environment` | Change or prepare a change |
+| `preview_stop` | `project_id`, `environment`, `idempotency_key` | Change or prepare a change |
+| `preview_rotate` | `project_id`, `environment`, `idempotency_key` | Change or prepare a change |
 | `project_dev_share_link_get` | `project_id` | Change or prepare a change |
 | `project_dev_access_mode_set` | `project_id`, `mode`, `idempotency_key` | Change or prepare a change |
 | `powered_by_flag_get` | `project_id` | Read |
