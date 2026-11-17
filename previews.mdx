@@ -36,6 +36,8 @@ A preview sleeps after ten minutes without meaningful use. An idle tab, hot-relo
 
 Dependencies are retained for thirty days after the last preview use. After that, the next open prepares them again. Sleeping has no compute charge; awake usage follows [the preview rate](/pricing).
 
+A compressed dependency snapshot can be at most 2 GiB. Reduce large dependencies or generated files if the preview exceeds this limit. A snapshot belongs only to the selected project's environment; publication still builds the saved source separately.
+
 ## Stop or replace the link
 
 Stop clears the current runtime and dependency cache. A later open prepares the saved source at the same URL:
