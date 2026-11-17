@@ -1,7 +1,7 @@
 {
-  "source_commit": "f9052a5d859f2357d497ffd971c281a138db12bc",
+  "source_commit": "d81383e54b407e02336662d9e0182638fa4278ff",
   "source_dirty": false,
-  "release": "0.1.60",
+  "release": "0.1.62",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -465,7 +465,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/references/surfaces.md",
-      "sha256": "045456684db12723572f97a02bba7ae145d98e4c01583b7d56509caf74db825a"
+      "sha256": "d7fe360ed86be9183553044cc312164d4768e600ded26f0569ac58905c558889"
     },
     {
       "path": "skills/ohmyhost-manage-database/SKILL.md",
@@ -497,15 +497,15 @@
     },
     {
       "path": "openapi.yaml",
-      "sha256": "4a72ba2b4eba4002c5e0e90dd0a8908b146d7600045a69334e579035dfad5179"
+      "sha256": "0dc727bacef0cd6aa521c91de548f1e89957a77881b1b40920b5c9a329f1d1bb"
     },
     {
       "path": "openapi.json",
-      "sha256": "38654bf54bab3aa55bbaa6fa8870d5fc017e5a4a8e88dcf9abdb0cada7068eaf"
+      "sha256": "dfe6950e21a9f39061570eea3a2d110b32d224d34c490c5b272c84297bbfaad1"
     },
     {
       "path": "mcp-tools.json",
-      "sha256": "14d2d14e1100f3f5d8bffcde4de3d9f1dd338a76046af3aadecb05e04bfd3104"
+      "sha256": "9e249b64e196f18ad0a619d7f72b0304a4a97f34960255bde8960175a891e1e6"
     },
     {
       "path": "mcp.json",
@@ -513,11 +513,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "15d4110dfe01cfbea136828f4759576450e94b7ba92c068c98820c8fc98ff007"
+      "sha256": "395462e0d3e75988a061fa0a3e51beb85d0ead2f6a49a79049728597464a9da7"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "7044c63a2e99a6ea7d884c794189a939199d4d4e226f2ddf2c8512969c1f2190"
+      "sha256": "eb8fe0af2e5ada159a9482812d1bb3020c0d204500e279557624dc8dd896186c"
     },
     {
       "path": "snippets/skill-catalog.mdx",
@@ -525,7 +525,7 @@
     },
     {
       "path": "snippets/mcp-tools.mdx",
-      "sha256": "580cf0925dd43433ba3121bc8b4904276be74bab699502e85142d113f0a1079c"
+      "sha256": "3fac15cd8eed0dd7eec3ab9e9ac10ea528c6a99a0e0d18fd32faf74bef6124a0"
     },
     {
       "path": "logo/light.svg",

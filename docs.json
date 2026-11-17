@@ -73,7 +73,12 @@
           },
           {
             "group": "Agent reference",
-            "pages": ["project-context", "feedback", "limits", "changelog"]
+            "pages": [
+              "project-context",
+              "feedback",
+              "limits",
+              "changelog"
+            ]
           },
           {
             "group": "Legal",
@@ -93,7 +98,9 @@
         "groups": [
           {
             "group": "Overview",
-            "pages": ["api"]
+            "pages": [
+              "api"
+            ]
           },
           {
             "group": "Endpoints",
@@ -175,7 +182,7 @@
     ]
   },
   "markdown": {
-    "instructions": "For account actions, read https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md and use the authenticated ohmyho.st CLI, local product MCP or supported remote OAuth MCP. Read the current project source binding before choosing GitHub or managed versions. Mintlify search only reads documentation. Preserve the customer’s selected project, environment and authentication provider; keep private application values in the one-hour secret link or local stdin flow."
+    "instructions": "For account actions, read https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md and use the authenticated ohmyho.st CLI, local product MCP or supported remote OAuth MCP. Read the current project source binding before choosing GitHub or managed versions. Mintlify search only reads documentation. Preserve the customer\u2019s selected project, environment and authentication provider; keep private application values in the one-hour secret link or local stdin flow."
   },
   "fonts": {
     "heading": {
