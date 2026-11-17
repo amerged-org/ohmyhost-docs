@@ -54,6 +54,8 @@ ohmyhost connection discover \
 
 Discovery returns organizations first. Repeat it with `--provider-organization ID` to list that organization's teams, then add `--team ID` to inspect the team's connections.
 
+Your app's hosting region does not choose Make's data region. Organization discovery reads across Make zones; team and connection metadata are read from the selected organization's zone.
+
 Make controls its OAuth token lifetimes. The service refreshes a valid grant as needed; a revoked or expired grant requires consent again. Ordinary portal logout does not disconnect a successfully linked account, while losing the linking owner's workspace rights suspends use.
 
 ## Disconnect
