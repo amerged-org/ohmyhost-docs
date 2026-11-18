@@ -1,19 +1,39 @@
 ---
-title: "Bring your application’s auth"
-description: "Keep application users and sessions separate from your hosting account."
+title: "Application authentication"
+description: "Set up Omh Native Auth for email and password sign-in, or connect your own provider for Google and GitHub sign-in."
 ---
 
-Your ohmyho.st login authorizes hosting operations. Your application chooses its own users, sessions and auth provider. A deliberately public app requires no application login.
+Choose Omh Native Auth for managed email and password sign-in on approved projects. You can also run Better Auth, connect your own WorkOS tenant, or integrate another compatible provider. Your ohmyho.st login authorizes hosting operations. A public app can run without an application login.
 
-## Native password authentication
+## Set up Omh Native Auth
 
-Native Auth password flows are available only for explicitly approved projects on the existing launch allowlist. Selecting `auth.provider: omh-native` is an explicit choice; keep your current customer-owned provider unless you choose to change it. Native Auth management requires CLI and local MCP version `0.1.50` or newer.
+Omh Native Auth manages application users and sessions for projects approved for password sign-in. The current rollout is limited to approved projects on the Development platform. Production activation is currently disabled. Start with a Paid project, a verified application identity, and your own verified sender authorized for the project. The application identity and sender must share the same registrable main domain. See [email](/email) and [application identity and shared senders](/shared-mail). Native Auth management requires CLI and local MCP version `0.1.50` or newer.
 
-An Owner configures the approved canonical application origin and application-owned redirect, reset and invitation paths for each environment, then checks readiness. The project needs Paid access and your own verified sender authorized for that project. The verified application identity and sender must share the same registrable main domain. See [email](/email) and [shared senders](/shared-mail).
+1. Set `auth.provider: omh-native` in `ohmyhost.yaml`:
 
-Native Auth uses a separately metered Auth database and separate Dev and Prod user directories, even when business data is shared. A business database is not required. Your application supplies the forms, validates sessions on the server and authorizes access to its business records. Native Auth reserves `/api/auth/v1`; declaring it does not protect static files.
+   ```yaml
+   auth:
+     provider: omh-native
+   ```
 
-Google and GitHub sign-in remain disabled. General availability, performance targets and full recovery and lifecycle qualification remain pending. Read customer-specific readiness and verify the required password flow on the actual application and environment before handing over access. The [application build Skill](https://ohmyho.st/skills/ohmyhost-build-portable-app/references/stack-contracts.md) describes the browser and server contracts.
+2. As a project Owner, select Dev or Prod. Read the current configuration with MCP `native_auth_config_get`, then use `native_auth_config_set` to enable Native Auth, choose `open` or `invite-only` signup, and set the application name, approved HTTPS origin and application paths. Include reset and invitation paths in the allowed redirect list. Follow the [MCP configuration workflow](/agents/mcp#configure-application-authentication).
+3. Build your sign-in and email verification screens with `createNativeAuthBrowser` from `@ohmyhost/customer-runtime/auth-browser`. Call `signIn.email` and `signOut` from the browser. Native Auth serves the same-origin `/api/auth/v1` namespace. Keep that namespace reserved for it.
+4. Protect server routes with `createNativeAuthServer(env.OHMYHOST_AUTH)` from `@ohmyhost/customer-runtime/auth-server`. Call `getSession(request)` or `requireUser(request)`, then check the user's permissions for the requested record or action. Static files remain public.
+5. Deploy to Dev and read readiness again. The first Native-capable deployment provisions Auth storage. Check that `paid`, `sender`, `origin` and `storage` are all ready. Exercise sign-up or invitation, email verification, sign-in, a protected action, reload and sign-out on the deployed origin. Confirm that protected access is denied after sign-out. Configure Prod separately and repeat the checks on its own origin.
+
+Native Auth uses a separately metered Auth database, with separate Dev and Prod user directories even when the application shares business data. A business database is optional. See the [application build Skill](https://ohmyho.st/skills/ohmyhost-build-portable-app/references/stack-contracts.md) for the runtime contract and how to retry an uncertain mail operation with the original idempotency key.
+
+## Add Google or GitHub to Omh Native Auth
+
+The current public Native Auth release supports email and password sign-in. Google and GitHub activation is pending release for approved projects. For an app that needs social sign-in today, [use an application-owned OAuth integration](#set-up-google-or-github-sign-in).
+
+When Native OAuth is enabled for your project, use your own Google Cloud or GitHub OAuth app for each environment:
+
+1. Read `native_auth_provider_get` for `google` or `github` with the selected project and environment IDs. Copy the returned `callbackUrl`. It ends in `/api/auth/v1/callback/google` or `/api/auth/v1/callback/github`. If it is null, configure the approved canonical origin in Native Auth first.
+2. For Google, configure the consent screen and audience in Google Auth Platform. Create a **Web application** OAuth client and paste the exact URL under **Authorized redirect URIs**. Add test users when the app is in testing and complete Google's applicable [brand verification](https://developers.google.com/identity/protocols/oauth2/production-readiness/brand-verification).
+3. For GitHub, open **Settings → Developer settings → OAuth Apps → New OAuth App**. Set **Homepage URL** to the same environment's app URL. Paste the full URL returned by Native Auth into **Authorization callback URL**. See [GitHub OAuth app setup](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app).
+4. Ask your agent to read the current Native Auth configuration revision and prepare the provider credential handoff using `native_auth_provider_secret_input_request` with the Client ID and `enabled: true`. In connected MCP, enter the Client Secret in the protected portal while signed in as the account connected to the agent. In local MCP, pass it to the returned CLI command through stdin. Read back the provider settings. See the [MCP workflow](/agents/mcp#configure-application-authentication).
+5. From the app's button, call the Native browser client's `signIn.social` with the provider and an approved app return path such as `/login`. To navigate explicitly, pass `disableRedirect: true` and navigate to the URL in the successful response. Test the provider prompt, callback, protected access and logout on the deployed origin. Configure and test Prod with its own OAuth client ID, secret and callback.
 
 To enforce a verified user's row permissions in PostgreSQL, use [backend row-level security](/row-level-security). Validate the server session before calling `database.withRls`; pass only selected authorization claims from trusted membership or administrator data. Application auth and RLS remain explicit choices, and authentication tables are not automatically protected.
 
@@ -32,6 +52,16 @@ To choose the managed bridge, set `auth.provider: better-auth` and `database.ena
 The public `@amerged/ohmyhost-auth` helper accepts an optional `email.send` callback, including your own Resend sender. Initialization, existing verified-user sign-in, sessions and validation of an already issued token need no sender. Sign-up, resend verification and password-reset requests need one; its final reset also sends a password-change notification. Missing sender returns `503 AUTH_EMAIL_SENDER_NOT_CONFIGURED` before those operations write. Email verification stays required; without a sender, unverified sign-in returns `403 EMAIL_NOT_VERIFIED` and sends no email. The helper's pg-pool constructor is not a Workers RPC adapter; use the actual database integration for your application.
 
 The optional [Kysely dialect](/database#optional-kysely-dialect) implements the leased transaction protocol. For application-owned Better Auth `1.7.7`, use its own migrated schema, normally `public`: `database: { db: db.withSchema("public"), type: "postgres", transaction: true }` with that Kysely instance. This is separate from the managed auth-lane bridge; `auth.provider: none` provisions no auth tables. Library transaction behavior does not establish hosted signup or mail delivery; verify those application flows. Do not assume an unverified Drizzle or pg-proxy adapter supplies equivalent transactions.
+
+## Set up Google or GitHub sign-in
+
+This example uses an application-owned Better Auth server handler with `auth.provider: none`. If you already use WorkOS or another provider, configure the social connection there and register the exact callback URL it supplies.
+
+1. Set Better Auth's `baseURL` from the trusted URL for the chosen environment, such as `https://dev.example.com` or `https://app.example.com`. With the default `/api/auth` base path, the OAuth callbacks are `/api/auth/callback/google` and `/api/auth/callback/github` on that origin. If you use a different base path, register the callback for your deployed handler.
+2. For **Google**, configure the consent screen and audience in Google Auth Platform. Create an OAuth client of type **Web application** and add the full callback URL under **Authorized redirect URIs**, for example `https://app.example.com/api/auth/callback/google`. If your consent screen is in testing, add the users who will test sign-in. See [Google OAuth setup](https://developers.google.com/identity/protocols/oauth2/web-server) and the [Better Auth Google guide](https://better-auth.com/docs/authentication/google).
+3. For **GitHub**, go to **Settings → Developer settings → OAuth Apps → New OAuth App**. Set **Homepage URL** to the environment's app URL and **Authorization callback URL** to its full callback, for example `https://app.example.com/api/auth/callback/github`. Register separate GitHub OAuth apps for Dev and Prod so each has its own callback and credentials. See [GitHub OAuth app setup](https://docs.github.com/en/apps/oauth-apps/building-oauth-apps/creating-an-oauth-app) and the [Better Auth GitHub guide](https://better-auth.com/docs/authentication/github).
+4. In the Better Auth server configuration, map each OAuth application's client ID and secret to `socialProviders.google` or `socialProviders.github`. Store the client secrets separately in each environment using [runtime secrets](/secrets). A connected agent can prepare a `secret_input_request` link so you can enter them privately. Add the provider origins called by your server handler to `runtime.egress.allow`.
+5. Wire your buttons to `authClient.signIn.social({ provider: "google" })` or `authClient.signIn.social({ provider: "github" })`. The OAuth redirect URI points to the server handler. Use the client call's `callbackURL` option to choose the app page the user sees after sign-in. Test the full provider redirect, protected access, reload and logout in each environment.
 
 ## Set up an environment
 
