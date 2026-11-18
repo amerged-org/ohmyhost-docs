@@ -1,7 +1,7 @@
 {
-  "source_commit": "aaa4ca5fe9c9837c4d5775942bcc5c5bc75a3f61",
+  "source_commit": "cc36e063586b74c3ee0444cdbdb82fdaba7eaeb5",
   "source_dirty": false,
-  "release": "0.1.66",
+  "release": "0.1.67",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -529,11 +529,11 @@
     },
     {
       "path": "openapi.yaml",
-      "sha256": "f06372aa375860c0b2681e5502929829e8417bd7d13932892ce89fb463cc3fcc"
+      "sha256": "1df38883e1ccb2ef32f615af76cb14b33f4421cea44ee65fd0e35d6ea1042255"
     },
     {
       "path": "openapi.json",
-      "sha256": "048aebe1bf5cf6a90904447a535656954b0a14aa0dfd055246191f0674c58403"
+      "sha256": "169544a84c5bf8e63c5261d2aa895adccfd1a34807db4e57d7e94fdd8817ba09"
     },
     {
       "path": "mcp-tools.json",
@@ -545,11 +545,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "51885628e64a1c98d073c99902aeefa933d512c313504f6bfc4cf7d904a1d367"
+      "sha256": "1e17138f2251e5d4c4937c3d31d2c696e3c3b3d77429379e75aa4a01b806dce2"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "6a756b214b6a7f882f5d5aa705906d721a266d5b395612568aac879d0c9d803c"
+      "sha256": "2ea2ae1e77a34f97db1cd5df0aa5a322d03d4312b457896e5a82530b926f9c83"
     },
     {
       "path": "snippets/skill-catalog.mdx",
@@ -561,7 +561,7 @@
     },
     {
       "path": "snippets/remote-mcp-tools.mdx",
-      "sha256": "bc7c74a5e099ae4008df36dac8564085fab2e052b764107049cff5cc8cf1720a"
+      "sha256": "9b1ee4831f268f535409e1ab7ad876ad6957692df69743ca74db2c6ba7c99445"
     },
     {
       "path": "logo/light.svg",

@@ -56,7 +56,9 @@ MCP file reads return valid UTF-8 as `content_text` by default, or base64 when t
 
 ## Discover API capabilities in a connected chat
 
-OpenAI and Claude plugins use the same remote server catalog. Their imported Skills may describe different workflows; the API still checks the connected account's current rights and any token restrictions for each requested action.
+The Claude directory package and the general remote connection use `https://app.ohmyho.st/mcp`. ChatGPT package versions configured with the dedicated profile use `https://app.ohmyho.st/mcp/chatgpt`. Check your installed package's connection URL to identify its catalog. When moving to the dedicated resource, reconnect if ChatGPT asks for authorization.
+
+The ChatGPT profile offers read-only workspace usage, remaining credits, and current account access alongside its app workflows. Manage purchases and payment settings in the ohmyho.st dashboard. Both resources check the connected account's current rights and token restrictions for each action.
 
 Ask the agent to inspect its actual named tools. The read-only `api_reference` tool can look up an operation or search a topic, for example `query: "database"` with `limit: 10`. It returns bounded API summaries or schemas, the compiled contract hash, the corresponding tool names or support limitation, and links to the complete [API reference](https://ohmyho.st/api).
 

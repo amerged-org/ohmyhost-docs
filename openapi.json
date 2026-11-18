@@ -868,7 +868,7 @@
           "adapter": "existing"
         },
         "summary": "Read a Native Auth provider",
-        "description": "Requires the current project Owner for this environment. Source capability and owner pause are independent.",
+        "description": "Requires the current project Owner. Returns the exact OAuth callback for the selected environment once its canonical origin is configured.",
         "parameters": [
           {
             "$ref": "#/components/parameters/RequestId"
@@ -942,7 +942,7 @@
           "reason": "Provider metadata uses native_auth_provider_set; clientSecret is accepted only through native_auth_provider_secret_input_request, never MCP arguments."
         },
         "summary": "Update a Native Auth provider",
-        "description": "Requires the current project Owner for this environment. Source capability and owner pause are independent.",
+        "description": "Requires the current project Owner. Google and GitHub can be enabled for projects on the Native Auth launch allowlist using the customer's OAuth client ID and secret for this environment. Use the callback returned by the read operation. Source capability and owner pause are independent.\n",
         "parameters": [
           {
             "$ref": "#/components/parameters/RequestId"
