@@ -52,7 +52,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -260,7 +261,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "changes": {
             "minItems": 1,
@@ -355,7 +357,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "restore_commit_sha": {
             "type": "string",
@@ -418,7 +421,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "directory": {
             "default": ".",
@@ -633,7 +637,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -706,7 +711,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -746,7 +752,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -846,7 +853,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirm": {
             "type": "boolean",
@@ -918,7 +926,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirm": {
             "type": "boolean",
@@ -1163,7 +1172,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -1466,7 +1476,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -1636,7 +1647,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -1877,7 +1889,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -1930,7 +1943,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -2034,7 +2048,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -2157,7 +2172,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -2279,7 +2295,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -2341,7 +2358,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -2394,7 +2412,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -2440,7 +2459,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -2540,7 +2560,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -2597,7 +2618,7 @@
     },
     {
       "name": "database_schedule_set",
-      "description": "Create or replace a named database schedule that runs SQL statements repeatedly on a timer, as the application's own runtime role, so row-level security applies. Send exactly one of cron (five-field UTC expression) or every_seconds (60 to 2678400). Each run is cancelled after timeout_ms (1000 to 30000, default 10000). Statements run in order and must be safe to repeat: write idempotent statements. Destructive: requires confirmed: true. A project whose Stop budget is reached has its schedules disabled automatically, within about an hour of the billed usage reaching the budget: the credit service does this after its hourly pgcf pass, and Continue budgets are never touched. While the budget is reached, schedule set with enabled true and schedule run are refused with project_budget_exceeded (HTTP 402). Re-enabling is manual: raise the budget (or wait for the next UTC month) and run database schedule set --enabled true again with the schedule body (read it with schedule get).",
+      "description": "Create or replace a named database schedule that runs SQL statements repeatedly on a timer, as the application's own runtime role, so row-level security applies. Send exactly one of cron (five-field UTC expression) or every_seconds (60 to 2678400). Each run is cancelled after timeout_ms (1000 to 30000, default 10000). Statements run in order and must be safe to repeat: write idempotent statements. Destructive: requires confirmed: true. A project whose Stop budget is reached has its schedules disabled automatically, within about an hour of the billed usage reaching the budget: the credit service does this after its hourly pgcf pass, and Continue budgets are never touched. While the budget is reached, database_schedule_set with enabled true and database_schedule_run_now are refused with project_budget_exceeded (HTTP 402). Re-enabling is manual: raise the budget (or wait for the next UTC month) and call database_schedule_set again with enabled true and the same schedule body (read that body with database_schedule_list).",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -2787,7 +2808,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -2939,7 +2961,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -2986,7 +3009,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "out_file": {
             "type": "string",
@@ -3160,7 +3184,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -3253,7 +3278,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -3366,7 +3392,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -3425,7 +3452,7 @@
     },
     {
       "name": "project_create",
-      "description": "Create an ohmyho.st project. Dev is included by default; set include_development_environment to false for Prod only, or add Dev later with project_development_add. When Dev is included, choose protected (default) or public access; public means anyone with the Dev URL can open it. data_mode defaults to shared; isolated separates database/Auth records and files. Later changes use project_data_plan and project_data_change; ohmyho.st never copies data and ordinary usage prices apply. region defaults to us; new databases, files and builds use the selected us or eu region. The customer API cannot change region later. ohmyhost.yaml storage.jurisdiction must match the recorded R2 jurisdiction; read project_context_get rather than guessing. Deploy to Dev then promote the reviewed artifact, or deploy directly to Prod when authorized.",
+      "description": "Create an ohmyho.st project. Returns project_id and the queued operation id. An identical retry with the same idempotency key returns both original IDs. Dev is included by default; set include_development_environment to false for Prod only, or add Dev later with project_development_add. When Dev is included, choose protected (default) or public access; public means anyone with the Dev URL can open it. data_mode defaults to shared; isolated separates database/Auth records and files. Later changes use project_data_plan and project_data_change; ohmyho.st never copies data and ordinary usage prices apply. region defaults to us; new databases, files and builds use the selected us or eu region. The customer API cannot change region later. ohmyhost.yaml storage.jurisdiction must match the recorded R2 jurisdiction; read project_context_get rather than guessing. Deploy to Dev then promote the reviewed artifact, or deploy directly to Prod when authorized.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3467,7 +3494,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -3558,7 +3586,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -3671,7 +3700,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -3713,7 +3743,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -3783,7 +3814,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -3849,7 +3881,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -3884,7 +3917,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -3918,7 +3952,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -3990,7 +4025,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -4173,7 +4209,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -4219,7 +4256,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -4260,7 +4298,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -4433,7 +4472,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -4521,7 +4561,7 @@
         ]
       },
       "annotations": {
-        "readOnlyHint": true,
+        "readOnlyHint": false,
         "destructiveHint": false,
         "idempotentHint": true
       }
@@ -4546,7 +4586,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -4685,7 +4726,7 @@
     },
     {
       "name": "operation_get",
-      "description": "Get durable operation status and current deployment progress/reconciliation guidance. Follow progress.phase and progress.suggested_action. waiting_for_mail requires mail_domain_status now for the current verification issue and DNS records; publishing means the build completed but runtime preparation/publication is unfinished. Poll this operation after progress.next_poll_after_seconds. A queued/running operation with reconciliation.state=required needs one confirmed operation_reconcile using the same operation; pending means poll this operation after 60 seconds. Never infer deployment success from a completed reconciliation attempt or start another build to recover it. A deploy, promotion or rollback names its deployment_id in every state; when state is failed, read that deployment with deployment_logs and follow error.suggested_action before changing source.",
+      "description": "Get durable operation status and current deployment progress/reconciliation guidance. Follow progress.phase and progress.suggested_action. waiting_for_mail requires the mail domain status now for the current verification issue and DNS records (use mail_domain_status in either MCP transport or GET /v1/projects/{project_id}/environments/{environment_id}/mail-domain over REST); publishing means the build completed but runtime preparation/publication is unfinished. Poll this operation after progress.next_poll_after_seconds. A queued/running operation with reconciliation.state=required needs one confirmed operation_reconcile using the same operation; pending means poll this operation after 60 seconds. Never infer deployment success from a completed reconciliation attempt or start another build to recover it. A deploy, promotion or rollback names its deployment_id in every state; when state is failed, read that deployment with deployment_logs and follow error.suggested_action before changing source.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4800,7 +4841,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -4849,7 +4891,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -4896,7 +4939,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -4975,7 +5019,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -5057,7 +5102,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -5114,7 +5160,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -5270,7 +5317,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -5322,7 +5370,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -5398,7 +5447,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -5439,7 +5489,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -5480,7 +5531,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -5531,7 +5583,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -5603,7 +5656,8 @@
             "type": "string"
           },
           "sending": {
-            "type": "boolean"
+            "type": "boolean",
+            "const": true
           },
           "receiving": {
             "type": "boolean"
@@ -5611,7 +5665,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -5692,7 +5747,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -5733,7 +5789,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -5773,7 +5830,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -5813,7 +5871,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirmed": {
             "type": "boolean",
@@ -5942,7 +6001,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -5985,7 +6045,8 @@
             "pattern": "^(?=.{1,253}$)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\\.)+[a-z]{2,63}$"
           },
           "sending": {
-            "type": "boolean"
+            "type": "boolean",
+            "const": true
           },
           "receiving": {
             "type": "boolean"
@@ -5993,7 +6054,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -6070,7 +6132,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirm": {
             "type": "boolean",
@@ -6194,7 +6257,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -6300,7 +6364,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -6399,7 +6464,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -6485,7 +6551,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirm": {
             "type": "boolean",
@@ -6536,7 +6603,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirm": {
             "type": "boolean",
@@ -6587,7 +6655,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirm": {
             "type": "boolean",
@@ -6638,7 +6707,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirm": {
             "type": "boolean",
@@ -6689,7 +6759,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "confirm": {
             "type": "boolean",
@@ -6755,7 +6826,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -6837,7 +6909,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -6882,7 +6955,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -6932,7 +7006,7 @@
         ]
       },
       "annotations": {
-        "readOnlyHint": true,
+        "readOnlyHint": false,
         "destructiveHint": false,
         "idempotentHint": true
       }
@@ -6967,7 +7041,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
@@ -7012,7 +7087,7 @@
         ]
       },
       "annotations": {
-        "readOnlyHint": true,
+        "readOnlyHint": false,
         "destructiveHint": false,
         "idempotentHint": true
       }
@@ -7042,7 +7117,8 @@
           "idempotency_key": {
             "type": "string",
             "minLength": 1,
-            "maxLength": 128
+            "maxLength": 128,
+            "pattern": "^[A-Za-z0-9._:-]+$"
           },
           "profile_name": {
             "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",

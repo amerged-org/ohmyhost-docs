@@ -1,0 +1,12 @@
+---
+title: "Domain deleting"
+description: "What the `domain_deleting` error means and what to do next."
+---
+
+The API, CLI and MCP return `domain_deleting` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+The Paid domain connection of this project is still being deleted. Wait until 'ohmyhost domain paid status --project ULID --json' shows it deleted, then repeat this request with a new idempotency key. Repeating it before the deletion finishes cannot work.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

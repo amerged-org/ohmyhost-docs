@@ -1,0 +1,12 @@
+---
+title: "Project operation in progress"
+description: "What the `project_operation_in_progress` error means and what to do next."
+---
+
+The API, CLI and MCP return `project_operation_in_progress` with HTTP 409. Repeating the same request, with the same idempotency key, after a wait can succeed.
+
+## What to do
+
+Another change to this project, such as a database write, a compute change or a data change, has not finished. Read the project with 'ohmyhost project status --project ULID --json', wait until it completes, then repeat the request with a new idempotency key. A deletion is also refused while a SQL export of the project is being captured, for up to about ten minutes ('ohmyhost export get').
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

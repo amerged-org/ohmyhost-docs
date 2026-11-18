@@ -123,7 +123,9 @@ reference describes server support; a host may still be checking a new or change
 - `ohmyhost plan` — ohmyhost plan --project ULID --commit SHA [--environment dev|prod] --json
 - `ohmyhost deploy` — ohmyhost deploy --project ULID (--plan-id ULID | --commit SHA [--environment dev|prod]) --idempotency-key KEY --yes [--wait] --json
 - `ohmyhost logs` — ohmyhost logs OPERATION_ULID --follow --json
-- `ohmyhost deployment logs` — ohmyhost deployment logs --project ULID --deployment ULID --follow --json
+- `ohmyhost deployment list` — ohmyhost deployment list --project ULID [--cursor CURSOR] [--limit 1-100] --json (newest first; a returned deployment ULID is a rollback target)
+- `ohmyhost deployment get` — ohmyhost deployment get --project ULID --deployment ULID --json
+- `ohmyhost deployment logs` — ohmyhost deployment logs --project ULID --deployment ULID [--cursor CURSOR] --json (one page of diagnostics, newest first; a next_cursor in the answer reads the older page)
 - `ohmyhost rollback plan` — ohmyhost rollback plan --project ULID --deployment DEPLOYMENT_ULID --json
 - `ohmyhost rollback` — ohmyhost rollback --project ULID --deployment DEPLOYMENT_ULID --if-match ETAG --confirmation-token TOKEN --idempotency-key KEY --yes --json
 - `ohmyhost deployment promote plan` — ohmyhost deployment promote plan --project ULID --deployment DEV_DEPLOYMENT_ULID --json
@@ -495,7 +497,7 @@ account rights and credential restrictions are checked by the canonical API on e
 
 ## Master Tool Contract and API reference
 
-Master Tool Contract SHA-256: `24727146b1480476c72d955114cf0f764291003414d62ce3cc8484d8c4d55b7b`.
+Master Tool Contract SHA-256: `048aebe1bf5cf6a90904447a535656954b0a14aa0dfd055246191f0674c58403`.
 
 The complete public OpenAPI contract is at <https://ohmyho.st/api> and mirrored per release.
 Its MCP metadata accounts for every API operation: a named tool, a protected handoff, an

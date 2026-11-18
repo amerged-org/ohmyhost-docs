@@ -1,0 +1,12 @@
+---
+title: "Cutover pending"
+description: "What the `cutover_pending` error means and what to do next."
+---
+
+The API, CLI and MCP return `cutover_pending` with HTTP 409. Repeating the same request, with the same idempotency key, after a wait can succeed.
+
+## What to do
+
+A database provider cutover of this project has not finished. Read the project with 'ohmyhost project status --project ULID --json', wait until it reports no pending cutover, then repeat the request with a new idempotency key.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

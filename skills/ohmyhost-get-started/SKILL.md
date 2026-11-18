@@ -316,7 +316,7 @@ source already in use: the current archive URLs from that guide, or npm
 An older client lacks commands and rejects newer server responses with `response_contract_invalid`;
 an older MCP server reports the same case as `client_request_failed` although connection and login
 work. Upgrade both clients and reload MCP before treating either as a platform fault; if both are
-current, report it with `feedback_submit`.
+current, report it with `feedback_submit`. Use `feedback_submit` to send a bug report through local or remote MCP.
 
 Read [harness setup](references/harness-setup.md) and register the local `ohmyhost-mcp` command with this harness's documented settings. Preserve other MCP servers, model choices and permission settings. Use `OHMYHOST_ENVIRONMENT=production` for CLI and MCP unless the customer explicitly selected the development platform.
 
@@ -501,4 +501,4 @@ commit. For example, `applicationRoot: apps/web` selects that app's sources and 
 an `ohmyhost.yaml` inside `apps/web` does not override the repository's selection. Compare the
 local result with the plan's `application_root` and keep any admission diagnostic visible.
 
-Support runs through this agent. When the customer needs help, reports a bug or asks for a feature, submit a redacted report with `feedback_submit` (CLI `ohmyhost feedback submit`), give the customer the receipt ID and read replies later with `feedback_status`; the **ohmyhost-troubleshoot-deployment** Skill describes a good report. Point the customer to https://ohmyho.st/contact only when they cannot sign in, a billing issue names `contact_support`, or they ask about privacy or the DPA. The customer page is https://docs.ohmyho.st/support.
+Support runs through this agent. When the customer needs help, reports a bug or asks for a feature, submit a redacted report with `feedback_submit` (CLI `ohmyhost feedback submit`), give the customer the receipt ID and read replies later with `feedback_status`; the **ohmyhost-troubleshoot-deployment** Skill describes a good report. Point the customer to https://ohmyho.st/contact only when they cannot sign in, a billing issue names `contact_support`, or they ask about privacy or the DPA. The customer page is https://docs.ohmyho.st/support. Use `feedback_status` in either MCP transport or `ohmyhost feedback status FEEDBACK_ULID --json` in the CLI.

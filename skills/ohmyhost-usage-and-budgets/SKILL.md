@@ -29,7 +29,7 @@ Only start `billing_checkout_create` when the owner requested or approved that p
 
 Use `billing_portal_create` for invoice history, payment methods and subscription management. Every successful purchase, including a one-time top-up, has an invoice. If checkout is unavailable for the selected platform, report that response; never call a test payment a real purchase.
 
-Return a concise cost explanation and the requested next action. For a suspected incorrect charge, use `feedback_submit` with the period and safe receipt/error identifiers, without payment details or raw records.
+Return a concise cost explanation and the requested next action. For a suspected incorrect charge, use `feedback_submit` with the period and safe receipt/error identifiers, without payment details or raw records. Use `feedback_submit` through local or remote MCP.
 
 The portal project card's **$** button opens **Usage & limits**, using the same `project_budget_set` contract: no limit, or credits per UTC calendar month with continue/stop. Preserve the selected mode and read back changes. Existing work and delayed measurements may settle after reaching a limit. IDs in a copied project prompt identify context only; authenticate and check current scope before retrieving details.
 

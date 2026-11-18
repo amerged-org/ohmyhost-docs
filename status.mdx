@@ -15,6 +15,13 @@ With client 0.1.57 or newer, `custom_domains` lists this project's production ho
 
 A queued operation with `blocking_operation_id` waits for that operation of the same project to end; inspect it instead of submitting again.
 
+With CLI 0.1.66 or newer, list the project's deployments newest first, then inspect the deployment returned by the operation:
+
+```sh
+ohmyhost deployment list --project "$PROJECT_ID" --json
+ohmyhost deployment get --project "$PROJECT_ID" --deployment "$DEPLOYMENT_ID" --json
+```
+
 ## Observe the next step
 
 During a deployment, `progress.phase` distinguishes building, publishing and waiting for mail. Follow `progress.next_poll_after_seconds` and the returned suggested action. Read sender or domain status when that dependency is pending.
