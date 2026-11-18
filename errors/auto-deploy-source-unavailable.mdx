@@ -1,0 +1,12 @@
+---
+title: "Auto deploy source unavailable"
+description: "What the `auto_deploy_source_unavailable` error means and what to do next."
+---
+
+The API, CLI and MCP return `auto_deploy_source_unavailable` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Auto-deploy follows a linked GitHub repository. If this workspace has no GitHub connection, run 'ohmyhost github connect --organization ULID --idempotency-key KEY --json' and complete its browser link; then link the repository with 'ohmyhost link --project ULID --repository-owner OWNER --repository-name REPOSITORY --idempotency-key KEY --json'. Then enable auto-deploy again with a new idempotency key. A platform-hosted source has no GitHub push to follow.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

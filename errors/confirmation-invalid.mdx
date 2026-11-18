@@ -7,6 +7,6 @@ The API, CLI and MCP return `confirmation_invalid` with HTTP 409. Repeating the 
 
 ## What to do
 
-The confirmation token does not match this action or the project's current state. A deletion is also refused while a SQL export of the project is being captured, for up to about ten minutes ('ohmyhost export get'). Then create a new plan and confirm with its confirmation_token and resource_etag before the token expires.
+The confirmation token does not match this action or the project's current state. Then create a new plan and confirm with its confirmation_token and resource_etag before the token expires.
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

@@ -1,0 +1,12 @@
+---
+title: "Native auth provider incomplete"
+description: "What the `native_auth_provider_incomplete` error means and what to do next."
+---
+
+The API, CLI and MCP return `native_auth_provider_incomplete` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+A sign-in provider can be enabled only with its client ID and client secret. Store them with 'ohmyhost auth provider set --project ULID --environment ULID --provider google|github --client-id ID --stdin --idempotency-key KEY --json' (the secret on stdin), then enable it with the current revision and a new idempotency key. Repeating unchanged does not help.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

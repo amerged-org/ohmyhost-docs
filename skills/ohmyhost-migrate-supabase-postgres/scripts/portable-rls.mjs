@@ -29,7 +29,7 @@ export function prepareRlsBaseline(source, options) {
     if (matches(tokens, ["alter", "table"])) {
       const table = readTable(tokens, isWord(tokens[2], "only") ? 3 : 2);
       const tail = tokens.slice(table.next);
-      if (tail.some((token) => isWord(token, "security"))) {
+      if (hasRowLevelSecurity(tail)) {
         if (matches(tail, ["enable", "row", "level", "security"]) && tail.length === 4)
           enabled.add(table.key);
         else if (matches(tail, ["force", "row", "level", "security"]) && tail.length === 4)
@@ -208,10 +208,12 @@ function parsePolicy(source, tokens, review) {
     fail(`${command} policy cannot contain WITH CHECK`);
   // PostgreSQL's implicit WITH CHECK uses the original USING predicate. Expand it
   // before adding a role guard, especially for non-applicable restrictive roles.
+  // An omitted clause of a PERMISSIVE policy grants nothing; RESTRICTIVE policies require "true".
+  const implicit = mode === "RESTRICTIVE" ? "true" : "false";
   const predicates = {};
-  if (command !== "INSERT") predicates.using = expressions.using ?? "true";
+  if (command !== "INSERT") predicates.using = expressions.using ?? implicit;
   if (["ALL", "INSERT", "UPDATE"].includes(command))
-    predicates.check = expressions.check ?? expressions.using ?? "true";
+    predicates.check = expressions.check ?? expressions.using ?? implicit;
   const guard = roles.includes("public")
     ? null
     : `((ohmyhost.claims() ->> 'role') IN (${[...new Set(roles)].map(quoteString).join(", ")})) IS TRUE`;
@@ -496,6 +498,10 @@ function isIdentifier(token) {
 }
 function isSymbol(token, value) {
   return token?.kind === "symbol" && token.value === value;
+}
+/** A column or constraint may be named security; only the RLS keyword sequence changes row security. */
+function hasRowLevelSecurity(tokens) {
+  return tokens.some((_, index) => matches(tokens.slice(index), ["row", "level", "security"]));
 }
 function isWord(token, value) {
   return token?.kind === "word" && token.value === value;

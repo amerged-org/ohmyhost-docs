@@ -172,7 +172,7 @@ this known unresolved case.
 
 The project sends at most 10 messages per UTC day during its first 24 hours after a mail-enabled
 deployment, 25 until day three, 50 until day seven and 100 thereafter, Dev/Prod combined.
-`mail_send_limit_exceeded` needs the next UTC day. Hard bounces above 5% or complaints above 0.1%
+`mail_send_limit_exceeded` needs the next UTC day. Native Auth verification, reset and invitation mail counts toward the same cap; the platform never retries a refused or uncertain send, so a failed verification or reset request (503) means the message was not delivered until the same request is replayed with its key within one hour. Hard bounces above 5% or complaints above 0.1%
 over the last thirty days suspend sending as `mail_reputation_suspended`; report through feedback,
 rather than repeatedly retrying or claiming it clears itself. `mail_rejected` means the provider
 refused the message. Payment failures are non-retryable 402 with the gateway's actual code:
