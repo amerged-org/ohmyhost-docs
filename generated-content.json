@@ -441,7 +441,7 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/SKILL.md",
-      "sha256": "36a5d935a9357544be3f67440300fe1561056ed118676b9c66d5645479fe44f7"
+      "sha256": "7ad43a2a2f5ffb439eeb5b9d90b68fdcb3d01f1cceca9ee596c1c28d15cc8025"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/ai.md",
@@ -469,7 +469,7 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/stack-contracts.md",
-      "sha256": "0df72b8a69077a53b0fb24a2391acd4dcf309dcc238b2f853b8915e0cd803dba"
+      "sha256": "66e062b4ed393c14606ba87f6958ef14a3263824956f49472baa063355beb7b7"
     },
     {
       "path": "skills/ohmyhost-deploy-github/SKILL.md",
@@ -489,7 +489,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/SKILL.md",
-      "sha256": "fa3fa25f976c53a2c28239596a7fdb6f14d642086f16f9b18c32520af4b13e57"
+      "sha256": "52f6cc42c143b0f4ea2d36b74c68e60886766a51a1797c737a544c91e4ed452b"
     },
     {
       "path": "skills/ohmyhost-get-started/references/harness-setup.md",
@@ -497,7 +497,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/references/surfaces.md",
-      "sha256": "1e297eb0a714b416f8a2d01e57e995c4600e24977c900d5a2ed59c82dbb7f049"
+      "sha256": "f833fb10f8e992aa0ca4469691096af104defba5ea3e301f8053708dd370270f"
     },
     {
       "path": "skills/ohmyhost-manage-database/SKILL.md",

@@ -497,7 +497,7 @@ account rights and credential restrictions are checked by the canonical API on e
 
 ## Master Tool Contract and API reference
 
-Master Tool Contract SHA-256: `048aebe1bf5cf6a90904447a535656954b0a14aa0dfd055246191f0674c58403`.
+Master Tool Contract SHA-256: `169544a84c5bf8e63c5261d2aa895adccfd1a34807db4e57d7e94fdd8817ba09`.
 
 The complete public OpenAPI contract is at <https://ohmyho.st/api> and mirrored per release.
 Its MCP metadata accounts for every API operation: a named tool, a protected handoff, an
