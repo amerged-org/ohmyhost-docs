@@ -136,17 +136,13 @@ dependency. Verify the connected account and workspace using the get-started Ski
    new version from the selected earlier commit under the same revision guards; it does not
    delete history or roll back database migrations. Observe its accepted operation before
    reading the resulting current commit.
-5. Set required application credentials using `secret_input_request` for the chosen environment,
-   one call per secret. Give its `url` only to the person who sets that value. It needs no sign-in,
-   names the secret, can generate a random value (dice button) and shows or hides the value (eye
-   button). A valid save uses up the link, whether or not the save succeeds, and the link expires
-   after one hour; call again for a fresh link if it expired or `connection_status` reports
-   `secret_failed`. `connection_status` reports `pending` until the link is used, `secret_submitted`
-   once it was used for a save (recorded before the write, so confirm the name with `secrets_list`
-   before relying on it), `secret_failed` when that save did not complete, and `expired` for an
-   unused link past its hour. `secrets_list` shows metadata only. Keep the link out of notes,
-   source and logs. Never put a password, model API key or runtime secret into a tool argument,
-   source file, commit, project note or chat message.
+5. Set required application credentials with one `secret_input_request` for the chosen project and
+   environment. Pass up to ten distinct secret names in `names` and give the single `url` to the
+   person who sets the values. The page needs no sign-in and has Dice, Copy and Show/Hide buttons
+   for each field. One valid Save consumes the link. It expires after one hour. Use
+   `connection_status` for the result by name. Request a fresh link for failed names and confirm
+   unconfirmed writes before retrying them. Keep the link private and values out of source, chat and
+   tool arguments.
 6. Call `deployment_plan` for the exact accepted commit and the requested environment (`dev` for
    a preview or `prod` for a direct production deployment); review its
    real costs/effects within the user's existing authorization, then `deployment_create` with

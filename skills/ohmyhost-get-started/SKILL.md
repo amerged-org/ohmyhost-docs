@@ -118,15 +118,14 @@ For a complete native file tree or an explicitly requested GitHub-to-managed swi
 **ohmyhost-deploy** uses `source_upload_prepare`, `source_blob_put`, `source_upload`,
 `source_upload_commit` or `source_switch`; retain the actual upload operation and receipts.
 These remote tools accept bounded file contents, not local directory paths or credentials.
-For private application credentials, use `secret_input_request`, one call per secret. Give its `url`
-only to the person who sets the value: it needs no sign-in, names the secret, can generate a random
-value, is used up by its first save even if the write fails, and expires after one hour (`expires_at`).
-Call again for a fresh link if needed, then observe `connection_status`. `secret_submitted` is recorded
-before the write, so confirm the name with `secrets_list` (names only) before relying on it. The form
-takes one line and browsers strip line breaks, so a multi-line value such as a PEM key goes through the
-local stdin path (`secret_set_command` or the CLI stdin) instead. Remote-only tools like this one are
-not in the surfaces list, so use the connector's `tools/list`. Values stay out of chat, source, tools
-and logs.
+For private application credentials, use one `secret_input_request` per project and environment.
+Pass up to ten distinct secret names with `names` and share its one `url` only with the person who
+sets the values. The link needs no sign-in and expires after one hour. The form has one field per
+name, with Dice, Copy and Show/Hide controls. One valid Save consumes the link. Use
+`connection_status` to check which names were saved, failed or are unconfirmed. Request a new link
+for failed names and confirm uncertain writes before retrying them. For multiline values such as PEM
+keys, use the local stdin path (`secret_set_command` or CLI stdin). Keep values out of chat and tool
+arguments. Discover remote-only tools through the connector's `tools/list`.
 If the required remote tools are unavailable, state that concrete capability gap; local device
 tokens are not a substitute for a missing remote connection.
 

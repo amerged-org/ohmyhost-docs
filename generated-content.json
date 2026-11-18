@@ -1,7 +1,7 @@
 {
-  "source_commit": "4163c2a2e795148ccb072fc209313a40cde26dfc",
+  "source_commit": "78a0625409750c02899c660b58c77a4cd46909d2",
   "source_dirty": false,
-  "release": "0.1.63",
+  "release": "0.1.64",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -441,11 +441,11 @@
     },
     {
       "path": "skills/ohmyhost-deploy-github/SKILL.md",
-      "sha256": "98ee857c64d72925767c739631af450b5cb957787a405505dbabe28e8b4c59e0"
+      "sha256": "851359cfa20746a382dcf3a9a317344151c4a8d4ac136e2fa26851d8dfd9283c"
     },
     {
       "path": "skills/ohmyhost-deploy/SKILL.md",
-      "sha256": "10ed296505f67507ca0d69ba86c65c982640fc364778cb5083e242bb8336489a"
+      "sha256": "bbd2a075057b3fc776a0732546d0ff4d30e4935bffd3ed9e99bb35f11171adf4"
     },
     {
       "path": "skills/ohmyhost-domains-and-mail/SKILL.md",
@@ -457,7 +457,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/SKILL.md",
-      "sha256": "22add1712c0318ef65c87f098a581e7b6422867b8cdb57db825fff0193bfb233"
+      "sha256": "74f4153c75470d18f18d3433abd4be506abf1300315ed0a81435dacd49959e8d"
     },
     {
       "path": "skills/ohmyhost-get-started/references/harness-setup.md",
@@ -513,11 +513,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "8919fc49bc8e800bffa50cf30477ebd8f36428c4bb2721423781a875e321c574"
+      "sha256": "05e6d108af90a55444639cceda74c88347ea726d89445b85b5ba78468ce40125"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "a7ddd7f513904ac62d1bec693a4d2507b8ff600ea1e6cec03777bb2d05c267ff"
+      "sha256": "f2317dc1cc1a29141c304fcd7398f8ebed8243bc4b57988c8255e7a8dae485b1"
     },
     {
       "path": "snippets/skill-catalog.mdx",

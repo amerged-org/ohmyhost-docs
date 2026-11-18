@@ -52,11 +52,10 @@ the local CLI flow below remains available for a local checkout.
    Return to `github_status` to confirm the result. Do not request a provider token or construct
    a GitHub callback. Then call `source_link` with the same project and selected repository
    owner/name, observe its accepted operation, and confirm the binding with `source_get`.
-4. Supply required credentials with `secret_input_request` for Dev or Prod, one call per secret. Give
-   each returned `url` only to the person who sets that value (no sign-in, used up by its first save
-   even if the write fails, expires after one hour), and observe the private input through
-   `connection_status`. Before relying on `secret_submitted`, confirm the name with `secrets_list`
-   (names only). Never put secret values into chat or tool calls.
+4. For required credentials in Dev or Prod, pass the secret `names` in one `secret_input_request`
+   for the project and environment. Share the one-hour, one-use `url` only with the person who
+   sets the values. Each field has Dice and Copy buttons. One Save submits all fields.
+   Use `connection_status` for the result by name. Keep secret values out of chat and tool calls.
    Plan the exact pushed commit for the requested `dev` or `prod` environment with `deployment_plan`, create the reviewed plan with
    `deployment_create`, and observe its original `operation_get`. Verify Dev with the returned
    URL when deploying Dev and, when protected, `project_dev_share_link_get` for the user or a one-use
