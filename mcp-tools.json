@@ -3967,7 +3967,7 @@
     },
     {
       "name": "integration_connection_begin",
-      "description": "Create a protected Make consent link for the workspace Owner.",
+      "description": "Create a protected Make consent link for the selected workspace and signed-in user.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4000,8 +4000,6 @@
         },
         "required": [
           "organization_id",
-          "project_id",
-          "environment_id",
           "idempotency_key"
         ],
         "additionalProperties": false
@@ -4014,7 +4012,7 @@
     },
     {
       "name": "integration_connection_list",
-      "description": "List the caller's connection grants.",
+      "description": "List the caller's workspace connection grants.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4120,14 +4118,83 @@
         },
         "required": [
           "organization_id",
-          "project_id",
-          "environment_id",
           "grant_id"
         ],
         "additionalProperties": false
       },
       "annotations": {
         "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true
+      }
+    },
+    {
+      "name": "integration_connection_import",
+      "description": "Import a selected Make connection into an explicit project and environment.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "organization_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "grant_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "project_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "environment_id": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256
+          },
+          "provider_organization_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "team_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "connection_id": {
+            "type": "integer",
+            "exclusiveMinimum": 0,
+            "maximum": 9007199254740991
+          },
+          "idempotency_key": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "profile_name": {
+            "description": "Saved login to act as (profile_list shows them). Needed only when several logins could run this call; OHMYHOST_PROFILE of this server must match it.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "organization_id",
+          "grant_id",
+          "project_id",
+          "environment_id",
+          "provider_organization_id",
+          "team_id",
+          "connection_id",
+          "idempotency_key"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
         "destructiveHint": false,
         "idempotentHint": true
       }

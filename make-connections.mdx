@@ -1,25 +1,23 @@
 ---
 title: "Connect Make"
-description: "Link the app owner's Make account and inspect its organizations, teams and connections."
+description: "Link your Make account to a workspace, discover connections and import one into a project."
 ---
 
-Connect Make as an Owner of the ohmyho.st workspace containing your project. Complete the protected portal handoff as the same person, then review and approve Make's consent screen. Your provider tokens stay in the connection service; responses to your agent contain safe status and discovery metadata.
+Connect your Make account to an ohmyho.st workspace. The grant belongs to your user and the selected workspace; you do not need to choose a project to connect or discover. Complete the protected portal handoff as the same person, then review and approve Make's consent screen. Your provider tokens stay in the connection service; responses to your agent contain safe status and discovery metadata.
 
 <Info>
-This project-scoped integration supports account linking and read-only discovery where available. Running app actions through Make Endpoints remains unavailable until it is separately qualified. Availability is reported by the connected environment.
+This integration supports account linking, read-only discovery and explicit project imports where available. Running app actions through Make Endpoints remains unavailable until it is separately qualified. Availability is reported by the connected environment.
 </Info>
 
 ## Connect your account
 
-Ask your agent to connect Make for the selected workspace, project and environment. It uses `integration_connection_begin`, opens the returned protected link for you, and follows `integration_connection_status` after you finish consent. Both your initiating login and portal login must identify the same person. Current workspace role and explicit credential restrictions still apply.
+Ask your agent to connect Make for the selected workspace. It uses `integration_connection_begin`, opens the returned protected link for you, and follows `integration_connection_status` after you finish consent. Both your initiating login and portal login must identify the same person. Current workspace role and explicit credential restrictions still apply.
 
-For the CLI, select your saved login and use the IDs returned by the project context:
+For the CLI, select your saved login and workspace:
 
 ```sh
 ohmyhost connection begin \
   --organization ORGANIZATION_ULID \
-  --project PROJECT_ULID \
-  --environment ENVIRONMENT_ULID \
   --idempotency-key make-connect-1 \
   --profile-name PROFILE_NAME --json
 ```
@@ -37,7 +35,7 @@ This status tracks the protected handoff: `consumed` means the portal accepted i
 
 ## Inspect connections
 
-`integration_connection_list` lists your permitted grants. Use `integration_connection_discover` with the selected grant and project context to inspect Make organizations, teams and existing connections. Select only IDs returned by that discovery. This operation reads metadata and does not run scenarios, send email or change CRM records.
+`integration_connection_list` lists your permitted grants. Use `integration_connection_discover` with the selected workspace grant to inspect Make organizations, teams and existing connections. Select only IDs returned by that discovery. This operation reads metadata and does not run scenarios, send email or change CRM records.
 
 ```sh
 ohmyhost connection list \
@@ -46,8 +44,6 @@ ohmyhost connection list \
 
 ohmyhost connection discover \
   --organization ORGANIZATION_ULID \
-  --project PROJECT_ULID \
-  --environment ENVIRONMENT_ULID \
   --grant GRANT_ULID \
   --profile-name PROFILE_NAME --json
 ```
@@ -56,7 +52,32 @@ Discovery returns organizations first. Repeat it with `--provider-organization I
 
 Your app's hosting region does not choose Make's data region. Organization discovery reads across Make zones; team and connection metadata are read from the selected organization's zone.
 
-Make controls its OAuth token lifetimes. The service refreshes a valid grant as needed; a revoked or expired grant requires consent again. Ordinary portal logout does not disconnect a successfully linked account, while losing the linking owner's workspace rights suspends use.
+Make controls its OAuth token lifetimes. The service refreshes a valid grant as needed; a revoked or expired grant requires consent again. Ordinary portal logout does not disconnect a successfully linked account, while losing the linking user's workspace rights suspends use.
+
+## Import into a project
+
+After discovery, choose the Make organization, team and connection, then select the destination project and environment. Import records that explicit selection; it does not run a Make action. Ask your agent to use `integration_connection_import`, or use the CLI with IDs returned by discovery and project context:
+
+```sh
+ohmyhost connection import \
+  --organization ORGANIZATION_ULID \
+  --grant GRANT_ULID \
+  --project PROJECT_ULID \
+  --environment ENVIRONMENT_ULID \
+  --provider-organization MAKE_ORGANIZATION_ID \
+  --team TEAM_ID \
+  --connection CONNECTION_ID \
+  --idempotency-key make-import-1 \
+  --profile-name PROFILE_NAME --json
+```
+
+## Use the portal
+
+Sign in to the portal, select your workspace under Projects and open **Connections**. Connect Make, then select an active grant, Make organization and team. Choose a connection and destination project and environment to import it. The portal offers only the choices available to your account.
+
+## Older clients
+
+Version 0.1.62 clients pass project and environment together when beginning a connection or discovering its catalog. Those paired parameters remain supported for the earlier project-scoped flow. Use a current client for workspace connection, discovery and import; a project-scoped connection does not automatically become a workspace grant.
 
 ## Disconnect
 

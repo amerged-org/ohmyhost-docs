@@ -91,10 +91,11 @@
 | `project_dev_share_link_rotate` | `project_id`, `idempotency_key` | Change or prepare a change |
 | `project_dev_share_link_revoke` | `project_id`, `idempotency_key` | Change or prepare a change |
 | `project_dev_access_create` | `project_id` | Change or prepare a change |
-| `integration_connection_begin` | `organization_id`, `project_id`, `environment_id`, `idempotency_key` | Change or prepare a change |
+| `integration_connection_begin` | `organization_id`, `idempotency_key` | Change or prepare a change |
 | `integration_connection_list` | `organization_id` | Read |
 | `integration_connection_status` | `organization_id`, `request_id` | Read |
-| `integration_connection_discover` | `organization_id`, `project_id`, `environment_id`, `grant_id` | Read |
+| `integration_connection_discover` | `organization_id`, `grant_id` | Read |
+| `integration_connection_import` | `organization_id`, `grant_id`, `project_id`, `environment_id`, `provider_organization_id`, `team_id`, `connection_id`, `idempotency_key` | Change or prepare a change |
 | `integration_connection_disconnect` | `organization_id`, `grant_id`, `idempotency_key`, `confirmed` | Change or prepare a change |
 | `github_connect` | `organization_id`, `idempotency_key` | Change or prepare a change |
 | `github_status` | `organization_id` | Read |

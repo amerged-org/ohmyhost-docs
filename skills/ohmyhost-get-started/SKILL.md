@@ -7,6 +7,24 @@ description: Connect a customer agent or native chat to ohmyho.st, verify the in
 
 Connect this agent to the customer's account, then continue with the selected app and its saved source.
 
+## Connect and import from Make
+
+A signed-in user can connect Make to a workspace before creating a project. Run
+`ohmyhost connection begin --organization ULID --idempotency-key KEY --json`, or use
+`integration_connection_begin` with the workspace ID and idempotency key. Open the protected
+consent link and complete sign-in and approval. `connection status` and `connection list`, or
+`integration_connection_status` and `integration_connection_list`, show the request and the
+user's workspace grants. Provider credentials stay private.
+
+Use `connection discover --organization ULID --grant ULID --json` or
+`integration_connection_discover` to choose a Make organization, then supply its ID to discover
+teams and both organization and team IDs to discover connections. Confirm the destination project
+and environment with the user, then use `connection import` or `integration_connection_import`
+with the grant, project, environment and all three selected Make IDs. Each destination requires
+its own import; the same workspace grant can serve multiple authorized projects. Legacy
+project-bound grants still require their original project and environment for discovery. Import
+records a reference and does not establish that Make Endpoint execution is qualified.
+
 ## What ohmyho.st is and what you can do with it
 
 ohmyho.st hosts a customer's app: Vite/React, TanStack Start, Next.js or a plain Worker
