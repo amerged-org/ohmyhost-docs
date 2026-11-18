@@ -20,6 +20,10 @@ For an unbound checkout, an explicit source choice already answers the question.
 
 Use [GitHub setup](/github) for a GitHub source. Commit and push changes there before planning their full commit SHA. Managed source needs no GitHub account or GitHub push.
 
+## See saved changes live
+
+Open a [live preview](/previews) for the intended project environment, then keep saving through this source flow. An awake preview applies accepted versions through the framework's hot reload; a sleeping preview catches up when opened. Publishing Dev or Prod remains an explicit checked deployment.
+
 ## Save current local files
 
 Run [the CLI setup](/cli) and `ohmyhost init --dry-run --json` first. Resolve framework blockers and include the actual `ohmyhost.yaml` and lockfile. `source publish` captures current files, including uncommitted and new files, as one managed version. It does not import local Git history or deploy the app.

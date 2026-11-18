@@ -12,10 +12,11 @@ and follow the returned schema rather than guessing arguments.
 - `ohmyhost logout` — ohmyhost logout [--profile-name NAME] [--revoke] --json (removes only the selected saved login)
 - `ohmyhost whoami` — ohmyhost whoami [--profile-name NAME] --json (the effective user, organization and saved login)
 - `ohmyhost profile list` — ohmyhost profile list --json (saved logins on this computer: name, user and organization, never a token; pass --profile-name NAME or set OHMYHOST_PROFILE to choose one)
-- `ohmyhost connection begin` — ohmyhost connection begin --organization ULID --project ULID --environment ULID --idempotency-key KEY --json
+- `ohmyhost connection begin` — ohmyhost connection begin --organization ULID [--project ULID --environment ULID] --idempotency-key KEY --json
 - `ohmyhost connection list` — ohmyhost connection list --organization ULID --json
 - `ohmyhost connection status` — ohmyhost connection status --organization ULID --request HASH --json
-- `ohmyhost connection discover` — ohmyhost connection discover --organization ULID --project ULID --environment ULID --grant ULID [--provider-organization ID] [--team ID] --json
+- `ohmyhost connection discover` — ohmyhost connection discover --organization ULID [--project ULID --environment ULID] --grant ULID [--provider-organization ID] [--team ID] --json
+- `ohmyhost connection import` — ohmyhost connection import --organization ULID --grant ULID --project ULID --environment ULID --provider-organization ID --team ID --connection ID --idempotency-key KEY --json
 - `ohmyhost connection disconnect` — ohmyhost connection disconnect --organization ULID --grant ULID --idempotency-key KEY --yes --json
 - `ohmyhost github connect` — ohmyhost github connect --organization ULID --idempotency-key KEY --json (connect once, then link covered repositories without another browser consent)
 - `ohmyhost github status` — ohmyhost github status --organization ULID --json
@@ -257,10 +258,11 @@ and follow the returned schema rather than guessing arguments.
 - `project_dev_share_link_rotate` — Owner only: replace the persistent Dev link and immediately revoke old links and sessions.
 - `project_dev_share_link_revoke` — Owner only: revoke the persistent Dev link and active sessions immediately without changing the Dev access mode.
 - `project_dev_access_create` — Create an owner-only one-hour single-use access link for the protected Dev app.
-- `integration_connection_begin` — Create a protected Make consent link for the workspace Owner.
-- `integration_connection_list` — List the caller's connection grants.
+- `integration_connection_begin` — Create a protected Make consent link for the selected workspace and signed-in user.
+- `integration_connection_list` — List the caller's workspace connection grants.
 - `integration_connection_status` — Read a consent request status.
 - `integration_connection_discover` — Read accessible Make organizations, teams and connection metadata.
+- `integration_connection_import` — Import a selected Make connection into an explicit project and environment.
 - `integration_connection_disconnect` — Disconnect a connection grant and revoke its provider credential.
 - `github_connect` — Owner or Admin: connect GitHub once for this workspace.
 - `github_status` — Read this workspace's GitHub connection.

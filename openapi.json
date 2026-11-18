@@ -201,6 +201,18 @@
             "schema": {
               "$ref": "#/components/schemas/Ulid"
             }
+          },
+          {
+            "name": "scope",
+            "in": "query",
+            "required": false,
+            "description": "Select workspace grants; omit for the legacy unfiltered list.",
+            "schema": {
+              "type": "string",
+              "enum": [
+                "workspace"
+              ]
+            }
           }
         ],
         "responses": {
@@ -425,7 +437,8 @@
           {
             "name": "project_id",
             "in": "query",
-            "required": true,
+            "required": false,
+            "description": "Supply together with environment_id only for a legacy project-bound grant.",
             "schema": {
               "$ref": "#/components/schemas/Ulid"
             }
@@ -433,7 +446,8 @@
           {
             "name": "environment_id",
             "in": "query",
-            "required": true,
+            "required": false,
+            "description": "Supply together with project_id only for a legacy project-bound grant.",
             "schema": {
               "$ref": "#/components/schemas/Ulid"
             }
@@ -476,6 +490,77 @@
           },
           "404": {
             "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "429": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "503": {
+            "$ref": "#/components/responses/Problem"
+          }
+        },
+        "x-ohmyhost-resource-disclosure": "indistinguishable-not-found"
+      }
+    },
+    "/v1/organizations/{organization_id}/connections/{grant_id}/imports": {
+      "post": {
+        "operationId": "importConnection",
+        "summary": "Import a Make connection into a project environment",
+        "parameters": [
+          {
+            "$ref": "#/components/parameters/RequestId"
+          },
+          {
+            "name": "organization_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "$ref": "#/components/schemas/Ulid"
+            }
+          },
+          {
+            "name": "grant_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "$ref": "#/components/parameters/IdempotencyKey"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConnectionImportRequest"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Imported project connection reference.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConnectionImport"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "401": {
+            "$ref": "#/components/responses/Problem"
+          },
+          "404": {
+            "$ref": "#/components/responses/ResourceNotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Problem"
           },
           "429": {
             "$ref": "#/components/responses/Problem"
@@ -11399,10 +11484,16 @@
         "type": "object",
         "additionalProperties": false,
         "required": [
-          "provider",
-          "project_id",
-          "environment_id"
+          "provider"
         ],
+        "dependentRequired": {
+          "project_id": [
+            "environment_id"
+          ],
+          "environment_id": [
+            "project_id"
+          ]
+        },
         "properties": {
           "provider": {
             "const": "make"
@@ -11412,6 +11503,76 @@
           },
           "environment_id": {
             "$ref": "#/components/schemas/Ulid"
+          }
+        }
+      },
+      "ConnectionImportRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "project_id",
+          "environment_id",
+          "provider_organization_id",
+          "team_id",
+          "connection_id"
+        ],
+        "properties": {
+          "project_id": {
+            "$ref": "#/components/schemas/Ulid"
+          },
+          "environment_id": {
+            "$ref": "#/components/schemas/Ulid"
+          },
+          "provider_organization_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "team_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "connection_id": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "ConnectionImport": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "grant_id",
+          "project_id",
+          "environment_id",
+          "provider_organization_id",
+          "team_id",
+          "connection_id"
+        ],
+        "properties": {
+          "id": {
+            "$ref": "#/components/schemas/Ulid"
+          },
+          "grant_id": {
+            "$ref": "#/components/schemas/Ulid"
+          },
+          "project_id": {
+            "$ref": "#/components/schemas/Ulid"
+          },
+          "environment_id": {
+            "$ref": "#/components/schemas/Ulid"
+          },
+          "provider_organization_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "team_id": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "connection_id": {
+            "type": "integer",
+            "minimum": 1
           }
         }
       },
