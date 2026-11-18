@@ -33,7 +33,9 @@ ohmyhost connection status \
 
 ## Find a connection in chat
 
-> Find my Salesforce connection in Make. If several names match, ask which one I mean.
+Copy the prompt from the portal into your chat.
+
+> Help me connect a SaaS tool to my application using Make. Ask me which tool I want to use, then find its connection.
 
 Your agent reuses your active workspace grant. It uses `integration_connection_discover` to list Make organizations, then teams within each relevant organization, then connection names and IDs in those teams. It can use an organization or team you already named to narrow the search. If it finds one clear match, it can identify the connection right away. When several match, it can show their names and teams so you can choose. If the names do not identify the integration, tell the agent the connection name you see in Make.
 
@@ -58,7 +60,7 @@ Make controls its OAuth token lifetimes. The service refreshes a valid grant as 
 
 ## Import into a project
 
-Ask for an import when you want to save a connection reference in a particular app. For example, “Import that Salesforce connection into the dev environment of my support app.” The agent can reuse the project and environment from your request or chat context and ask if the destination is unclear. You can import the same connection into another authorized project in your workspace using the same Make grant.
+Ask for an import when you want to save a connection reference in a particular app. For example, “Import that connection into the dev environment of my support app.” The agent can reuse the project and environment from your request or chat context and ask if the destination is unclear. You can import the same connection into another authorized project in your workspace using the same Make grant.
 
 Use `integration_connection_import` in chat or the following CLI command with IDs from discovery and project context.
 
