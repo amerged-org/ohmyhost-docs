@@ -1,0 +1,12 @@
+---
+title: "Native auth revision conflict"
+description: "What the `native_auth_revision_conflict` error means and what to do next."
+---
+
+The API, CLI and MCP return `native_auth_revision_conflict` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+The configuration or provider changed after your configurationRevision. Read it with 'ohmyhost auth config get --project ULID --environment ULID --json' or 'ohmyhost auth provider get --project ULID --environment ULID --provider google|github --json', then repeat the change with its current revision and a new idempotency key.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

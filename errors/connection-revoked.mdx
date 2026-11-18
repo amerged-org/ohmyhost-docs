@@ -1,0 +1,12 @@
+---
+title: "Connection revoked"
+description: "What the `connection_revoked` error means and what to do next."
+---
+
+The API, CLI and MCP return `connection_revoked` with HTTP 403. Repeating the same request unchanged does not help.
+
+## What to do
+
+Remove the ohmyho.st connector from your agent and add it again to reconnect.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

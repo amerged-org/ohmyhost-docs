@@ -224,15 +224,11 @@ $$`,
     }
     output.push(candidate.trim());
   }
-  const canonical = output
-    .filter((statement) => statement !== null)
-    .map((statement, index) => ({
-      statement,
-      index,
-      priority: statementPriority(statement, normalize),
-    }))
-    .sort((left, right) => left.priority - right.priority || left.index - right.index)
-    .map(({ statement }) => statement);
+  // The input is a dependency-ordered dump and the synthetic preamble is already first, so the
+  // statements keep their order: a function precedes every table, default, check or domain that
+  // calls it. statementPriority remains the allow-list of supported statement kinds.
+  const canonical = output.filter((statement) => statement !== null);
+  for (const statement of canonical) statementPriority(statement, normalize);
   if (rls) canonical.push(...prepared.rlsStatements);
   if (canonical.length === 0) fail("baseline is empty");
   return Object.freeze({

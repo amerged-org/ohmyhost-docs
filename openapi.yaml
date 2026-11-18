@@ -953,7 +953,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/Ulid"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
       requestBody:
         required: true
         content:
@@ -1055,7 +1055,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/Ulid"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
       requestBody:
         required: true
         content:
@@ -1110,7 +1110,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/Ulid"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
       requestBody:
         required: true
         content:
@@ -1211,7 +1211,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/Ulid"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
       requestBody:
         required: true
         content:
@@ -1313,7 +1313,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/Ulid"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
       requestBody:
         required: true
         content:
@@ -1367,7 +1367,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/Ulid"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
       requestBody:
         required: true
         content:
@@ -1459,7 +1459,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/Ulid"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
       requestBody:
         required: true
         content:
@@ -1508,7 +1508,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/Ulid"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
       requestBody:
         required: true
         content:
@@ -1558,7 +1558,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/Ulid"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
       requestBody:
         required: true
         content:
@@ -1608,7 +1608,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/Ulid"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
       requestBody:
         required: true
         content:
@@ -1699,7 +1699,7 @@ paths:
           required: true
           schema:
             $ref: "#/components/schemas/Ulid"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
       requestBody:
         required: true
         content:
@@ -2098,6 +2098,7 @@ paths:
           in: path
           required: true
           schema: { $ref: "#/components/schemas/Ulid" }
+        - $ref: "#/components/parameters/RequestId"
       responses:
         "200":
           description: Authenticated account data.
@@ -2117,6 +2118,7 @@ paths:
         "503":
           $ref: "#/components/responses/Problem"
   /v1/contact-requests:
+    x-ohmyhost-other-methods: { status: 405, code: invalid_request }
     post:
       operationId: submitContactRequest
       x-ohmyhost-mcp:
@@ -2125,7 +2127,8 @@ paths:
         reason: Public website contact submission, outside authenticated application management.
       summary: Submit a contact or privacy question
       description: Stores a private contact request for twelve months, with idempotent replay and no
-        account creation or marketing enrollment.
+        account creation or marketing enrollment. Any other method answers 405 with the Problem code
+        invalid_request.
       security: []
       requestBody:
         required: true
@@ -2159,6 +2162,7 @@ paths:
         "429": { $ref: "#/components/responses/Problem" }
         "503": { $ref: "#/components/responses/Problem" }
   /v1/site/feature-interests:
+    x-ohmyhost-other-methods: { status: 405, code: invalid_request }
     parameters:
       - in: header
         name: X-Ohmyho-Voter
@@ -2197,7 +2201,8 @@ paths:
       description:
         Store a desired choice once per request key for twelve months. Replaying an earlier
         request never overwrites a later choice. A null choice removes the vote; this is not
-        toggle-on-every-request behavior.
+        toggle-on-every-request behavior. After the voter header check, any method other than GET
+        or POST answers 405 with the Problem code invalid_request.
       security: []
       requestBody:
         required: true
@@ -2231,6 +2236,7 @@ paths:
         "429": { $ref: "#/components/responses/Problem" }
         "503": { $ref: "#/components/responses/Problem" }
   /v1/site/stats:
+    x-ohmyhost-other-methods: { status: 404, code: resource_not_found }
     get:
       operationId: getPublicDeploymentStats
       x-ohmyhost-mcp:
@@ -2238,6 +2244,7 @@ paths:
         tool_names: []
         reason: Public marketing statistics, not tenant application management.
       summary: Read distinct active projects successfully deployed in the past seven days
+      description: Any other method answers 404 with the Problem code resource_not_found.
       security: []
       responses:
         "200":
@@ -2270,7 +2277,7 @@ paths:
         blindly create another token. Available at zero credits.
       parameters:
         - $ref: "#/components/parameters/RequestId"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
         - name: organization_id
           in: path
           required: true
@@ -2397,7 +2404,7 @@ paths:
         message is created.
       parameters:
         - $ref: "#/components/parameters/RequestId"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
       requestBody:
         required: true
         content:
@@ -2681,7 +2688,7 @@ paths:
         identity-lifecycle operation does not create a project operation.
       parameters:
         - $ref: "#/components/parameters/RequestId"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
       responses:
         "200":
           description: Provider session revocation and local terminal denial are confirmed.
@@ -2806,7 +2813,7 @@ paths:
         portal URL instead of another purchase. Works at zero credits.
       parameters:
         - $ref: "#/components/parameters/RequestId"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
         - name: organization_id
           in: path
           required: true
@@ -3031,7 +3038,7 @@ paths:
         subscription or Paid features are created.
       parameters:
         - $ref: "#/components/parameters/RequestId"
-        - $ref: "#/components/parameters/IdempotencyKey"
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
         - name: organization_id
           in: path
           required: true
@@ -3154,11 +3161,12 @@ paths:
       summary: Read recent measured usage by day, project and meter
       description:
         Owner-only. days holds the credit-log charges of the last up to 14 UTC days (today included,
-        oldest first), grouped by day, project and meter. projects holds what each project has used
-        so far in the current UTC month. A null environment_id means a project-shared cost, never a
-        guessed Dev allocation. Only billed usage is included; charges may arrive later, so this is
-        not a complete provider invoice or a zero-usage guarantee. No credit is granted or charged by
-        this read; it remains usable at zero credits.
+        oldest first), grouped by day, project and meter; a refund is not netted into days. projects
+        holds what each project has used so far in the current UTC month, after refunds. A null
+        environment_id means a project-shared cost, never a guessed Dev allocation. Only billed
+        usage is included; charges may arrive later, so this is not a complete provider invoice or a
+        zero-usage guarantee. No credit is granted or charged by this read; it remains usable at
+        zero credits.
       parameters:
         - $ref: "#/components/parameters/RequestId"
         - name: organization_id
@@ -3419,7 +3427,7 @@ paths:
         "404":
           $ref: "#/components/responses/ResourceNotFound"
         "409":
-          $ref: "#/components/responses/IdempotencyConflict"
+          $ref: "#/components/responses/Problem"
         "429":
           $ref: "#/components/responses/Problem"
         "503":
@@ -3471,7 +3479,7 @@ paths:
           - project_create
         adapter: existing
       summary: Create a project
-      description: Atomically records the project and a durable operation for asynchronous processing.
+      description: Atomically records the project and a durable operation for asynchronous processing. The accepted answer and an identical idempotent replay both return the new project_id.
       parameters:
         - $ref: "#/components/parameters/RequestId"
         - $ref: "#/components/parameters/IdempotencyKey"
@@ -3483,7 +3491,7 @@ paths:
               $ref: "#/components/schemas/CreateProjectRequest"
       responses:
         "202":
-          $ref: "#/components/responses/AcceptedOperation"
+          $ref: "#/components/responses/AcceptedProject"
         "400":
           $ref: "#/components/responses/Problem"
         "401":
@@ -3491,7 +3499,7 @@ paths:
         "403":
           $ref: "#/components/responses/Problem"
         "409":
-          $ref: "#/components/responses/IdempotencyConflict"
+          $ref: "#/components/responses/Problem"
         "413":
           $ref: "#/components/responses/Problem"
         "429":
@@ -4194,7 +4202,7 @@ paths:
         "404":
           $ref: "#/components/responses/ResourceNotFound"
         "409":
-          $ref: "#/components/responses/IdempotencyConflict"
+          $ref: "#/components/responses/Problem"
         "429":
           $ref: "#/components/responses/Problem"
         "503":
@@ -5003,7 +5011,7 @@ paths:
         "404":
           $ref: "#/components/responses/ResourceNotFound"
         "409":
-          $ref: "#/components/responses/IdempotencyConflict"
+          $ref: "#/components/responses/Problem"
         "429":
           $ref: "#/components/responses/Problem"
         "503":
@@ -5051,7 +5059,7 @@ paths:
         "404":
           $ref: "#/components/responses/ResourceNotFound"
         "409":
-          $ref: "#/components/responses/IdempotencyConflict"
+          $ref: "#/components/responses/Problem"
         "429":
           $ref: "#/components/responses/Problem"
         "503":
@@ -5147,8 +5155,14 @@ paths:
         but never start or extend Paid access. Without an active Prod deployment, apply declares the
         hostname as awaiting_deployment, enabling Cloudflare consent without provider resources,
         DNS changes or domain charges. After a successful Prod deployment, replay the same hostname
-        and idempotency key to activate it. A changed request under a used key returns
-        idempotency_key_reused (409).
+        and idempotency key to activate it. A key already used for this connection returns
+        idempotency_key_reused (409) when its request changed or its connection has since ended. The
+        same member's fresh key for this hostname's live connection is answered with that connection
+        as it stands and provisions nothing; only the original key activates an awaiting_deployment
+        connection. A fresh key for another hostname, or for a connection another member configured,
+        answers domain_already_configured (409); the project's one connection must be deleted first
+        to replace it. A connection still being deleted answers domain_deleting (409) until its
+        deletion finishes.
       parameters:
         - $ref: "#/components/parameters/RequestId"
         - $ref: "#/components/parameters/ProjectId"
@@ -5236,6 +5250,12 @@ paths:
             type: boolean
             const: true
       summary: Delete one exact Paid customer-owned hostname
+      description:
+        A changed request under a used key returns idempotency_key_reused (409). A repeated delete of
+        an already deleted connection answers the deleted state (200), under its own key or a fresh
+        one, and records no further deletion. The project's connection of another hostname answers
+        domain_already_configured (409), and a deletion already running under another key answers
+        domain_deleting (409).
       parameters:
         - $ref: "#/components/parameters/RequestId"
         - $ref: "#/components/parameters/ProjectId"
@@ -5255,7 +5275,7 @@ paths:
         "401": { $ref: "#/components/responses/Problem" }
         "403": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/ResourceNotFound" }
-        "409": { $ref: "#/components/responses/IdempotencyConflict" }
+        "409": { $ref: "#/components/responses/Problem" }
         "429": { $ref: "#/components/responses/Problem" }
         "503": { $ref: "#/components/responses/Problem" }
       x-ohmyhost-resource-disclosure: indistinguishable-not-found
@@ -5353,7 +5373,7 @@ paths:
         "404":
           $ref: "#/components/responses/ResourceNotFound"
         "409":
-          $ref: "#/components/responses/IdempotencyConflict"
+          $ref: "#/components/responses/Problem"
         "429":
           $ref: "#/components/responses/Problem"
         "503":
@@ -5481,15 +5501,23 @@ paths:
         - $ref: "#/components/parameters/RequestId"
         - $ref: "#/components/parameters/ProjectId"
         - $ref: "#/components/parameters/DeploymentId"
+        - name: cursor
+          in: query
+          schema: { type: string, maxLength: 2048 }
+        - name: limit
+          in: query
+          schema: { type: integer, minimum: 1, maximum: 100, default: 100 }
       responses:
         "200":
-          description: A bounded normalized diagnostic event stream.
+          description: "A bounded normalized diagnostic event stream of one page. Each diagnostic is a diagnostic event; when more follow, a final next event carries next_cursor for the next request's cursor."
           content:
             text/event-stream:
               schema: { $ref: "#/components/schemas/DeploymentDiagnostic" }
+        "400": { $ref: "#/components/responses/Problem" }
         "401": { $ref: "#/components/responses/Problem" }
         "403": { $ref: "#/components/responses/Problem" }
         "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "429": { $ref: "#/components/responses/Problem" }
         "503": { $ref: "#/components/responses/Problem" }
       x-ohmyhost-resource-disclosure: indistinguishable-not-found
   /v1/projects/{project_id}/database/compute:
@@ -7165,7 +7193,7 @@ paths:
         "404":
           $ref: "#/components/responses/ResourceNotFound"
         "409":
-          $ref: "#/components/responses/IdempotencyConflict"
+          $ref: "#/components/responses/Problem"
         "429":
           $ref: "#/components/responses/Problem"
         "503":
@@ -7223,7 +7251,7 @@ paths:
         "404":
           $ref: "#/components/responses/ResourceNotFound"
         "409":
-          $ref: "#/components/responses/IdempotencyConflict"
+          $ref: "#/components/responses/Problem"
         "429":
           $ref: "#/components/responses/Problem"
         "503":
@@ -7269,7 +7297,7 @@ paths:
         "404":
           $ref: "#/components/responses/ResourceNotFound"
         "409":
-          $ref: "#/components/responses/IdempotencyConflict"
+          $ref: "#/components/responses/Problem"
         "429":
           $ref: "#/components/responses/Problem"
         "503":
@@ -8186,6 +8214,16 @@ components:
         type: string
         minLength: 1
         maxLength: 128
+    IdempotencyKeyToken:
+      name: Idempotency-Key
+      in: header
+      description: "Identifies one mutation and its canonical request payload; only letters, digits and the characters . _ : - are accepted."
+      required: true
+      schema:
+        type: string
+        minLength: 1
+        maxLength: 128
+        pattern: "^[A-Za-z0-9._:-]+$"
     IfMatch:
       name: If-Match
       in: header
@@ -8324,7 +8362,12 @@ components:
     SecretName:
       name: secret_name
       in: path
-      description: Uppercase environment-variable name.
+      description:
+        Uppercase environment-variable name. Set refuses a name starting with OHMYHOST_ and the
+        platform names BETTER_AUTH_SECRET, BETTER_AUTH_URL, DATABASE_URL, HYPERDRIVE, ASSETS, FILES,
+        IMAGES and STORAGE with a 400 whose detail is "Secret name is reserved.". Delete refuses the
+        installed platform keys OHMYHOST_AI_KEY, OHMYHOST_MAIL_KEY, OHMYHOST_STORAGE_KEY,
+        OHMYHOST_BROWSER_KEY and BETTER_AUTH_SECRET with the same detail.
       required: true
       schema:
         type: string
@@ -8420,6 +8463,21 @@ components:
         application/json:
           schema:
             $ref: "#/components/schemas/Operation"
+    AcceptedProject:
+      description: The project creation was accepted for asynchronous provisioning.
+      headers:
+        Location:
+          description: Relative URL of the durable operation resource.
+          required: true
+          schema:
+            type: string
+            pattern: ^/v1/operations/[0-9A-HJKMNP-TV-Z]{26}$
+        X-Request-Id:
+          $ref: "#/components/headers/XRequestId"
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ProjectCreateOperation"
     Problem:
       description: The request failed.
       headers:
@@ -8993,7 +9051,7 @@ components:
       required: [domain, sending, receiving]
       properties:
         domain: { type: string, minLength: 4, maxLength: 253 }
-        sending: { type: boolean }
+        sending: { type: boolean, const: true }
         receiving: { type: boolean }
     ManagedMailWebhookRequest:
       type: object
@@ -12309,6 +12367,14 @@ components:
             - shared_data_requires_promotion
             - development_environment_exists
             - development_environment_missing
+            - source_generation_conflict
+            - source_commit_conflict
+            - source_upload_conflict
+            - source_upload_expired
+            - source_scope_unavailable
+            - source_snapshot_invalid
+            - source_snapshot_too_large
+            - preview_version_conflict
             - production_deployment_required
             - framework_conversion_required
             - repository_configuration_missing
@@ -12348,6 +12414,7 @@ components:
             - billing_purchase_conflict
             - billing_recharge_conflict
             - github_connection_required
+            - connection_revoked
             - github_connection_revoked
             - repository_not_installed
             - cloudflare_zone_not_bound
@@ -12365,6 +12432,8 @@ components:
             - domain_hostname_taken
             - domain_ownership_required
             - domain_dns_conflict
+            - domain_already_configured
+            - domain_deleting
             - data_change_blocked
             - data_change_in_progress
             - data_change_not_applicable
@@ -12374,6 +12443,11 @@ components:
             - native_auth_launch_unavailable
             - native_auth_provider_unavailable
             - native_auth_epoch_exhausted
+            - native_auth_revision_conflict
+            - native_auth_provider_incomplete
+            - auto_deploy_source_unavailable
+            - cutover_pending
+            - project_operation_in_progress
             - native_user_conflict
             - project_domains_conflict
         request_id:
@@ -12390,6 +12464,33 @@ components:
         suggested_action:
           type: string
           minLength: 1
+    ProjectCreateOperation:
+      type: object
+      description:
+        Durable record of an accepted project creation. project_id identifies the new project; it
+        is returned unchanged by an identical idempotent replay.
+      additionalProperties: false
+      required:
+        - id
+        - state
+        - created_at
+        - updated_at
+        - project_id
+      properties:
+        id:
+          $ref: "#/components/schemas/Ulid"
+        state:
+          type: string
+          enum:
+            - queued
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+        project_id:
+          $ref: "#/components/schemas/Ulid"
     Operation:
       type: object
       description:
@@ -12627,36 +12728,6 @@ components:
           oneOf:
             - type: "null"
             - $ref: "#/components/schemas/FixedDatabaseCompute"
-            - type: object
-              additionalProperties: false
-              required:
-                [
-                  min_cu,
-                  max_cu,
-                  min_memory_gb,
-                  max_memory_gb,
-                  suspend_timeout_seconds,
-                  state,
-                  pending_state,
-                  disabled,
-                  region,
-                ]
-              properties:
-                min_cu: { type: number, minimum: 0.25 }
-                max_cu: { type: number, minimum: 0.25 }
-                min_memory_gb: { type: number, minimum: 1 }
-                max_memory_gb: { type: number, minimum: 1 }
-                suspend_timeout_seconds:
-                  {
-                    type: integer,
-                    minimum: -1,
-                    maximum: 604800,
-                    description: "Configured timeout: 0 is provider default; -1 disables suspension.",
-                  }
-                state: { type: string, enum: [init, active, idle] }
-                pending_state: { type: [string, "null"], enum: [init, active, idle, null] }
-                disabled: { type: boolean }
-                region: { type: string, pattern: "^aws-[a-z0-9]+(?:-[a-z0-9]+)*-[0-9]+$" }
     FixedDatabaseCompute:
       type: object
       additionalProperties: false
@@ -12814,6 +12885,7 @@ components:
             - storage_jurisdiction_conflict
             - provider_state_absent
             - auto_deploy_plan_rejected
+            - auto_deploy_repository_renamed
             - promotion_source_stale
             - promotion_target_stale
             - project_handle_taken

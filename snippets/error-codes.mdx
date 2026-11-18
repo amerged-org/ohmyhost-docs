@@ -2,6 +2,7 @@
 | --- | --- | --- |
 | [`api_key_creation_uncertain`](/errors/api-key-creation-uncertain) | 503 | Yes |
 | [`api_key_permissions_unavailable`](/errors/api-key-permissions-unavailable) | 503 | No |
+| [`auto_deploy_source_unavailable`](/errors/auto-deploy-source-unavailable) | 409 | No |
 | [`billing_purchase_conflict`](/errors/billing-purchase-conflict) | 409 | No |
 | [`billing_recharge_conflict`](/errors/billing-recharge-conflict) | 409 | No |
 | [`build_capacity_reached`](/errors/build-capacity-reached) | 429 | No |
@@ -15,6 +16,8 @@
 | [`compute_storage_shrink_requires_migration`](/errors/compute-storage-shrink-requires-migration) | 409 | No |
 | [`confirmation_expired`](/errors/confirmation-expired) | 409 | No |
 | [`confirmation_invalid`](/errors/confirmation-invalid) | 409 | No |
+| [`connection_revoked`](/errors/connection-revoked) | 403 | No |
+| [`cutover_pending`](/errors/cutover-pending) | 409 | Yes |
 | [`data_change_blocked`](/errors/data-change-blocked) | 409 | Yes |
 | [`data_change_in_progress`](/errors/data-change-in-progress) | 409 | Yes |
 | [`data_change_not_applicable`](/errors/data-change-not-applicable) | 409 | No |
@@ -36,6 +39,8 @@
 | [`deployment_plan_incompatible`](/errors/deployment-plan-incompatible) | 409 | No |
 | [`development_environment_exists`](/errors/development-environment-exists) | 409 | No |
 | [`development_environment_missing`](/errors/development-environment-missing) | 409 | No |
+| [`domain_already_configured`](/errors/domain-already-configured) | 409 | No |
+| [`domain_deleting`](/errors/domain-deleting) | 409 | No |
 | [`domain_dns_conflict`](/errors/domain-dns-conflict) | 409 | No |
 | [`domain_hostname_taken`](/errors/domain-hostname-taken) | 409 | No |
 | [`domain_ownership_required`](/errors/domain-ownership-required) | 409 | No |
@@ -56,7 +61,9 @@
 | [`migration_filename_noncanonical`](/errors/migration-filename-noncanonical) | 409 | No |
 | [`native_auth_epoch_exhausted`](/errors/native-auth-epoch-exhausted) | 409 | No |
 | [`native_auth_launch_unavailable`](/errors/native-auth-launch-unavailable) | 409 | No |
+| [`native_auth_provider_incomplete`](/errors/native-auth-provider-incomplete) | 409 | No |
 | [`native_auth_provider_unavailable`](/errors/native-auth-provider-unavailable) | 409 | No |
+| [`native_auth_revision_conflict`](/errors/native-auth-revision-conflict) | 409 | No |
 | [`native_domain_sync_pending`](/errors/native-domain-sync-pending) | 409 | No |
 | [`native_user_conflict`](/errors/native-user-conflict) | 409 | No |
 | [`organization_required`](/errors/organization-required) | 409 | No |
@@ -75,6 +82,7 @@
 | [`project_handle_unchanged`](/errors/project-handle-unchanged) | 409 | No |
 | [`project_identity_unavailable`](/errors/project-identity-unavailable) | 503 | Yes |
 | [`project_notes_conflict`](/errors/project-notes-conflict) | 409 | No |
+| [`project_operation_in_progress`](/errors/project-operation-in-progress) | 409 | Yes |
 | [`project_rename_blocked`](/errors/project-rename-blocked) | 409 | Yes |
 | [`promotion_invalid_target`](/errors/promotion-invalid-target) | 409 | No |
 | [`promotion_source_stale`](/errors/promotion-source-stale) | 409 | No |
