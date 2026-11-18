@@ -7,7 +7,7 @@ Choose Omh Native Auth for managed email and password sign-in on approved projec
 
 ## Set up Omh Native Auth
 
-Omh Native Auth manages application users and sessions for projects approved for password sign-in. The current rollout is limited to approved projects on the Development platform. Production activation is currently disabled. Start with a Paid project, a verified application identity, and your own verified sender authorized for the project. The application identity and sender must share the same registrable main domain. See [email](/email) and [application identity and shared senders](/shared-mail). Native Auth management requires CLI and local MCP version `0.1.50` or newer.
+Omh Native Auth manages application users and sessions for projects approved for the Native Auth rollout. Start with a Paid project, a verified application identity, and your own verified sender authorized for the project. The application identity and sender must share the same registrable main domain. See [email](/email) and [application identity and shared senders](/shared-mail). Native Auth management requires CLI and local MCP version `0.1.50` or newer.
 
 1. Set `auth.provider: omh-native` in `ohmyhost.yaml`:
 
@@ -21,13 +21,11 @@ Omh Native Auth manages application users and sessions for projects approved for
 4. Protect server routes with `createNativeAuthServer(env.OHMYHOST_AUTH)` from `@ohmyhost/customer-runtime/auth-server`. Call `getSession(request)` or `requireUser(request)`, then check the user's permissions for the requested record or action. Static files remain public.
 5. Deploy to Dev and read readiness again. The first Native-capable deployment provisions Auth storage. Check that `paid`, `sender`, `origin` and `storage` are all ready. Exercise sign-up or invitation, email verification, sign-in, a protected action, reload and sign-out on the deployed origin. Confirm that protected access is denied after sign-out. Configure Prod separately and repeat the checks on its own origin.
 
-Native Auth uses a separately metered Auth database, with separate Dev and Prod user directories even when the application shares business data. A business database is optional. See the [application build Skill](https://ohmyho.st/skills/ohmyhost-build-portable-app/references/stack-contracts.md) for the runtime contract and how to retry an uncertain mail operation with the original idempotency key.
+Native Auth uses a separately metered Auth database, with separate Dev and Prod user directories even when the application shares business data. A business database is optional. For signup, verification and password-reset mail requests, generate an operation key with `createNativeAuthIdempotencyKey` from `@ohmyhost/customer-runtime/auth-browser`. Send it as the `Idempotency-Key` header in the client fetch options and reuse the same key after an uncertain result.
 
 ## Add Google or GitHub to Omh Native Auth
 
-The current public Native Auth release supports email and password sign-in. Google and GitHub activation is pending release for approved projects. For an app that needs social sign-in today, [use an application-owned OAuth integration](#set-up-google-or-github-sign-in).
-
-When Native OAuth is enabled for your project, use your own Google Cloud or GitHub OAuth app for each environment:
+Project Owners can enable Google and GitHub separately on approved Native Auth projects. Use your own Google Cloud or GitHub OAuth app for each environment.
 
 1. Read `native_auth_provider_get` for `google` or `github` with the selected project and environment IDs. Copy the returned `callbackUrl`. It ends in `/api/auth/v1/callback/google` or `/api/auth/v1/callback/github`. If it is null, configure the approved canonical origin in Native Auth first.
 2. For Google, configure the consent screen and audience in Google Auth Platform. Create a **Web application** OAuth client and paste the exact URL under **Authorized redirect URIs**. Add test users when the app is in testing and complete Google's applicable [brand verification](https://developers.google.com/identity/protocols/oauth2/production-readiness/brand-verification).
