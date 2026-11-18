@@ -60,6 +60,8 @@ Daily limits are 10 sends during the first 24 hours of mail-enabled deployment,2
 
 Receiving additionally requires a verified HTTPS webhook in the project's Prod application and the MX records that mail status returns. The protected Dev URL is not an inbound mail target.
 
+Webhook preparation and signing-secret rotation are private local CLI/direct REST custody steps because their responses contain a signing credential. They are not remote MCP tools. A remote-only chat can help build the handler, inspect metadata and explain the handoff, but the secret is installed outside chat before verification continues. Use `api_reference` to distinguish these exceptions from metadata-only mail operations available in the connected host.
+
 1. Add a server route, such as `/api/email/inbound`, test it in Dev and deploy it to Prod. It reads the raw body with a size limit and calls `verifyMailWebhook` from `@ohmyhost/customer-runtime` before parsing JSON. For `email.received`, it stores the message in your own database keyed by the stable event `id`, commits, and only then returns 2xx.
 2. Register the Prod URL. The response contains a server-only signing secret; install it as an application-owned Prod secret such as `APP_MAIL_WEBHOOK_SECRET` and redeploy (`OHMYHOST_*` names are reserved):
 

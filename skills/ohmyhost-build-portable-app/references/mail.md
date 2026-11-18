@@ -10,6 +10,12 @@ without it deploys with no mail domain.
 
 ## Setup
 
+Discover this transport's actual tools first. Sending setup/status use remote `mail_domain_set` /
+`mail_domain_status`, while local examples can use `mail_setup` / `mail_status`. Receiving preparation
+and rotation return a signing credential, so they remain a private local/direct REST custody step.
+A remote-only chat can build the handler and explain the limitation, but never fetches or receives
+that signing secret; the human installs it outside chat before metadata-only verification continues.
+
 1. Select the exact project and its one production mail domain. Keep Dev and Prod application
    secrets separate. Both environments may send through the same verified domain;
    incoming mail goes only to the Prod webhook.

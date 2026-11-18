@@ -65,7 +65,11 @@ await db.transaction().execute(async (trx) => {
     .where("id", "=", itemId)
     .executeTakeFirst();
   if (row)
-    await trx.updateTable("items").set({ title: nextTitle }).where("id", "=", row.id).execute();
+    await trx
+      .updateTable("items")
+      .set({ title: nextTitle })
+      .where("id", "=", row.id)
+      .execute();
 });
 ```
 
@@ -175,7 +179,7 @@ No mode can change schema or roles: schema changes remain versioned [GitHub migr
 
 ## Use MCP or an automation platform
 
-MCP `database_query` requires `project_id`, `environment`, `statement` and optional scalar `parameters`. `database_write` uses the same project/environment with JSON `parameters`, the saved `idempotency_key` and `confirmed: true` for an authorized write.
+MCP `database_query` requires `project_id`, `environment`, `statement` and optional scalar `parameters`. `database_write` uses the same project/environment with JSON `parameters`, the saved `idempotency_key` and `confirmed: true` for an authorized write. These are individually named local and remote tools; check the connected host's actual schemas. Use remote `api_reference` to inspect API coverage or an unfamiliar operation. A pending host check can delay a new tool's availability.
 
 REST uses your token in the Authorization header:
 
@@ -258,7 +262,7 @@ ohmyhost database watch create --project "$PROJECT_ID" --environment dev --table
 
 Then create a webhook whose `--event-types` is the printed `event_type`, for example `data.orders`. For a table that already takes writes, create the webhook before the watch: events committed while no webhook subscribes to the topic are discarded and never replayed. Verify with a real change. `database webhook test` sends a test event, not a data event, so it proves only the receiver and signature handling. Make one harmless change in Dev with the MCP tool `database_write`, then read `database webhook deliveries` for an event of type `data.orders` in state `delivered`. Events normally leave within seconds of the commit.
 
-`ohmyhost database watch list --project ID --environment dev` lists the watches of an environment and does not list triggers declared by migrations. `ohmyhost database watch delete --project ID --environment dev --watch WATCH_ID --idempotency-key KEY --yes` removes one. The local MCP server offers `database_watch_create`, `database_watch_list` and `database_watch_delete`; create and delete need `confirmed: true` and a saved idempotency key. The remote MCP server cannot create or delete watches. REST uses `POST` and `GET /v1/projects/{project_id}/database/watches` (operations `createProjectDatabaseWatch` and `listProjectDatabaseWatches`) and `DELETE /v1/projects/{project_id}/database/watches/{watch_id}` (`deleteProjectDatabaseWatch`).
+`ohmyhost database watch list --project ID --environment dev` lists the watches of an environment and does not list triggers declared by migrations. `ohmyhost database watch delete --project ID --environment dev --watch WATCH_ID --idempotency-key KEY --yes` removes one. The named MCP tools are `database_watch_create`, `database_watch_list` and `database_watch_delete`; check actual availability in the connected local or remote host. Create and delete need `confirmed: true` and a saved idempotency key. REST uses `POST` and `GET /v1/projects/{project_id}/database/watches` (operations `createProjectDatabaseWatch` and `listProjectDatabaseWatches`) and `DELETE /v1/projects/{project_id}/database/watches/{watch_id}` (`deleteProjectDatabaseWatch`).
 
 **Topic.** The topic is the table name in lower case, with every character outside `a-z`, `0-9` and `_` replaced by `_`, prefixed with `t_` when the first character is not a letter, and cut to 48 characters. The schema is not part of the topic, so two tables with the same name in different schemas share one; tell them apart by `data.schema` and `data.table`.
 
@@ -326,7 +330,7 @@ ohmyhost database table create --project "$PROJECT_ID" --environment dev --table
 ]
 ```
 
-The local MCP server offers the same operation as `database_table_create`; it needs `confirmed: true` and a saved idempotency key, and `primary_key` takes the column names. The remote MCP server does not offer it. REST uses `POST /v1/projects/{project_id}/database/tables` (operation `createProjectDatabaseTable`) with an `Idempotency-Key` header and the same permission as the other database changes. The body is `environment`, `table`, `columns` and an optional `primary_key`:
+The named MCP operation is `database_table_create`; it needs `confirmed: true` and a saved idempotency key, and `primary_key` takes the column names. Check the connected host's actual tool schema; remote chat supplies column objects rather than a local file path. REST uses `POST /v1/projects/{project_id}/database/tables` (operation `createProjectDatabaseTable`) with an `Idempotency-Key` header and the same permission as the other database changes. The body is `environment`, `table`, `columns` and an optional `primary_key`:
 
 ```json
 {

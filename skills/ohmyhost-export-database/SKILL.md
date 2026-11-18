@@ -7,6 +7,8 @@ description: Request and download an on-demand password-encrypted SQL ZIP from o
 
 The organization Owner can request one export per project per rolling 24 hours, including at zero credits. Exports contain SQL only: separate Dev/Prod dumps for isolated data, or one shared dump. Files, application source and configuration are not included.
 
+This workflow needs the separately selected local CLI/MCP password-input path. A remote-only chat cannot read a password file on the user's computer, and the API reference does not make it available. Explain that specific limitation without requesting the password in chat or substituting a credential-bearing generic call.
+
 1. Ask the user to choose and retain the ZIP password. The platform refuses a new export password of fewer than 12 characters, so ask for a longer passphrase. Use an existing private UTF-8 password file (at least 12 characters, 1–1,024 bytes, not blank) on the machine running the local MCP server; do not put the password in the prompt or tool arguments. Preserve its exact bytes, including any final line break. On POSIX the file must be owner-only (`chmod 600`). Do not silently save a password elsewhere.
 2. Discover `project_export_create`, then supply the project ID, absolute `password_file` path and one saved idempotency key. The CLI alternative reads the password from stdin:
 

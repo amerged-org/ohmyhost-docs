@@ -12,6 +12,8 @@ ohmyhost export get "$EXPORT_ID" --project "$PROJECT_ID" --json
 
 `EXPORT_ID` is the create response's operation ID. MCP `project_export_create` takes `password_file`, the absolute path of an existing regular file that only its owner can access on macOS/Linux (`chmod 600`); otherwise it answers `export_password_file_invalid`. The local server reads the file without putting its password in MCP arguments. Poll `project_export_get` after the returned interval.
 
+This is a local CLI/MCP password-input workflow. A remote-only chat cannot read the file on your computer; it must explain that limitation without asking you to paste the password. The API reference describes the operation but does not execute it or add a remote password-input path.
+
 ## What the ZIP contains
 
 SQL dumps of the current assignments only: isolated data uses `dev.sql` and/or `prod.sql`; shared data is exported once as `shared.sql`. Retired databases are not included. The SQL dumps leave out the platform event schema. The export contains no R2 files, application code, runtime secrets or configuration. The maximum plaintext SQL payload is 256 MiB. Before a destructive [data-assignment change](/environments#change-data-assignments), download any needed SQL export and use the application's own downloads for files.

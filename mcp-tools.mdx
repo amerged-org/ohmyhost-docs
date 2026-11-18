@@ -4,12 +4,23 @@ description: "Discover the shipped tool names, required arguments and current sc
 ---
 
 import McpTools from "/snippets/mcp-tools.mdx";
+import RemoteMcpTools from "/snippets/remote-mcp-tools.mdx";
 
-Call `tools/list` after connecting the local product server. Read the returned schema before supplying arguments; the catalogue below is generated with the public client release.
+Call `tools/list` on the server actually connected to this host. Remote OAuth and local stdio have separate catalogs; read the returned schema before supplying arguments.
+
+## Remote OAuth tools
+
+The OpenAI and Claude plugins share these individually named tools. The full OpenAPI plus MCP coverage metadata is the Master Tool Contract. `api_reference` reads bounded summaries or one operation's schema, its corresponding tools or explicit support limitation, and the compiled contract hash; it never executes an API request. A host may still be checking a new or changed tool, so this server catalog is not proof of current native visibility.
+
+<RemoteMcpTools />
+
+## Local stdio tools
+
+The following catalog is generated from the shipped `ohmyhost-mcp` local client. It includes workflows that need a local filesystem or private credential input.
 
 <McpTools />
 
-[Download complete tool schemas](https://ohmyho.st/mcp-tools.json) · [Connect MCP](/agents/mcp) · [Task Skills](/skills).
+[Download complete local tool schemas](https://ohmyho.st/mcp-tools.json) · [Complete API contract](https://ohmyho.st/api) · [Connect MCP](/agents/mcp) · [Task Skills](/skills).
 
 A listed tool does not grant account access. The API checks the current user, organization, project, environment and action. Use the existing project context before changes, and retain mutation idempotency keys across uncertain responses.
 
@@ -32,4 +43,4 @@ For a complete native-chat snapshot, use remote `source_upload_prepare` and `sou
 
 MCP text reads default to `content_text` with `encoding: "utf8"`, with a base64 fallback for binary files. `source_changes` accepts exactly one `content_text` or `content_base64` per path; `content_base64: null` deletes the file. REST uses base64. The [editing example](/sources#develop-in-a-connected-chat) includes the complete argument shape.
 
-The generated catalogue above is the local product server. Remote OAuth clients discover their own tools through `tools/list`; local directory tools cannot operate inside a native chat without a local filesystem. Connection and publishing permissions are described in [MCP setup](/agents/mcp).
+Both catalogs describe server support, not account authorization. Discover this native host's actual remote tools through `tools/list`; local directory tools cannot operate inside a native chat without a local filesystem. Connection and publishing permissions are described in [MCP setup](/agents/mcp).
