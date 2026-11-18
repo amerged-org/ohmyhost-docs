@@ -1,19 +1,17 @@
 ---
 title: "Connect Make"
-description: "Link your Make account to a workspace, discover connections and import one into a project."
+description: "Connect Make once in your workspace and ask your agent to find the connection you want to use."
 ---
 
-Connect your Make account to an ohmyho.st workspace. The grant belongs to your user and the selected workspace; you do not need to choose a project to connect or discover. Complete the protected portal handoff as the same person, then review and approve Make's consent screen. Your provider tokens stay in the connection service; responses to your agent contain safe status and discovery metadata.
-
-<Info>
-This integration supports account linking, read-only discovery and explicit project imports where available. Running app actions through Make Endpoints remains unavailable until it is separately qualified. Availability is reported by the connected environment.
-</Info>
+Connect Make once in your ohmyho.st workspace. Your agent can use that authorization to find the Make connections available to you across projects in the workspace. Credentials stay in the connection service.
 
 ## Connect your account
 
-Ask your agent to connect Make for the selected workspace. It uses `integration_connection_begin`, opens the returned protected link for you, and follows `integration_connection_status` after you finish consent. Both your initiating login and portal login must identify the same person. Current workspace role and explicit credential restrictions still apply.
+Open [Connections](https://app.ohmyho.st/connections) in the workspace you want to use and select **Connect Make**. Sign in if prompted, review the permissions on Make’s consent screen and approve access. When the portal shows that Make is connected, return to your agent or start a new chat.
 
-For the CLI, select your saved login and workspace:
+If you start from chat, have your agent use `integration_connection_list` to look for your active workspace grant. It can create a protected consent link with `integration_connection_begin` when you need to connect. Open that link as the same ohmyho.st user who requested it and select **Continue to Make**. If a manual save is needed after Make returns, select **Save connection**.
+
+To start from the CLI, use your saved login and workspace.
 
 ```sh
 ohmyhost connection begin \
@@ -22,7 +20,7 @@ ohmyhost connection begin \
   --profile-name PROFILE_NAME --json
 ```
 
-Open the returned URL privately and complete the two consent steps. Retain the returned request ID to check completion:
+Open the returned URL privately and approve access on Make. Use the request ID to check the handoff.
 
 ```sh
 ohmyhost connection status \
@@ -31,11 +29,15 @@ ohmyhost connection status \
   --profile-name PROFILE_NAME --json
 ```
 
-This status tracks the protected handoff: `consumed` means the portal accepted it, even if Make consent has not finished. After completing consent and the final portal confirmation, use `connection list` to check for an `active` grant. Neither response returns an access token or refresh token. A human session's selected workspace is context; current target-workspace access and any explicit restrictions decide whether the request is allowed. An API key remains limited to its recorded workspace and permissions.
+`consumed` means the portal accepted the link. Check `connection list` for an `active` grant to verify that Make is connected.
 
-## Inspect connections
+## Find a connection in chat
 
-`integration_connection_list` lists your permitted grants. Use `integration_connection_discover` with the selected workspace grant to inspect Make organizations, teams and existing connections. Select only IDs returned by that discovery. This operation reads metadata and does not run scenarios, send email or change CRM records.
+> Find my Salesforce connection in Make. If several names match, ask which one I mean.
+
+Your agent reuses your active workspace grant. It uses `integration_connection_discover` to list Make organizations, then teams within each relevant organization, then connection names and IDs in those teams. It can use an organization or team you already named to narrow the search. If it finds one clear match, it can identify the connection right away. When several match, it can show their names and teams so you can choose. If the names do not identify the integration, tell the agent the connection name you see in Make.
+
+Discovery works before you have a project. It reads connection metadata. Running Make Endpoints for CRM data or actions such as sending email is currently unavailable.
 
 ```sh
 ohmyhost connection list \
@@ -50,13 +52,15 @@ ohmyhost connection discover \
 
 Discovery returns organizations first. Repeat it with `--provider-organization ID` to list that organization's teams, then add `--team ID` to inspect the team's connections.
 
-Your app's hosting region does not choose Make's data region. Organization discovery reads across Make zones; team and connection metadata are read from the selected organization's zone.
+Discovery finds organizations across Make zones and reads team and connection metadata from the selected organization's zone.
 
-Make controls its OAuth token lifetimes. The service refreshes a valid grant as needed; a revoked or expired grant requires consent again. Ordinary portal logout does not disconnect a successfully linked account, while losing the linking user's workspace rights suspends use.
+Make controls its OAuth token lifetimes. The service refreshes a valid grant as needed. A grant that can no longer refresh requires consent again. The grant persists across portal logins, and access depends on the linking user's current workspace rights.
 
 ## Import into a project
 
-After discovery, choose the Make organization, team and connection, then select the destination project and environment. Import records that explicit selection; it does not run a Make action. Ask your agent to use `integration_connection_import`, or use the CLI with IDs returned by discovery and project context:
+Ask for an import when you want to save a connection reference in a particular app. For example, “Import that Salesforce connection into the dev environment of my support app.” The agent can reuse the project and environment from your request or chat context and ask if the destination is unclear. You can import the same connection into another authorized project in your workspace using the same Make grant.
+
+Use `integration_connection_import` in chat or the following CLI command with IDs from discovery and project context.
 
 ```sh
 ohmyhost connection import \
@@ -70,10 +74,6 @@ ohmyhost connection import \
   --idempotency-key make-import-1 \
   --profile-name PROFILE_NAME --json
 ```
-
-## Use the portal
-
-Sign in to the portal, select your workspace under Projects and open **Connections**. Connect Make, then select an active grant, Make organization and team. Choose a connection and destination project and environment to import it. The portal offers only the choices available to your account.
 
 ## Older clients
 
