@@ -39,7 +39,7 @@ Copy the prompt from the portal into your chat.
 
 Your agent reuses your active workspace grant. It uses `integration_connection_discover` to list Make organizations, then teams within each relevant organization, then connection names and IDs in those teams. It can use an organization or team you already named to narrow the search. If it finds one clear match, it can identify the connection right away. When several match, it can show their names and teams so you can choose. If the names do not identify the integration, tell the agent the connection name you see in Make.
 
-Discovery works before you have a project. It reads connection metadata. Running Make Endpoints for CRM data or actions such as sending email is currently unavailable.
+Discovery works before you have a project. It reads connection metadata. Make action execution described below is a candidate and is not yet available on the hosted service.
 
 ```sh
 ohmyhost connection list \
@@ -76,6 +76,48 @@ ohmyhost connection import \
   --idempotency-key make-import-1 \
   --profile-name PROFILE_NAME --json
 ```
+
+## Run a Make action (planned)
+
+This execution flow is being prepared and has not yet been released or accepted on the hosted service. An older Make grant continues to support discovery; using execution requires explicitly renewing your Make authorization to grant the additional permissions.
+
+After importing a connection into the intended project and environment, an owner can bind an exact published Make Endpoint using `POST /v1/organizations/{organization_id}/connections/action-bindings`. The Endpoint must be compatible with the selected Make team connection and runs confidentially. Use direct Endpoints first. The initial Development proof targets Outlook through the published Make Endpoints SDK definitions.
+
+For example, bind a published Endpoint using an owner API token, IDs from the imported connection and its exact app, version and Endpoint names:
+
+```sh
+umask 077
+printf 'header = "Authorization: Bearer %s"\n' "$OWNER_API_TOKEN" | \
+  curl --config - --request POST "https://app.ohmyho.st/v1/organizations/$ORGANIZATION_ID/connections/action-bindings" \
+  --output make-action-binding.private.json \
+  --header "Idempotency-Key: bind-action-1" \
+  --header "Content-Type: application/json" \
+  --data '{"project_id":"PROJECT_ULID","environment_id":"ENVIRONMENT_ULID","import_id":"IMPORT_ULID","action":{"kind":"endpoint","app_name":"APP_NAME","app_version":1,"endpoint_name":"ENDPOINT_NAME"}}'
+```
+
+Use the Development platform origin for a Development platform workspace. The private response file contains an `execution_key`. Save it as a [runtime secret](/secrets) for the app server and remove the temporary response file after setup. Keep that key out of browser code and messages. The server sends that key as its bearer, an idempotency key for the intended action and an input object. It does not receive or send Make OAuth credentials.
+
+For example, this server-side JavaScript sends input to the bound Endpoint. Supply a stable, unique `intentKey` for each logical invocation, provide input matching the Endpoint definition, and set `MAKE_ACTION_KEY` as a runtime secret, available here on the server environment object `env`.
+
+```js
+const response = await fetch("https://app.ohmyho.st/v1/make/actions/run", {
+  method: "POST",
+  redirect: "error",
+  headers: {
+    Authorization: `Bearer ${env.MAKE_ACTION_KEY}`,
+    "Content-Type": "application/json",
+    "Idempotency-Key": intentKey,
+  },
+  body: JSON.stringify({ input: endpointInput }),
+});
+const result = await response.json();
+```
+
+Use the Development platform origin when appropriate. Check `response.ok` and `result.state` before using a result. Reuse the same key for the same intent: a known outcome can be returned without another provider action. A `502` with `uncertain` needs investigation before another invocation.
+
+When a direct Endpoint definitely did not dispatch, an application can opt into the local `make-api-shell-connection-workflow` fallback, including for file cases. The owner binds an active on-demand, three-module app-specific API Shell configured with the exact imported Make connection. Its action identifies `scenario_id`, `method` and an origin-relative `path_prefix`. Runtime input uses the shell fields `path`, `method`, `header`, `qs` and `body` within that pinned authority. Do not fall back after an uncertain write outcome. Arbitrary scenarios, routes and URLs are not supported.
+
+Add the exact applicable platform origin, `https://app.ohmyho.st` or `https://dev.app.ohmyho.st`, to the application's `runtime.egress.allow` in its manifest and deploy the change. These binding and runtime operations are excluded from remote MCP; use the API for this flow when it becomes available.
 
 ## Older clients
 
