@@ -1,6 +1,7 @@
 ---
 title: "Your first deployment"
 description: "Save a managed or GitHub version, deploy one app and verify its Dev URL."
+robots: "index, follow"
 ---
 
 Start with the app you want to deploy, in a local checkout or a connected chat. Continue its saved managed or GitHub source. A new app developed entirely in chat uses managed source; a local checkout without a saved binding can use managed source or GitHub. Signing up is open. [Sources and versions](/sources).
@@ -71,7 +72,7 @@ After Prod works on its hosting address, the agent repeats the original domain a
 
 ## If something needs time
 
-- Build or deployment pending: follow the operation's returned polling interval.
+- Build or deployment pending: follow the operation's returned polling interval. If you are tracking it from a script, see [how to poll operations through the REST API](/api#requests-that-change-state).
 - DNS or mail verification pending: apply the exact records and check again after the returned interval; mail status currently returns 60 seconds; hostname status has no hint, so check DNS/TLS after sixty minutes.
 - An error without a useful next action: use the [troubleshooting Skill](/troubleshooting) and report the operation through [feedback](/feedback).
 

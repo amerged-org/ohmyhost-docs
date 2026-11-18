@@ -1,15 +1,13 @@
 ---
 title: "Connect Make"
-description: "Connect Make once in your workspace and ask your agent to find the connection you want to use."
+description: "Ask your ohmyho.st agent to connect Make and find the connection you want to use."
 ---
 
 Connect Make once in your ohmyho.st workspace. Your agent can use that authorization to find the Make connections available to you across projects in the workspace. Credentials stay in the connection service.
 
 ## Connect your account
 
-Open [Connections](https://app.ohmyho.st/connections) in the workspace you want to use and select **Connect Make**. Sign in if prompted, review the permissions on Make’s consent screen and approve access. When the portal shows that Make is connected, return to your agent or start a new chat.
-
-If you start from chat, have your agent use `integration_connection_list` to look for your active workspace grant. It can create a protected consent link with `integration_connection_begin` when you need to connect. Open that link as the same ohmyho.st user who requested it and confirm that you want to connect Make. If a manual save is needed after Make returns, select **Save connection**.
+In your chat, ask your ohmyho.st agent to connect your Make account. It checks for an active workspace grant with `integration_connection_list` and creates a private consent link with `integration_connection_begin` if needed. Open the link as the same ohmyho.st user, review and approve the permissions in Make, then return to the chat. If prompted after approval, select **Save connection** before returning.
 
 To start from the CLI, use your saved login and workspace.
 
@@ -33,7 +31,7 @@ ohmyhost connection status \
 
 ## Find a connection in chat
 
-Copy the prompt from the portal into your chat.
+For example, tell your agent:
 
 > Help me connect a SaaS tool to my application using Make. Ask me which tool I want to use, then find its connection.
 

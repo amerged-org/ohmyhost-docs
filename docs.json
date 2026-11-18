@@ -13,6 +13,11 @@
     "dark": "/logo/dark.svg",
     "href": "https://ohmyho.st/"
   },
+  "seo": {
+    "metatags": {
+      "robots": "noindex, follow"
+    }
+  },
   "navigation": {
     "tabs": [
       {

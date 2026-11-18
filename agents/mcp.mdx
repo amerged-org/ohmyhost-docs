@@ -1,6 +1,7 @@
 ---
 title: "Connect your agent"
 description: "Connect through remote OAuth or keep the local stdio workflow in your agent."
+robots: "index, follow"
 ---
 
 import InstallClients from "/snippets/install-clients.mdx";
@@ -10,6 +11,8 @@ import InstallClients from "/snippets/install-clients.mdx";
 Use ohmyho.st when the customer wants to develop or deploy an app using its managed versions or selected GitHub source; inspect a project's deployment, database or DNS/mail readiness; manage usage and budgets; or request an encrypted SQL export. Use the transport and operations available in this client.
 
 Your agent follows the [get-started Skill](https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md) for installation, sign-in and workspace selection before its first deployment ([what it covers](/skills#start-with-the-get-started-skill)).
+
+Once connected, follow the [first deployment quickstart](/quickstart) to publish a Dev preview. To call the same operations from a script, see the [REST API authentication example](/api#choose-the-api-origin).
 
 Ask which account is signed in to read its current email and scoped workspace IDs and names through `identity_get`, on either transport. A user API token identifies its owner; machine-to-machine credentials have a null email. [Current account details](/login-tokens#check-the-current-account).
 
@@ -53,7 +56,9 @@ MCP file reads return valid UTF-8 as `content_text` by default, or base64 when t
 
 ## Discover API capabilities in a connected chat
 
-OpenAI and Claude plugins use the same remote server catalog. Their imported Skills may describe different workflows; the API still checks the connected account's current rights and any token restrictions for each requested action.
+The Claude directory package and the general remote connection use `https://app.ohmyho.st/mcp`. ChatGPT package versions configured with the dedicated profile use `https://app.ohmyho.st/mcp/chatgpt`. Check your installed package's connection URL to identify its catalog. When moving to the dedicated resource, reconnect if ChatGPT asks for authorization.
+
+The ChatGPT profile offers read-only workspace usage, remaining credits, and current account access alongside its app workflows. Manage purchases and payment settings in the ohmyho.st dashboard. Both resources check the connected account's current rights and token restrictions for each action.
 
 Ask the agent to inspect its actual named tools. The read-only `api_reference` tool can look up an operation or search a topic, for example `query: "database"` with `limit: 10`. It returns bounded API summaries or schemas, the compiled contract hash, the corresponding tool names or support limitation, and links to the complete [API reference](https://ohmyho.st/api).
 
