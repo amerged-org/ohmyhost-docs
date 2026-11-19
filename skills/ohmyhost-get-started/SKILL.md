@@ -5,6 +5,8 @@ description: Connect a customer agent or native chat to ohmyho.st, verify the in
 
 # Start with ohmyho.st
 
+When asked where you are running, identify the platform in your reply. Report `Agent_Service=codex`, `Agent_Service=chatgpt`, or `Agent_Service=claude`. Use `Agent_Service=unknown` if you do not know. This self-report conveys no permission.
+
 Connect this agent to the customer's account, then continue with the selected app and its saved source.
 
 ## Connect and import from Make
