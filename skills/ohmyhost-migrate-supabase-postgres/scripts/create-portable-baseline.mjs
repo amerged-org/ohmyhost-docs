@@ -5,10 +5,27 @@ import { resolve } from "node:path";
 import { pathToFileURL } from "node:url";
 import { TextEncoder } from "node:util";
 import process from "node:process";
-import { lexSql, lexStatements, prepareRlsBaseline, stripDumpGuards } from "./portable-rls.mjs";
+import {
+  inspectRlsPolicies,
+  lexSql,
+  lexStatements,
+  prepareRlsBaseline,
+  stripDumpGuards,
+} from "./portable-rls.mjs";
+
+const PORTABLE_EXTENSION =
+  /^create extension (?:if not exists )?(?:(pgcrypto|btree_gist|unaccent)(?: with schema extensions)?|(pg_trgm|citext|ltree) with schema extensions)$/u;
 
 if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
-  await main();
+  try {
+    await main();
+  } catch (error) {
+    if (!process.argv.slice(2).includes("--report-only")) throw error;
+    process.stderr.write(
+      "RLS report refused: check the arguments, input file and reviewed options.\n",
+    );
+    process.exitCode = 1;
+  }
 }
 
 async function main() {
@@ -17,7 +34,17 @@ async function main() {
   const outputPath = argumentsByName.get("--output");
   const outputDirectory = argumentsByName.get("--output-directory");
   const migrationPrefix = argumentsByName.get("--migration-prefix");
-  if (
+  const reportOnly = argumentsByName.has("--report-only");
+  if (reportOnly) {
+    if (
+      inputPath === undefined ||
+      outputPath !== undefined ||
+      outputDirectory !== undefined ||
+      migrationPrefix !== undefined ||
+      argumentsByName.get("--authorization-mode") !== "preserve-rls"
+    )
+      fail("report-only requires input and preserve-rls with no output options");
+  } else if (
     inputPath === undefined ||
     (outputPath === undefined) === (outputDirectory === undefined) ||
     (outputDirectory === undefined) !== (migrationPrefix === undefined)
@@ -36,7 +63,7 @@ async function main() {
     )
   )
     fail("RLS options file is invalid");
-  const result = createPortableBaseline(await readFile(inputPath, "utf8"), {
+  const options = {
     ...rlsOptions,
     ...(argumentsByName.get("--auth-mode") === undefined
       ? {}
@@ -44,7 +71,15 @@ async function main() {
     ...(argumentsByName.get("--authorization-mode") === undefined
       ? {}
       : { authorizationMode: argumentsByName.get("--authorization-mode") }),
-  });
+  };
+  const source = await readFile(inputPath, "utf8");
+  if (reportOnly) {
+    const report = createRlsCompatibilityReport(source, options);
+    process.stdout.write(`${JSON.stringify(report)}\n`);
+    process.exitCode = report.canGenerate ? 0 : 1;
+    return;
+  }
+  const result = createPortableBaseline(source, options);
   const files = outputPath === undefined ? splitPortableBaseline(result, migrationPrefix) : [];
   const outputs =
     outputPath === undefined
@@ -97,6 +132,43 @@ async function main() {
       })),
     })}\n`,
   );
+}
+
+function createRlsCompatibilityReport(source, rawOptions) {
+  const options = parseOptions(rawOptions);
+  const { completeInventory, policies, requiredExtensions, blockers } = inspectRlsPolicies(
+    source,
+    options,
+  );
+  const counts = { preserved: 0, translated: 0, blocked: 0 };
+  for (const policy of policies) counts[policy.status] += 1;
+  if (
+    completeInventory &&
+    lexStatements(stripDumpGuards(source)).some((statement) => {
+      const normalized = normalizeExecutableStatement(statement);
+      return normalized.startsWith("create extension ") && !PORTABLE_EXTENSION.test(normalized);
+    })
+  )
+    blockers.push("unsupported_extension_declaration");
+  if (completeInventory && counts.blocked === 0 && blockers.length === 0) {
+    try {
+      // Run the same schema and provider checks as generation. The result is
+      // discarded, and this path never reaches the output writers.
+      createPortableBaseline(source, options);
+    } catch {
+      blockers.push("schema_not_portable");
+    }
+  }
+  return {
+    version: 1,
+    completeInventory,
+    canGenerate: completeInventory && counts.blocked === 0 && blockers.length === 0,
+    sourcePolicies: policies.length,
+    ...counts,
+    requiredExtensions,
+    blockers: [...new Set(blockers)],
+    policies,
+  };
 }
 
 export function splitPortableBaseline(baseline, migrationPrefix, maximumBytes = 256 * 1024) {
@@ -182,6 +254,7 @@ $$`,
       : []),
   ];
   const views = new Map();
+  const optedInExtensions = new Set();
   let omittedPolicyCount = 0;
   for (const statement of statements) {
     let candidate = statement;
@@ -204,6 +277,16 @@ $$`,
       /^alter table\b.*\brow level security$/u.test(normalized)
     )
       fail("RLS requires explicit preserve-rls review or server authorization mode");
+    if (normalized.startsWith("create extension ")) {
+      const extension = PORTABLE_EXTENSION.exec(normalized);
+      if (extension === null) fail("unsupported extension declaration");
+      const optIn = extension[2];
+      if (optIn !== undefined && !optedInExtensions.has(optIn)) {
+        output.push(`CREATE EXTENSION IF NOT EXISTS ${optIn} WITH SCHEMA extensions`);
+        optedInExtensions.add(optIn);
+      }
+      continue;
+    }
     if (ignoredStatement(normalized)) continue;
     rejectProviderDependencies(lexSql(candidate), options, /^create function\b/u.test(normalized));
     rejectUnsafeStatement(normalized);
@@ -368,14 +451,26 @@ function statementPriority(statement, normalize = normalizeStatement) {
 }
 
 function parseArguments(values) {
+  const valuedOptions = new Set([
+    "--input",
+    "--output",
+    "--output-directory",
+    "--migration-prefix",
+    "--auth-mode",
+    "--authorization-mode",
+    "--rls-options",
+  ]);
   const parsed = new Map();
-  for (let index = 0; index < values.length; index += 2) {
+  for (let index = 0; index < values.length; index += 1) {
     const name = values[index];
-    const value = values[index + 1];
-    if (!/^--[a-z-]+$/u.test(name ?? "") || value === undefined || parsed.has(name)) {
-      fail("arguments are invalid");
+    if (parsed.has(name)) fail("arguments are invalid");
+    if (name === "--report-only") parsed.set(name, true);
+    else {
+      if (!valuedOptions.has(name)) fail("arguments are invalid");
+      const value = values[++index];
+      if (value === undefined || value.startsWith("--")) fail("arguments are invalid");
+      parsed.set(name, value);
     }
-    parsed.set(name, value);
   }
   return parsed;
 }
@@ -385,7 +480,10 @@ function ignoredStatement(statement) {
     statement.startsWith("set ") ||
     statement.startsWith("select pg_catalog.set_config(") ||
     statement === "create schema public" ||
-    /^create schema(?: if not exists)? private$/u.test(statement) ||
+    /^create schema(?: if not exists)? (?:private|extensions)$/u.test(statement) ||
+    /^comment on extension (?:pgcrypto|btree_gist|unaccent|pg_trgm|citext|ltree) is (?:''|null)$/u.test(
+      statement,
+    ) ||
     /^alter table(?: only)? [a-z0-9_."]+ (?:enable|force) row level security$/u.test(statement)
   );
 }

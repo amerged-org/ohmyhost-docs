@@ -123,7 +123,9 @@ These remote tools accept bounded file contents, not local directory paths or cr
 For private application credentials, use one `secret_input_request` per project and environment.
 Pass up to ten distinct secret names with `names`, or use `name` for the existing single-secret flow.
 Share its one `url` only with the person setting the values. The link needs no sign-in and expires
-one hour after creation. The form has one field per name, with Dice, Copy and Show/Hide controls.
+one hour after creation. Grouped forms have Dice, Copy and Show/Hide for each field.
+For a single `name`, **Generate token** creates and copies the value in the browser. The Copy
+and Show/Hide controls are also available for that field.
 One valid Save consumes the link. For a group, check the name-only results in `connection_status`
 and report separately which names were saved, failed or remain unconfirmed. Request a fresh link
 for failed names and verify unconfirmed writes before retrying them. For an existing single-secret

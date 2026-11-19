@@ -85,6 +85,61 @@ export function prepareRlsBaseline(source, options) {
   };
 }
 
+export function inspectRlsPolicies(source, options) {
+  const policies = [];
+  const requiredExtensions = new Set();
+  const blockers = [];
+  let completeInventory = false;
+  try {
+    const statements = lexStatements(stripDumpGuards(source));
+    const review = validateReview(options);
+    const identities = new Set();
+    for (const statement of statements) {
+      const tokens = lexSql(statement);
+      if (matches(tokens, ["create", "extension"])) {
+        const name = tokens[matches(tokens.slice(2), ["if", "not", "exists"]) ? 5 : 2];
+        if (isIdentifier(name) && /^[a-z_][a-z0-9_-]*$/u.test(name.value))
+          requiredExtensions.add(name.value);
+        else blockers.push("unsupported_extension_declaration");
+      }
+      if (!["create", "alter", "drop"].some((action) => matches(tokens, [action, "policy"])))
+        continue;
+      const diagnostic = { table: null, policy: null, command: null };
+      try {
+        if (!matches(tokens, ["create", "policy"])) {
+          const start = matches(tokens, ["drop", "policy", "if", "exists"]) ? 4 : 2;
+          const { name, table } = readPolicyTarget(tokens, start);
+          diagnostic.policy = name.value;
+          diagnostic.table = table.key;
+          fail("unsupported policy lifecycle", "unsupported_policy_lifecycle");
+        }
+        const policy = parsePolicy(statement, tokens, review, diagnostic);
+        if (!review.tables.has(policy.table.key))
+          fail("policy table requires explicit review", "policy_table_review_required");
+        const identity = JSON.stringify([policy.table.key, policy.name.value]);
+        if (identities.has(identity)) fail("duplicate policy", "duplicate_policy");
+        identities.add(identity);
+        diagnostic.status = policy.translated ? "translated" : "preserved";
+      } catch (error) {
+        if (!(error instanceof PortableRlsError)) throw error;
+        diagnostic.status = "blocked";
+        diagnostic.reason = error.code;
+      }
+      policies.push(diagnostic);
+    }
+    completeInventory = true;
+  } catch (error) {
+    if (!(error instanceof PortableRlsError)) throw error;
+    blockers.push("inventory_incomplete");
+  }
+  return {
+    completeInventory,
+    policies,
+    requiredExtensions: [...requiredExtensions].sort(),
+    blockers,
+  };
+}
+
 function validateReview(options) {
   if (!Array.isArray(options.backendRlsTables) || options.backendRlsTables.length === 0) {
     fail("backendRlsTables must explicitly list each reviewed RLS table");
@@ -145,13 +200,20 @@ function validateReview(options) {
   return { tables, claims, userIdMapping: options.userIdMapping };
 }
 
-function parsePolicy(source, tokens, review) {
-  let index = 2;
-  const name = tokens[index++];
-  if (!isIdentifier(name) || !isWord(tokens[index++], "on"))
+function readPolicyTarget(tokens, start = 2) {
+  const name = tokens[start];
+  if (!isIdentifier(name) || !isWord(tokens[start + 1], "on"))
     fail("malformed CREATE POLICY name or ON clause");
-  const table = readTable(tokens, index);
-  index = table.next;
+  return { name, table: readTable(tokens, start + 2) };
+}
+
+function parsePolicy(source, tokens, review, diagnostic) {
+  const { name, table } = readPolicyTarget(tokens);
+  if (diagnostic !== undefined) {
+    diagnostic.policy = name.value;
+    diagnostic.table = table.key;
+  }
+  let index = table.next;
   let mode = "PERMISSIVE";
   let command = "ALL";
   let roles = ["public"];
@@ -170,13 +232,14 @@ function parsePolicy(source, tokens, review) {
       fail("invalid policy FOR command");
     index += 2;
   }
+  if (diagnostic !== undefined) diagnostic.command = command;
   if (isWord(tokens[index], "to")) {
     roles = [];
     do {
       index += 1;
       const role = tokens[index++];
       if (!isIdentifier(role) || !["public", "anon", "authenticated"].includes(role.value))
-        fail(`unsupported policy role ${role?.raw ?? "<missing>"}`);
+        fail(`unsupported policy role ${role?.raw ?? "<missing>"}`, "unsupported_policy_role");
       roles.push(role.value);
     } while (isSymbol(tokens[index], ","));
   }
@@ -273,6 +336,7 @@ function convertExpression(source, review) {
           if (review.userIdMapping !== "uuid")
             fail(
               "auth.uid() requires explicit userIdMapping: uuid after reviewing identity preservation",
+              "uuid_identity_review_required",
             );
           sql = "ohmyhost.user_id()::uuid";
         } else {
@@ -294,6 +358,7 @@ function convertExpression(source, review) {
           if (target === undefined)
             fail(
               `missing reviewed server-trusted claim mapping for auth.jwt() path ${path.join(".") || "<whole JWT>"}`,
+              "claim_mapping_required",
             );
           if (path.length === 1 && path[0] === "role") {
             if (!textResult) fail("derived JWT role requires a literal text role comparison");
@@ -314,8 +379,9 @@ function convertExpression(source, review) {
         continue;
       }
       if (["auth", "storage", "ohmyhost"].includes(token.value))
-        fail(`unsupported policy dependency ${qualified}`);
-      if (isSymbol(tokens[index + 3], "(")) fail(`unsupported custom policy function ${qualified}`);
+        fail(`unsupported policy dependency ${qualified}`, "unsupported_policy_dependency");
+      if (isSymbol(tokens[index + 3], "("))
+        fail(`unsupported custom policy function ${qualified}`, "unsupported_policy_function");
     }
     if (token.kind === "dollar" || token.kind === "escaped-string")
       fail("unsupported policy literal form; use ordinary quoted literals");
@@ -346,7 +412,7 @@ function convertExpression(source, review) {
           "on",
         ].includes(token.value)
       )
-        fail(`unsupported custom policy function ${token.raw}`);
+        fail(`unsupported custom policy function ${token.raw}`, "unsupported_policy_function");
     }
     if (
       isWord(token, "current_user") ||
@@ -643,6 +709,13 @@ export function lexStatements(source) {
   return statements;
 }
 
-function fail(message) {
-  throw new Error(`Portable baseline generation failed: ${message}`);
+class PortableRlsError extends Error {
+  constructor(message, code) {
+    super(`Portable baseline generation failed: ${message}`);
+    this.code = code;
+  }
+}
+
+function fail(message, code = "unsupported_policy") {
+  throw new PortableRlsError(message, code);
 }

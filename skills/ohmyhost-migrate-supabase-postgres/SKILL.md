@@ -13,7 +13,7 @@ Run `ohmyhost init --dry-run --json` in the chosen repository. Inventory actual 
 
 Explain what can remain external, what needs application changes, and any unsupported runtime capability. Do not replace the customer's auth provider or discard data without their decision. A database dump does not migrate every Supabase service.
 
-Read [provider contracts](references/provider-contracts.md) only for the affected capabilities. The [portable baseline helper](scripts/create-portable-baseline.mjs) can prepare a reviewed migration baseline; inspect its documented input/output and the selected migration files before running it. Its `--input` must be a plain-SQL `pg_dump` of the reviewed public schema; the helper keeps the dump's order, which is trusted, so the dump must already list each function before the objects that call it. It does not grant database authority or prove that application data has moved.
+Read [provider contracts](references/provider-contracts.md) only for the affected capabilities. The [portable baseline helper](scripts/create-portable-baseline.mjs) can prepare a reviewed migration baseline; inspect its documented input/output and the selected migration files before running it. Its `--input` must be a plain-SQL `pg_dump` of the reviewed public schema; the helper keeps the dump's order, which is trusted, so the dump must already list each function before the objects that call it. It does not grant database authority or prove that application data has moved. For a policy-preserving import, run the helper with `--report-only` and the reviewed RLS options first. Resolve blockers before generating SQL or starting a deployment.
 
 ## Convert the selected capabilities
 

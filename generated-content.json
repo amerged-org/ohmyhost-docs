@@ -1,7 +1,7 @@
 {
-  "source_commit": "a288fb1be640d4d8ebe6a3a8c08fbfb547bb6278",
+  "source_commit": "c4372eb6052b1600d09f7f2072b0d6203d135829",
   "source_dirty": false,
-  "release": "0.1.69",
+  "release": "0.1.70",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -489,7 +489,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/SKILL.md",
-      "sha256": "ea6344ba5ae69304c998e54ecf08eea1da32b6b4c4ca4a5a32b2f9aaa8ea816d"
+      "sha256": "eef9683b197f2a3df3031076897ed5806f8befe402c1c99a777adbb89f451f3b"
     },
     {
       "path": "skills/ohmyhost-get-started/references/harness-setup.md",
@@ -501,23 +501,23 @@
     },
     {
       "path": "skills/ohmyhost-manage-database/SKILL.md",
-      "sha256": "99c017148b433a121c7cab1bd097732d42fadd71879d94dca26b96a9d07f5929"
+      "sha256": "41a910c40e2f87e18a562c19e5c29587daa8a458d371934b43e1c30435479af4"
     },
     {
       "path": "skills/ohmyhost-migrate-supabase-postgres/SKILL.md",
-      "sha256": "41e04278105351fc4907b2b42cabb55e9ea7ba349781098e1d2c536d27dee71d"
+      "sha256": "91c2438efd7f3262a0287345d72b953836665c7cfb501e64c5fada4eade04429"
     },
     {
       "path": "skills/ohmyhost-migrate-supabase-postgres/references/provider-contracts.md",
-      "sha256": "df2f97b9bd542e1f22604df01697f04c73ef42de4aa25e2c96213133b63a7327"
+      "sha256": "251234c0e5da3807e8f140096dbe7508de6a0a9c77e8c80f3f5180ddc6827dd3"
     },
     {
       "path": "skills/ohmyhost-migrate-supabase-postgres/scripts/create-portable-baseline.mjs",
-      "sha256": "00e9ab5fdff5ab1c2672f268e05b50772228c00148750f3618e9e3479e3fce1f"
+      "sha256": "b3576c36edb4cf3c4832af3feb0cfdb93bc97f7d22cafaa7ae11dc9bcfbd705d"
     },
     {
       "path": "skills/ohmyhost-migrate-supabase-postgres/scripts/portable-rls.mjs",
-      "sha256": "080304363e981dba3fb80798c75ebe50d27543ac5b3056969a7b4be026f65b7d"
+      "sha256": "567d7a40e576a25a918df7aeeab6686ae1bbd1695c47e404995022d079e3a3a8"
     },
     {
       "path": "skills/ohmyhost-troubleshoot-deployment/SKILL.md",
@@ -545,11 +545,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "acfc170bae6d117c738a40b37df52f66595fcb510f20ead5603db4fbead1c521"
+      "sha256": "d5ed33ef51991c97b99fd7214ca4bb3a5aee1b651a7e17b25b8a9772e35f021e"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "5d44d2f64050bc9f02b02d5266d9faae24c9ffffa537d860adde9bc194e1a4b9"
+      "sha256": "cbcf8dc3b6bc9534537d1e4dd851282674b56ae180f0f4527bb72c49c49d0977"
     },
     {
       "path": "snippets/skill-catalog.mdx",
