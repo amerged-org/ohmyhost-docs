@@ -304,6 +304,92 @@ paths:
         "429": { $ref: "#/components/responses/Problem" }
         "503": { $ref: "#/components/responses/Problem" }
       x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/organizations/{organization_id}/connections/action-bindings:
+    post:
+      operationId: createMakeActionBinding
+      x-ohmyhost-mcp:
+        disposition: excluded
+        reason: The response contains an action capability secret and must not be exposed through MCP.
+      summary: Bind one Make action to an imported connection
+      description: Requires an authenticated human with permission to manage integrations. Give the returned execution key to the owner or agent through a secure setup flow. It grants access to this one action and must be kept secret; it is not a Make token or a generic process capability.
+      parameters:
+        - $ref: "#/components/parameters/RequestId"
+        - name: organization_id
+          in: path
+          required: true
+          schema: { $ref: "#/components/schemas/Ulid" }
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MakeActionBindingRequest" }
+      responses:
+        "201":
+          description: Created action binding and its secret execution key.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MakeActionBinding" }
+        "400": { $ref: "#/components/responses/Problem" }
+        "401": { $ref: "#/components/responses/Problem" }
+        "404": { $ref: "#/components/responses/ResourceNotFound" }
+        "409": { $ref: "#/components/responses/Problem" }
+        "429": { $ref: "#/components/responses/Problem" }
+        "503": { $ref: "#/components/responses/Problem" }
+      x-ohmyhost-resource-disclosure: indistinguishable-not-found
+  /v1/make/actions/run:
+    post:
+      operationId: runMakeAction
+      x-ohmyhost-mcp:
+        disposition: excluded
+        reason: The operation uses an action capability secret that must not be exposed through MCP.
+      summary: Run a bound Make action
+      description: Uses the action execution key as its bearer credential. Supply a stable idempotency key for each logical invocation. An uncertain result may mean that the action was dispatched; do not create a new invocation solely to retry it.
+      security:
+        - MakeActionBearer: []
+      parameters:
+        - $ref: "#/components/parameters/IdempotencyKeyToken"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: "#/components/schemas/MakeActionRunRequest" }
+      responses:
+        "200":
+          description: The action completed, or the invocation had already completed.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MakeActionRunSuccess" }
+        "400":
+          description: Invalid request.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MakeActionInvalidRequest" }
+        "403":
+          description: Execution denied or reconnection required.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MakeActionDenied" }
+        "409":
+          description: Idempotency conflict or execution still running.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MakeActionConflict" }
+        "429":
+          description: Rate limited.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MakeActionRateLimited" }
+        "502":
+          description: Dispatch outcome is uncertain.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MakeActionUncertain" }
+        "503":
+          description: Execution service unavailable.
+          content:
+            application/json:
+              schema: { $ref: "#/components/schemas/MakeActionUnavailable" }
   /v1/organizations/{organization_id}/connections/{grant_id}/imports:
     post:
       operationId: importConnection
@@ -3258,7 +3344,7 @@ paths:
         adapter: generated
         tool:
           name: project_export_get
-          title: Read export progress and its verified 24-hour download capability
+          title: Read encrypted database export status
           description:
             "Owner-only: read the original encrypted SQL ZIP export's progress and error, never its
             password or a download URL. While queued or running, follow next_poll_after_seconds and poll
@@ -3270,7 +3356,7 @@ paths:
             destructiveHint: false
             idempotentHint: true
             openWorldHint: false
-      summary: Read export progress and its verified 24-hour download capability
+      summary: Read encrypted database export status
       description: Owner-only, including at zero credits. Poll queued/running jobs after
         next_poll_after_seconds. A verified SQL ZIP is retained seven days. This read never signs a
         download URL, so download_url and download_expires_at are always null here. Request a link with
@@ -3285,7 +3371,7 @@ paths:
           schema: { $ref: "#/components/schemas/Ulid" }
       responses:
         "200":
-          description: Current export state and optional verified SQL ZIP download.
+          description: Current export status and archive metadata. Download fields are always null.
           content:
             application/json:
               schema: { $ref: "#/components/schemas/ProjectExport" }
@@ -3938,13 +4024,14 @@ paths:
           name: project_dev_access_mode_set
           title: Select public or protected Dev access
           description:
-            "Owner only: choose public Dev (no platform token) or protected Dev (share link
-            required). A switch takes effect on the next request; switching back creates a new link."
+            "Owner only: anyone with the URL can reach public Dev without platform authentication.
+            Switching Dev back to protected issues a fresh share link and invalidates earlier
+            sessions. The change takes effect on the next request."
           annotations:
             readOnlyHint: false
             destructiveHint: true
             idempotentHint: true
-            openWorldHint: false
+            openWorldHint: true
       summary: Select public or protected Dev access
       description: Owner-only. Public Dev needs no platform access link; switching back to protected
         creates a fresh link and invalidates earlier sessions.
@@ -4975,7 +5062,7 @@ paths:
             readOnlyHint: false
             destructiveHint: true
             idempotentHint: true
-            openWorldHint: false
+            openWorldHint: true
       summary: Move a project to a chosen address
       description:
         Starts a durable operation that re-publishes the project's Dev and Prod gateways at the
@@ -8536,6 +8623,10 @@ components:
       description: WorkOS access JWT or a user-owned WorkOS API key. User keys are bound to one
         organization and restricted to their enabled product permissions. Session-only onboarding
         and session revocation require an interactive access JWT. No cookie session is assumed.
+    MakeActionBearer:
+      type: http
+      scheme: bearer
+      description: A secret execution key scoped to one bound Make action, prefixed omh_make_v1.
   schemas:
     Preview:
       type: object
@@ -8572,6 +8663,98 @@ components:
         provider: { const: make }
         project_id: { $ref: "#/components/schemas/Ulid" }
         environment_id: { $ref: "#/components/schemas/Ulid" }
+    MakeActionBindingRequest:
+      type: object
+      additionalProperties: false
+      required: [project_id, environment_id, import_id, action]
+      properties:
+        project_id: { $ref: "#/components/schemas/Ulid" }
+        environment_id: { $ref: "#/components/schemas/Ulid" }
+        import_id: { $ref: "#/components/schemas/Ulid" }
+        action:
+          oneOf:
+            - type: object
+              additionalProperties: false
+              required: [kind, app_name, app_version, endpoint_name]
+              properties:
+                kind: { const: endpoint }
+                app_name: { type: string, pattern: "^[A-Za-z0-9_-]{1,128}$" }
+                app_version: { type: integer, minimum: 1, maximum: 9007199254740991 }
+                endpoint_name: { type: string, pattern: "^[A-Za-z0-9_-]{1,128}$" }
+            - type: object
+              additionalProperties: false
+              required: [kind, scenario_id, method, path_prefix]
+              properties:
+                kind: { const: scenario }
+                scenario_id: { type: integer, minimum: 1, maximum: 9007199254740991 }
+                method: { type: string, enum: [GET, POST, PUT, PATCH, DELETE] }
+                path_prefix:
+                  type: string
+                  minLength: 1
+                  maxLength: 2048
+                  description: Origin-relative path prefix the owner permits on the bound Make API Shell.
+    MakeActionBinding:
+      type: object
+      additionalProperties: false
+      required: [binding_id, execution_key]
+      properties:
+        binding_id: { $ref: "#/components/schemas/Ulid" }
+        execution_key: { type: string, description: Secret capability for this action. }
+    MakeActionRunRequest:
+      type: object
+      additionalProperties: false
+      required: [input]
+      properties:
+        input: { type: object, additionalProperties: true }
+    MakeActionRunSuccess:
+      oneOf:
+        - type: object
+          additionalProperties: false
+          required: [state, output]
+          properties:
+            state: { const: completed }
+            output: { description: Bounded JSON response envelope returned by Make. }
+        - type: object
+          additionalProperties: false
+          required: [state]
+          properties:
+            state: { const: already_completed }
+    MakeActionInvalidRequest:
+      type: object
+      additionalProperties: false
+      required: [state]
+      properties:
+        state: { const: invalid_request }
+    MakeActionDenied:
+      type: object
+      additionalProperties: false
+      required: [state]
+      properties:
+        state: { enum: [denied, reconnect_required] }
+    MakeActionConflict:
+      type: object
+      additionalProperties: false
+      required: [state]
+      properties:
+        state: { enum: [conflict, running] }
+    MakeActionRateLimited:
+      type: object
+      additionalProperties: false
+      required: [state]
+      properties:
+        state: { const: rate_limited }
+    MakeActionUncertain:
+      type: object
+      additionalProperties: false
+      required: [state]
+      properties:
+        state: { const: uncertain }
+    MakeActionUnavailable:
+      type: object
+      additionalProperties: false
+      required: [state]
+      properties:
+        state: { const: unavailable }
     ConnectionImportRequest:
       type: object
       additionalProperties: false

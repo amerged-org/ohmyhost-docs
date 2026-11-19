@@ -1,4 +1,10 @@
 {
+  "redirects": [
+    {
+      "source": "/api-reference/read-export-progress-and-its-verified-24-hour-download-capability",
+      "destination": "/api-reference/read-encrypted-database-export-status"
+    }
+  ],
   "$schema": "https://mintlify.com/docs.json",
   "theme": "mint",
   "name": "ohmyho.st",

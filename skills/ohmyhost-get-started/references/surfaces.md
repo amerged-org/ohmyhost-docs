@@ -450,7 +450,7 @@ account rights and credential restrictions are checked by the canonical API on e
 - `project_data_change` — Owner only: execute the exact reviewed project_data_plan after explicit customer confirmation.
 - `project_data_plan` — Owner only: plan a Dev/Prod data assignment change and review the data, files, deployments and database logins it keeps or removes.
 - `project_dev_access_create` — Use tools/list for project_dev_access_create's registered MCP description and exact input schema.
-- `project_dev_access_mode_set` — Owner only: choose public Dev (no platform token) or protected Dev (share link required).
+- `project_dev_access_mode_set` — Owner only: anyone with the URL can reach public Dev without platform authentication.
 - `project_dev_share_link_get` — Use tools/list for project_dev_share_link_get's registered MCP description and exact input schema.
 - `project_dev_share_link_revoke` — Owner only: revoke the persistent Dev link and active sessions immediately without changing the Dev access mode.
 - `project_dev_share_link_rotate` — Owner only: replace the persistent Dev link and immediately revoke old links and sessions.
@@ -497,7 +497,7 @@ account rights and credential restrictions are checked by the canonical API on e
 
 ## Master Tool Contract and API reference
 
-Master Tool Contract SHA-256: `169544a84c5bf8e63c5261d2aa895adccfd1a34807db4e57d7e94fdd8817ba09`.
+Master Tool Contract SHA-256: `16c2ec672b854abcb397067464e93b6e38c85e00d0b6ba806dc0037d60499d3a`.
 
 The complete public OpenAPI contract is at <https://ohmyho.st/api> and mirrored per release.
 Its MCP metadata accounts for every API operation: a named tool, a protected handoff, an
