@@ -37,7 +37,7 @@ For example, tell your agent:
 
 Your agent reuses your active workspace grant. It uses `integration_connection_discover` to list Make organizations, then teams within each relevant organization, then connection names and IDs in those teams. It can use an organization or team you already named to narrow the search. If it finds one clear match, it can identify the connection right away. When several match, it can show their names and teams so you can choose. If the names do not identify the integration, tell the agent the connection name you see in Make.
 
-Discovery works before you have a project. It reads connection metadata. Make action execution described below is a candidate and is not yet available on the hosted service.
+Discovery works before you have a project. It reads connection metadata. Running a Make action needs an imported connection and a binding, described below.
 
 ```sh
 ohmyhost connection list \
@@ -79,7 +79,7 @@ ohmyhost connection import \
 
 An older Make grant continues to support discovery. Renew your Make authorization to grant the additional permissions for execution.
 
-After importing a connection into the intended project and environment, a workspace owner can bind a published Make Endpoint using `POST /v1/organizations/{organization_id}/connections/action-bindings`. The selected connection must match the Endpoint's requirements, including the app account permissions. Make runs the action confidentially. Look up the app, version, Endpoint name and input schema in the SDK reference. [Make Endpoints SDK](https://developers.make.com/make-sdk/make-endpoints-sdk)
+After importing a connection into the intended project and environment, a workspace owner can bind a published Make Endpoint using `POST /v1/organizations/{organization_id}/connections/action-bindings`. The selected connection must match the Endpoint's requirements, including the app account permissions. Make runs the action confidentially. The binding flow is the same for each Make app. Use the [Make Endpoints SDK](https://developers.make.com/make-sdk/make-endpoints-sdk) definitions to discover the exact app, version, Endpoint name and input schema. Then bind with `createMakeActionBinding` in the generated ohmyhost SDK or the REST call below, and make the server-side call with the SDK's `runMakeAction` or REST. Use the CLI or MCP for discovery and import, and the SDK or REST for action binding and execution.
 
 For example, bind a published Endpoint using an owner API token, IDs from the imported connection and its exact app, version and Endpoint names:
 
@@ -116,7 +116,9 @@ const result = await response.json();
 
 Use the Development platform origin when appropriate. The request rejects redirects so the action key stays on that origin. Check `response.ok` and `result.state` before using a result. Reusing the same key for the same intent preserves the existing execution outcome. A `502` with `uncertain` needs investigation before another invocation. [Cloudflare Workers request options](https://developers.cloudflare.com/workers/runtime-apis/request/)
 
-When a direct Endpoint definitely did not dispatch, an application can opt into the local `make-api-shell-connection-workflow` fallback, including for file cases. The owner binds an active on-demand, three-module app-specific API Shell configured with the exact imported Make connection. Its action identifies `scenario_id`, `method` and an origin-relative `path_prefix`. Runtime input uses the shell fields `path`, `method`, `header`, `qs` and `body` within that pinned authority. Do not fall back after an uncertain write outcome. Arbitrary scenarios, routes and URLs are not supported.
+When a direct Endpoint definitely did not dispatch, an application can opt into a Make API Shell fallback, including for file cases. Use the `make-api-shell-connection-workflow` skill to set up the shell. The owner binds an active on-demand, three-module app-specific API Shell configured with the exact imported Make connection. Its action identifies `scenario_id`, `method` and an origin-relative `path_prefix`. Runtime input uses the shell fields `path`, `method`, `header`, `qs` and `body` within that pinned authority. Do not fall back after an uncertain write outcome. Arbitrary scenarios, routes and URLs are not supported.
+
+Download the existing Make skill, [Make API Shell + Connection Workflow](https://raw.githubusercontent.com/sebmer-com/make-skills/2b053dbd2d4892e17a485e9999a2dd9745443da7/dist/make-api-shell-connection-workflow.zip) (pinned fork [source](https://github.com/sebmer-com/make-skills/tree/2b053dbd2d4892e17a485e9999a2dd9745443da7/skills/make-api-shell-connection-workflow)). If you are helping a user in chat, share this ZIP link so they can install the skill in a compatible agent or upload it where skill ZIPs are supported.
 
 Add the exact applicable platform origin, `https://app.ohmyho.st` or `https://dev.app.ohmyho.st`, to the application's `runtime.egress.allow` in its manifest and deploy the change. Use the API for binding and execution. Your agent can continue to discover and import connections through MCP.
 
