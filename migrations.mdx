@@ -15,6 +15,8 @@ Source planning checks canonical filenames, not complete SQL admission. Run init
 
 Deployment logs can also show a `DATABASE_MIGRATION_FAILED` item with a catalog reason. Fix the named cause and plan the new commit; never reset to repair a failed migration.
 
+Declare `pg_trgm`, `citext` or `ltree` in a pending migration with `CREATE EXTENSION IF NOT EXISTS <name> WITH SCHEMA extensions`. Create the `extensions` schema first if it does not exist. These extensions are opt-in. Test the types and indexes you use with the scoped migration and application roles.
+
 ## Make an additive change
 
 Add a nullable field, deploy code supporting both shapes, then backfill with authorized database writes of at most 1,000 rows or bounded application work, outside migrations. Dropping/renaming columns and tightening existing constraints are unsupported; leave retired columns unused and enforce new rules in application code. Commit each versioned migration with the application code and matching lockfile.
