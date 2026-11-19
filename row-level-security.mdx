@@ -151,6 +151,8 @@ CLI/MCP queries, writes and temporary SQL logins do not sign in as an applicatio
 
 Use the migration Skill's [reviewed RLS-preserving conversion mode](https://ohmyho.st/skills/ohmyhost-migrate-supabase-postgres/references/provider-contracts.md#preserving-backend-rls). Select every protected table and review the identity and claim mappings. UUID conversion requires confirmation that the backend preserves those user IDs. Claims must map to values supplied by verified server authority.
 
+Run the baseline helper with `--report-only` and the reviewed RLS options before you generate SQL. The private report lists preserved, translated and blocked policies and the source extensions without writing migration files. Resolve each blocker before generating a baseline.
+
 The converter preserves supported policy commands, permissive/restrictive behavior and role applicability. Unsupported functions, unknown roles, service-role assumptions or missing claim mappings stop conversion with an error. Do not remove a policy to make conversion pass, and do not rewrite already-applied migrations. Compare allowed and denied outcomes for the original and converted policies before adopting the baseline.
 
 This feature provides backend PostgreSQL row authorization. It does not provide Supabase's public Data API, direct browser SQL, Storage RLS or Realtime authorization. Those integrations require separate product support and verification.
