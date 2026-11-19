@@ -75,11 +75,11 @@ ohmyhost connection import \
   --profile-name PROFILE_NAME --json
 ```
 
-## Run a Make action (planned)
+## Run a Make action
 
-This execution flow is being prepared and has not yet been released or accepted on the hosted service. An older Make grant continues to support discovery; using execution requires explicitly renewing your Make authorization to grant the additional permissions.
+An older Make grant continues to support discovery. Renew your Make authorization to grant the additional permissions for execution.
 
-After importing a connection into the intended project and environment, an owner can bind an exact published Make Endpoint using `POST /v1/organizations/{organization_id}/connections/action-bindings`. The Endpoint must be compatible with the selected Make team connection and runs confidentially. Use direct Endpoints first. The initial Development proof targets Outlook through the published Make Endpoints SDK definitions.
+After importing a connection into the intended project and environment, a workspace owner can bind a published Make Endpoint using `POST /v1/organizations/{organization_id}/connections/action-bindings`. The selected connection must match the Endpoint's requirements, including the app account permissions. Make runs the action confidentially. Look up the app, version, Endpoint name and input schema in the SDK reference. [Make Endpoints SDK](https://developers.make.com/make-sdk/make-endpoints-sdk)
 
 For example, bind a published Endpoint using an owner API token, IDs from the imported connection and its exact app, version and Endpoint names:
 
@@ -118,7 +118,7 @@ Use the Development platform origin when appropriate. The request rejects redire
 
 When a direct Endpoint definitely did not dispatch, an application can opt into the local `make-api-shell-connection-workflow` fallback, including for file cases. The owner binds an active on-demand, three-module app-specific API Shell configured with the exact imported Make connection. Its action identifies `scenario_id`, `method` and an origin-relative `path_prefix`. Runtime input uses the shell fields `path`, `method`, `header`, `qs` and `body` within that pinned authority. Do not fall back after an uncertain write outcome. Arbitrary scenarios, routes and URLs are not supported.
 
-Add the exact applicable platform origin, `https://app.ohmyho.st` or `https://dev.app.ohmyho.st`, to the application's `runtime.egress.allow` in its manifest and deploy the change. These binding and runtime operations are excluded from remote MCP; use the API for this flow when it becomes available.
+Add the exact applicable platform origin, `https://app.ohmyho.st` or `https://dev.app.ohmyho.st`, to the application's `runtime.egress.allow` in its manifest and deploy the change. Use the API for binding and execution. Your agent can continue to discover and import connections through MCP.
 
 ## Older clients
 
