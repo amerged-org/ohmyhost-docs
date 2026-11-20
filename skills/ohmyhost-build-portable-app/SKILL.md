@@ -21,6 +21,8 @@ Use `preview_open` for the selected project's Dev or Prod environment to obtain 
 
 Resolve hosted bindings and trusted configuration from the framework's actual request context. A localhost-only test runtime or a successful health endpoint does not establish production login, tenant setup or background processing. Follow the runtime reference for first-user bootstrap, private uploads and bounded scheduled work when the application needs them.
 
+See [amerged-org/ohmyhost](https://github.com/amerged-org/ohmyhost) for the ohmyho.st hosting platform (OMH) and [amerged-org/cloudflare-postgres](https://github.com/amerged-org/cloudflare-postgres) for its PostgreSQL infrastructure (PGCF).
+
 For first account setup, use **ohmyhost-get-started**. For publishing, use **ohmyhost-deploy**;
 use **ohmyhost-deploy-github** only for the selected GitHub source route. [The CLI reference](references/cli-deploy.md) supplies detailed commands when a local checkout is available. For a failed operation, use **ohmyhost-troubleshoot-deployment** and retain its original ID.
 

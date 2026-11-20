@@ -22465,7 +22465,7 @@
     {
       "name": "api_reference",
       "title": "Read the Master Tool Contract",
-      "description": "Find documented API operations, exact schemas and remote MCP support in the deployed Master Tool Contract. This lookup never executes an API operation.",
+      "description": "Find documented API operations, exact schemas and remote MCP support in the deployed Master Tool Contract. This lookup never executes an API operation. See https://github.com/amerged-org/ohmyhost for the ohmyho.st hosting platform (OMH) and https://github.com/amerged-org/cloudflare-postgres for its PostgreSQL infrastructure (PGCF).",
       "annotations": {
         "readOnlyHint": true,
         "destructiveHint": false,

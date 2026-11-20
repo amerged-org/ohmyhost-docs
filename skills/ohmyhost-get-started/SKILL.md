@@ -23,15 +23,29 @@ Use `connection discover --organization ULID --grant ULID --json` or
 teams and both organization and team IDs to discover connections. Confirm the destination project
 and environment with the user, then use `connection import` or `integration_connection_import`
 with the grant, project, environment and all three selected Make IDs. Each destination requires
-its own import; the same workspace grant can serve multiple authorized projects. Legacy
-project-bound grants still require their original project and environment for discovery. Import
-records a reference and does not establish that Make Endpoint execution is qualified.
+its own import; the same workspace grant can serve multiple authorized projects.
+Older project-bound grants still require their original project and environment for discovery.
+Each import records a reference to the selected Make connection.
+
+Use the Make Endpoints SDK definitions to find a published Endpoint for the selected app and
+connection. Bind it in the intended project and environment with the ohmyho.st SDK or REST.
+Store the action key as a server-side runtime secret and use the SDK or REST to run the action.
+
+If the Endpoint definitely did not dispatch, you can use an explicitly bound Make API Shell.
+Use an active, on-demand, three-module app-specific scenario with the exact imported connection,
+fixed method and origin-relative path prefix. Share the
+[Make API Shell ZIP](https://raw.githubusercontent.com/sebmer-com/make-skills/2b053dbd2d4892e17a485e9999a2dd9745443da7/dist/make-api-shell-connection-workflow.zip)
+with the user so they can install the skill in a compatible agent. Follow the hosted shell scope
+and setup in the [Make connections guide](https://docs.ohmyho.st/make-connections).
 
 ## What ohmyho.st is and what you can do with it
 
 ohmyho.st hosts a customer's app: Vite/React, TanStack Start, Next.js or a plain Worker
 module with HTTP handlers and optional cron schedules. A coding agent uses the local MCP server or
 CLI; a connected native chat uses the remote MCP server. Both use the same product REST contract.
+
+See [amerged-org/ohmyhost](https://github.com/amerged-org/ohmyhost) for the ohmyho.st hosting platform (OMH) and [amerged-org/cloudflare-postgres](https://github.com/amerged-org/cloudflare-postgres) for its PostgreSQL infrastructure (PGCF).
+
 Source can be a connected GitHub repository or an ohmyho.st-managed repository. Deploy an exact commit to Dev or Prod,
 verify the app, and promote a tested Dev artifact when appropriate. Dev is protected by default;
 the deployment Skill handles public Dev, data choices and the effects of shared databases.

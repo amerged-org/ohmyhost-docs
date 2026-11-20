@@ -338,7 +338,7 @@ These named tools belong to the shared remote endpoint used by the OpenAI and Cl
 The Claude package's four focused workflows do not restrict this server catalog. Current
 account rights and credential restrictions are checked by the canonical API on every call.
 
-- `api_reference` — Find documented API operations, exact schemas and remote MCP support in the deployed Master Tool Contract. This lookup never executes an API operation.
+- `api_reference` — Find documented API operations, exact schemas and remote MCP support in the deployed Master Tool Contract. This lookup never executes an API operation. See https://github.com/amerged-org/ohmyhost for the ohmyho.st hosting platform (OMH) and https://github.com/amerged-org/cloudflare-postgres for its PostgreSQL infrastructure (PGCF).
 - `application_domain_identity_authorization_revoke` — Use tools/list for application_domain_identity_authorization_revoke's registered MCP description and exact input schema.
 - `application_domain_identity_authorization_status` — Use tools/list for application_domain_identity_authorization_status's registered MCP description and exact input schema.
 - `application_domain_identity_authorize` — Use tools/list for application_domain_identity_authorize's registered MCP description and exact input schema.
@@ -497,7 +497,7 @@ account rights and credential restrictions are checked by the canonical API on e
 
 ## Master Tool Contract and API reference
 
-Master Tool Contract SHA-256: `16c2ec672b854abcb397067464e93b6e38c85e00d0b6ba806dc0037d60499d3a`.
+Master Tool Contract SHA-256: `490aa3b1c4d68906162af3f8d000fa37e93d0a52ef29fe52f57a83cbc5209294`.
 
 The complete public OpenAPI contract is at <https://ohmyho.st/api> and mirrored per release.
 Its MCP metadata accounts for every API operation: a named tool, a protected handoff, an
