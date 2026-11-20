@@ -16,7 +16,7 @@ ohmyhost source status --project "$PROJECT_ID" --json
 
 `source inspect` reads local checkout and sanitized remote information without signing in or uploading files. `source status` requests the authenticated project's full binding. In MCP, use `source_get` with `include_binding: true` before using source connection or generation guards; REST uses `GET /v1/projects/{project_id}/source?include_binding=true`. Default GitHub reads retain the existing status view; managed reads always include their full binding. The saved binding takes precedence over a local Git remote. A Git directory alone does not imply GitHub.
 
-For an unbound checkout, an explicit source choice already answers the question. Otherwise use its selected GitHub repository, or ask once whether to keep versions with ohmyho.st or set up GitHub. A new application developed entirely in a connected chat uses managed source. Keep the selected account, project, region, framework and data mode when continuing work.
+An unbound checkout is published as it is, with or without a GitHub remote; an explicit request for GitHub is followed instead, and GitHub is otherwise the later step for deployment on every push. A new application developed entirely in a connected chat uses managed source. Keep the selected account, project, region, framework and data mode when continuing work.
 
 Use [GitHub setup](/github) for a GitHub source. Commit and push changes there before planning their full commit SHA. Managed source needs no GitHub account or GitHub push.
 
