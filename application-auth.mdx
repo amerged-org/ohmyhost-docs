@@ -53,6 +53,12 @@ The public `@amerged/ohmyhost-auth` helper accepts an optional `email.send` call
 
 The optional [Kysely dialect](/database#optional-kysely-dialect) implements the leased transaction protocol. For application-owned Better Auth `1.7.7`, use its own migrated schema, normally `public`: `database: { db: db.withSchema("public"), type: "postgres", transaction: true }` with that Kysely instance. This is separate from the managed auth-lane bridge; `auth.provider: none` provisions no auth tables. Library transaction behavior does not establish hosted signup or mail delivery; verify those application flows. Do not assume an unverified Drizzle or pg-proxy adapter supplies equivalent transactions.
 
+### App-owned password hashing
+
+When the app hashes passwords in a Worker, verify a real registration and subsequent sign-in on the deployed environment. In ohmyho.st hosted tests, Workers WebCrypto PBKDF2-HMAC-SHA-256 rejected 250,000 and 260,000 iterations. Registration and sign-in succeeded with 100,000. These results describe compatibility on the tested Workers. Workerd checks a runtime-specific iteration limit. [Cloudflare’s implementation](https://github.com/cloudflare/workerd/blob/3e1baad7d6f7a71b3e8e1bb23d34a6b8107559b9/src/workerd/api/crypto/pbkdf2.c%2B%2B#L66)
+
+Choose password-hashing parameters according to your security policy. Keep the algorithm version, salt and work factor with each stored hash and use those parameters to verify existing accounts. If your policy or existing hashes require a higher work factor than the deployed Worker supports, use a maintained authentication implementation on a compatible runtime.
+
 ## Set up Google or GitHub sign-in
 
 This example uses an application-owned Better Auth server handler with `auth.provider: none`. If you already use WorkOS or another provider, configure the social connection there and register the exact callback URL it supplies.
