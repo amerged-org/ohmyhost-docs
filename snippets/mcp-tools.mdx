@@ -97,6 +97,8 @@
 | `integration_connection_discover` | `organization_id`, `grant_id` | Read |
 | `integration_connection_import` | `organization_id`, `grant_id`, `project_id`, `environment_id`, `provider_organization_id`, `team_id`, `connection_id`, `idempotency_key` | Change or prepare a change |
 | `integration_connection_disconnect` | `organization_id`, `grant_id`, `idempotency_key`, `confirmed` | Change or prepare a change |
+| `integration_credential_request_create` | `organization_id`, `grant_id`, `provider_organization_id`, `team_id`, `idempotency_key`, `selections` | Change or prepare a change |
+| `integration_credential_request_status` | `organization_id`, `grant_id`, `request_id` | Read |
 | `github_connect` | `organization_id`, `idempotency_key` | Change or prepare a change |
 | `github_status` | `organization_id` | Read |
 | `github_disconnect` | `organization_id`, `confirmed` | Change or prepare a change |
