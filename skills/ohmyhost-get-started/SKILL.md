@@ -27,6 +27,18 @@ its own import; the same workspace grant can serve multiple authorized projects.
 Older project-bound grants still require their original project and environment for discovery.
 Each import records a reference to the selected Make connection.
 
+If the owner needs a new connection or key for a Make standard app, use
+`integration_credential_request_create` with the workspace grant, verified Make
+organization and team, and concrete module IDs or published Endpoint names for
+the app version. Ask for the Make zone and team only when you cannot identify
+them from the request and discovery. Make derives the credentials and scopes.
+Give the requesting owner the private Make authorization link returned by the
+tool. Use `integration_credential_request_status` with the returned request ID
+to check authorization. Discover the resulting connection before importing it.
+Retry the same selections with the same idempotency key. Verify an uncertain
+result before starting another request. Reconnect requires the owner's explicit
+authorization to disconnect an existing grant.
+
 Use the Make Endpoints SDK definitions to find a published Endpoint for the selected app and
 connection. Bind it in the intended project and environment with the ohmyho.st SDK or REST.
 Store the action key as a server-side runtime secret and use the SDK or REST to run the action.

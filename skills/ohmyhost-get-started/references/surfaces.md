@@ -18,6 +18,8 @@ reference describes server support; a host may still be checking a new or change
 - `ohmyhost connection discover` — ohmyhost connection discover --organization ULID [--project ULID --environment ULID] --grant ULID [--provider-organization ID] [--team ID] --json
 - `ohmyhost connection import` — ohmyhost connection import --organization ULID --grant ULID --project ULID --environment ULID --provider-organization ID --team ID --connection ID --idempotency-key KEY --json
 - `ohmyhost connection disconnect` — ohmyhost connection disconnect --organization ULID --grant ULID --idempotency-key KEY --yes --json
+- `ohmyhost connection credential-request-create` — ohmyhost connection credential-request-create --organization ULID --grant ULID --provider-organization ID --team ID --selections JSON --idempotency-key KEY --json
+- `ohmyhost connection credential-request-status` — ohmyhost connection credential-request-status --organization ULID --grant ULID --request HASH --json
 - `ohmyhost github connect` — ohmyhost github connect --organization ULID --idempotency-key KEY --json (connect once, then link covered repositories without another browser consent)
 - `ohmyhost github status` — ohmyhost github status --organization ULID --json
 - `ohmyhost github disconnect` — ohmyhost github disconnect --organization ULID --yes --json (Owner only; revokes the workspace GitHub connection and every repository grant under it, so auto-deploy and linked sources stop at once; the GitHub App stays installed for other workspaces, and github connect starts a new connection)
@@ -266,6 +268,8 @@ reference describes server support; a host may still be checking a new or change
 - `integration_connection_discover` — Read accessible Make organizations, teams and connection metadata.
 - `integration_connection_import` — Import a selected Make connection into an explicit project and environment.
 - `integration_connection_disconnect` — Disconnect a connection grant and revoke its provider credential.
+- `integration_credential_request_create` — Create a native Make Credential Request for selected standard app modules or Endpoints.
+- `integration_credential_request_status` — Read the current Make status of a Credential Request owned by the selected workspace grant.
 - `github_connect` — Owner or Admin: connect GitHub once for this workspace.
 - `github_status` — Read this workspace's GitHub connection.
 - `github_disconnect` — Owner only: disconnect this workspace's GitHub connection.
@@ -408,6 +412,8 @@ account rights and credential restrictions are checked by the canonical API on e
 - `integration_connection_list` — Use tools/list for integration_connection_list's registered MCP description and exact input schema.
 - `integration_connection_providers` — Check which SaaS connection providers are available to this workspace and whether discovery is ready.
 - `integration_connection_status` — Use tools/list for integration_connection_status's registered MCP description and exact input schema.
+- `integration_credential_request_create` — Use tools/list for integration_credential_request_create's registered MCP description and exact input schema.
+- `integration_credential_request_status` — Use tools/list for integration_credential_request_status's registered MCP description and exact input schema.
 - `mail_binding_detach` — Use tools/list for mail_binding_detach's registered MCP description and exact input schema.
 - `mail_binding_get` — Use tools/list for mail_binding_get's registered MCP description and exact input schema.
 - `mail_binding_set` — Use tools/list for mail_binding_set's registered MCP description and exact input schema.
@@ -497,7 +503,7 @@ account rights and credential restrictions are checked by the canonical API on e
 
 ## Master Tool Contract and API reference
 
-Master Tool Contract SHA-256: `490aa3b1c4d68906162af3f8d000fa37e93d0a52ef29fe52f57a83cbc5209294`.
+Master Tool Contract SHA-256: `99da3b404be30539e086a7972dca78e3d0270117abf06d1b83522d5b095d571d`.
 
 The complete public OpenAPI contract is at <https://ohmyho.st/api> and mirrored per release.
 Its MCP metadata accounts for every API operation: a named tool, a protected handoff, an

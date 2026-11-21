@@ -56,6 +56,41 @@ Discovery finds organizations across Make zones and reads team and connection me
 
 Make controls its OAuth token lifetimes. The service refreshes a valid grant as needed. A grant that can no longer refresh requires consent again. The grant persists across portal logins, and access depends on the linking user's current workspace rights.
 
+## Request a new Make connection
+
+If your team needs a new connection, ask your agent to create a Make Credential Request. A workspace owner selects the Make organization and team, then names the standard apps and exact published module or Endpoint IDs to authorize. Use discovery to find the right organization and team in Make. If the choice is ambiguous, include the Make zone in your request. ohmyho.st takes the zone from the selected Make organization.
+
+> Create a Make Credential Request for Google Sheets v2, using the `getValues` and `updateValues` Endpoints in my selected Make team.
+
+The agent calls `integration_credential_request_create` with the active workspace grant. Make determines the credentials and provider scopes needed for the selected actions and returns a private authorization link. Open it in Make and follow Make's instructions. Keep the link private and enter credentials only on Make. The request can be created before you choose a project. [Make Credential Requests](https://developers.make.com/api-documentation/api-reference/credential-requests) · [Make Endpoints SDK](https://developers.make.com/make-sdk/make-endpoints-sdk)
+
+From the CLI, provide the workspace and grant IDs and the Make organization and team IDs found through discovery. Each selection includes the app name and version, with explicit `module_ids`, `endpoint_names`, or both.
+
+```sh
+ohmyhost connection credential-request-create \
+  --organization ORGANIZATION_ULID \
+  --grant GRANT_ULID \
+  --provider-organization MAKE_ORGANIZATION_ID \
+  --team TEAM_ID \
+  --selections '[{"app_name":"google-sheets","app_version":2,"endpoint_names":["getValues","updateValues"]}]' \
+  --idempotency-key make-credential-request-1 \
+  --json
+```
+
+When the response includes an `authorization_url`, open it privately. Save the `request_id` to check status later with `integration_credential_request_status` or the CLI.
+
+```sh
+ohmyhost connection credential-request-status \
+  --organization ORGANIZATION_ULID \
+  --grant GRANT_ULID \
+  --request REQUEST_HASH \
+  --json
+```
+
+When Make reports `provider_status: authorized`, use discovery again to find the connection before importing it into a project. If the result is `reconnect_required`, renew the workspace Make grant to authorize its Credential Request permissions.
+
+Reuse the same idempotency key and selections for the same request under the workspace grant. Changing the selections or team with that key conflicts. If the result is `uncertain`, check the original request in Make before creating another one.
+
 ## Import into a project
 
 Ask for an import when you want to save a connection reference in a particular app. For example, “Import that connection into the dev environment of my support app.” The agent can reuse the project and environment from your request or chat context and ask if the destination is unclear. You can import the same connection into another authorized project in your workspace using the same Make grant.
