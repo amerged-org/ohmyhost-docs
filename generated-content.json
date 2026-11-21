@@ -1,5 +1,5 @@
 {
-  "source_commit": "11d38a2e3b30171209dc6619efaf2c1be2a4a25f",
+  "source_commit": "bdbe78ec25767b7271b6c8173e30b3b4ce6bd3e7",
   "source_dirty": false,
   "release": "0.1.73",
   "files": [
@@ -441,7 +441,7 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/SKILL.md",
-      "sha256": "f70b74a15382ec03524945b52f06c19db496fc2fea8d833bc805276908c5ff1b"
+      "sha256": "96e604868ba4f28232f9684788135d15132f5a52cf5192b964fe1c0e37fc51a2"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/ai.md",

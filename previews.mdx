@@ -22,7 +22,7 @@ Open the returned `url` in your browser. `status` is `cold`, `starting`, `ready`
 
 Anyone with this URL can view and use the app without a platform login. Share it only with intended viewers. Application login, when configured, still applies.
 
-If the preview says “Native Auth is unavailable for this project,” ask the project owner to confirm Native Auth rollout access with [support](/support). After access is enabled, open the same preview URL and check [Native Auth setup](/application-auth#set-up-omh-native-auth) for the selected environment.
+For an app that uses Native Auth, the preview checks project rollout access before Paid coverage. If it reports `native_auth_launch_unavailable`, ask the project owner to contact [support](/support) with the project ID. If it reports `paid_plan_required` during Native Auth preparation, the owner can check the workspace plan. Once the reported requirement is satisfied, wake the same preview URL. [Native Auth setup](/application-auth#set-up-omh-native-auth).
 
 ## Save and continue
 
