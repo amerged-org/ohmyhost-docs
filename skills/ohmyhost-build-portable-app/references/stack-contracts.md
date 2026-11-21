@@ -8,7 +8,7 @@ Use this reference only when implementing framework or capability code. Product 
 - Supported framework config extensions are `.js`, `.mjs`, and `.ts`.
 - Next.js, Vite and TanStack Start need at least their security floor, with no upper bound: Next `16.4.5`, Vite `5.4.6`, TanStack Start `1.168.60`; older releases, prereleases and older majors are refused. The GitHub Advisory Database published [GHSA-mfr8-8qww-v76h](https://github.com/advisories/GHSA-mfr8-8qww-v76h) on 16 November 2026: it affects Next.js 16.3.0 through 16.4.4 and is fixed in 16.4.5. Next.js 16.4.0 and older 16.x releases had already been refused following the 22 October 2026 security advisories. The version that `package-lock.json` (v2/v3) or `pnpm-lock.yaml` (v6/v9) resolves decides, otherwise the exact version or `^`/`~` range in `package.json`; a range spanning the floor is `pending` until the build checks the installed version. Passing this check does not guarantee that a later release builds; OpenNext, for example, refuses a Next major it does not support yet. Next.js 15 builds stopped on 21 October 2026, when the pinned OpenNext started refusing Next.js 15 as an unsupported major; a Next.js 15 app now moves to Next.js 16.4.5 or later. Use Next.js 16 for new work. A deployment that is already live keeps running, but an affected app remains exposed until rebuilt on a fixed release.
 - `package.json` scripts.build is exactly `next build` or `next build --webpack` for Next.js. Vite and TanStack Start use `vite build`, optionally with one `tsc`, `tsc --noEmit`, `tsc -b` or `tsc --build` stage before or after it joined by `&&`. Arbitrary preparation, `cd`, traversal and lifecycle hooks are outside this build contract. Builds use Node.js 24 and stop after eight minutes; runtime secrets are absent from the build. Commit intentional public build values. Gzipped Worker limits are 10 MiB for Next.js and 5 MiB for other Workers. Ordinary public static assets are limited to 10 MiB per file and 25 MiB/1,000 files in total; a static runtime also needs `index.html`. The complete deployment archive, including public assets, private SSG cache, Worker modules, migrations and archive metadata, is at most 30 MiB compressed and 64 MiB expanded.
-- The platform overlay, not the customer repository, pins OpenNext `1.20.9` and Wrangler `4.125.0`. Do not commit those packages, generated Wrangler files, platform bindings, or `OHMYHOST_BASE_PATH` for hosting.
+- The platform supplies OpenNext `1.20.9` and Wrangler `4.125.0` for hosted builds. Keep dependencies used by application code, such as `@opennextjs/cloudflare` for `getCloudflareContext`, in the app’s matching manifest and lockfile. Leave generated deployment configuration, platform bindings and `OHMYHOST_BASE_PATH` to the hosting service.
 
 ## The customer chooses application authentication
 
@@ -164,6 +164,49 @@ Frames, workers and external resources stay blocked when undeclared; service wor
 The gateway replaces application CSP and drops Set-Cookie with a Domain attribute; keep session
 cookies host-only. OAuth form-post callbacks must satisfy the explicit CORS/origin policy;
 verify the provider's chosen callback mode instead of assuming a redirect proves a session.
+
+## Form and admin apps
+
+For a new protected form with a separate admin view, Next.js App Router and TypeScript provide pages and server-side route handlers in the same application. The public Next Native Auth example at commit `d9c39a68b39b30f8045da8f123065ebddfb1ab58` includes `pnpm@10.28.2`, its application manifest and the frozen dependency graph used by the example. Use the same two files as a pair. Check current framework admission if you change dependencies, and resolve a new lockfile with the pinned package manager. [Pinned example](https://github.com/amerged-org/ohmyhost/tree/d9c39a68b39b30f8045da8f123065ebddfb1ab58/fixtures/cloudflare-preview/next-native-auth)
+
+| File in the pinned example |   Bytes | SHA-256                                                            |
+| -------------------------- | ------: | ------------------------------------------------------------------ |
+| `package.json`             |   1,108 | `9b8e8bec0bbb496d6539c0e4c3638f3d57195e11d7c759a084106737d3561406` |
+| `pnpm-lock.yaml`           | 156,377 | `e13c965dd1ad90a775b2e5ac662cf2f1cc5647ba2ed07eeba0462e751fa6f217` |
+
+Keep Next.js App Router handlers on their default Node.js runtime by omitting route-level `export const runtime = 'edge'`, even when `ohmyhost.yaml` selects `runtime.mode: edge`.
+
+In a Next.js server handler, type the bindings that the app declares in `ohmyhost.yaml`. For an app using PostgreSQL and Omh Native Auth:
+
+```ts
+import { getCloudflareContext } from "@opennextjs/cloudflare";
+import {
+  createPrivateDatabaseClient,
+  type CustomerDatabaseBinding,
+} from "@ohmyhost/customer-runtime/database";
+import {
+  createNativeAuthServer,
+  type NativeAuthBinding,
+} from "@ohmyhost/customer-runtime/auth-server";
+
+export async function formServices() {
+  const { env } = await getCloudflareContext({ async: true });
+  const bindings = env as unknown as {
+    OHMYHOST_DATABASE: CustomerDatabaseBinding;
+    OHMYHOST_AUTH: NativeAuthBinding;
+  };
+  return {
+    db: createPrivateDatabaseClient(bindings.OHMYHOST_DATABASE),
+    auth: createNativeAuthServer(bindings.OHMYHOST_AUTH),
+  };
+}
+```
+
+An app with its own sign-in can use just the database binding and its chosen auth configuration. Check required JSON fields or database values with `typeof value === "string"` before passing them to a string parameter.
+
+For Omh Native Auth, check project rollout, Paid coverage, sender and authorized origin. Use `createNativeAuthBrowser()` for browser signup, verification, sign-in and sign-out. On the server, `await auth.requireUser(request)` returns the verified user’s `id` and `email`. Use the ID for ownership and the app’s role lookup. Show the returned email if the interface identifies the signed-in account. `getSession(request)` returns a session or `null`; handle service errors separately. [Application authentication](https://docs.ohmyho.st/application-auth)
+
+For a hosted check, a guest opens the sign-in screen, a verified customer creates a record, and an authorized admin reads the same record ID after reload. Check that the customer's own session cannot read the protected admin data, and that logout ends access. Use separate browser sessions for the two users. If the requested app uses private files, confirm the owner downloads the original bytes and another identity receives none at the same application URL.
 
 ## Framework notes
 

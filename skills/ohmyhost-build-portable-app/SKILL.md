@@ -7,6 +7,16 @@ description: Build or adapt a TypeScript Vite, TanStack Start, Next.js (includin
 
 Prepare the application's real capabilities, then verify them after deployment.
 
+## Choose a framework for a new app
+
+Keep the customer's chosen stack and authentication. When there is no existing framework:
+
+- For a protected form with a customer login, PostgreSQL and an admin view, use **Next.js App Router with TypeScript**. In a native chat, choose managed source with the `empty` template. Start from a real, accessible `package.json` and its matching frozen lockfile at one immutable revision. Save the actual bytes and verify their sizes and SHA-256 values in the persisted source. The [pinned Next.js reference and Native Auth bindings](references/stack-contracts.md#form-and-admin-apps) give a working starting point.
+- For a small React form, use **Vite and TypeScript**. The `vite-react` template supplies the frontend. Render the real form at `/`. When it needs server data, use the same-origin `/api/*` routes in `src/ohmyhost/companion.ts` and select edge mode. Submit controls to those routes and verify the root in a browser.
+- For lightweight HTTP handlers, server-rendered HTML or a scheduled job, use a **plain TypeScript Worker**. Select `runtime.mode: functions`, export `fetch` from `src/ohmyhost/worker.ts`, and export a `scheduled` handler on the same default object when the app uses a cron. Enable the capabilities that the chosen flow actually uses.
+
+Verify the user's requested action in the hosted browser. Submit a record and read it back after a reload. For protected data, check a guest, a signed-in customer and an authorized admin against the same record, then sign out and check access again. For a Live Preview, save a visible source edit and observe it in the same open tab at the same URL. For a scheduled outcome, observe an actual UTC invocation and its persisted effect.
+
 Use `preview_open` for the selected project's Dev or Prod environment to obtain its private stable preview URL; accepted source saves update an open preview without deploying. Use `preview_get`, `preview_stop`, and `preview_rotate` to inspect, stop, or replace that URL, and keep it private. For a Native Auth preview, rollout approval is checked before Paid coverage. For `native_auth_launch_unavailable`, ask ohmyho.st support to check rollout access for the workspace and project. For `paid_plan_required` during Native Auth preparation, ask the owner to check the workspace plan. Wake the same preview after the reported requirement is satisfied.
 
 1. Inspect the selected repository and, with a local checkout, run `ohmyhost init --dry-run --json`. In a native chat, inspect the saved source files and apply the runtime references through the remote file tools; use the actual plan/build diagnostics, without claiming a local command ran. Preserve a valid existing `ohmyhost.yaml`, application root, egress rules, auth choice and migrations. Resolve the returned blockers and requirements rather than replacing the configuration with a reduced file.
