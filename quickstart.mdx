@@ -26,6 +26,16 @@ Check that you completed the same sign-in flow your agent opened and that the ag
 
 ## 2. Inspect the application
 
+### Choose a framework for a new app
+
+Keep the framework and sign-in system you already use. For a new form with customer login, PostgreSQL and an admin view, start with **Next.js App Router and TypeScript**. Ask your agent to use an admitted version and save a real starter’s matching `package.json` and frozen lockfile. In native chat, select managed source with the `empty` template for this stack. [Next.js](/frameworks/nextjs) · [Application authentication](/application-auth)
+
+For a small React form, the `vite-react` starter supplies a frontend. Put the form at `/` and send its server requests to same-origin `/api/*` routes in the Vite companion. A lightweight HTTP service or scheduled job can use a plain Worker. [Vite](/frameworks/vite) · [Functions and schedules](/functions)
+
+Open the hosted app, submit a record and reload to confirm it was saved. If there is an admin view, verify that the admin sees the same record, an ordinary customer cannot access the protected data and signing out ends access. For Live Preview, save a visible change and check it in the same open tab. [Live Previews](/previews)
+
+### Inspect a checkout
+
 For a local checkout:
 
 ```sh
