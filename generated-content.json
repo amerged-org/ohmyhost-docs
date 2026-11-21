@@ -1,5 +1,5 @@
 {
-  "source_commit": "0db5a5a877ed29aaa4009aa1b8742aab88f6c5de",
+  "source_commit": "11d38a2e3b30171209dc6619efaf2c1be2a4a25f",
   "source_dirty": false,
   "release": "0.1.73",
   "files": [
@@ -477,7 +477,7 @@
     },
     {
       "path": "skills/ohmyhost-deploy/SKILL.md",
-      "sha256": "6a817ef7c80b67976ddb1700a196fb66f3a92adb84f76e2a15fec6a62aad3db1"
+      "sha256": "51cfe7e8e19875831c858c0a775c0243d05c082aa6a73febd27172a285b3f3d8"
     },
     {
       "path": "skills/ohmyhost-domains-and-mail/SKILL.md",

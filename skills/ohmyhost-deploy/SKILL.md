@@ -59,9 +59,8 @@ to plan and deploy. An upload is not itself a successful build or publication.
 If publication is pending, poll its saved `operation_get` and then run
 `ohmyhost source publish complete --project ULID --directory PATH --operation ULID --json`
 under the same login. This confirms the persisted version and finishes the local binding.
-If `operation_get` reports `managed_source_dispatch_failed`, the platform ended that publication
-because its dispatch never completed. Read `source_get` to confirm whether the change landed, then
-submit the change again with a new idempotency key if it did not.
+A terminal `managed_source_dispatch_failed` ends that publication. Read `source_get` to check its
+current commit. If the intended change is still missing, use fresh source guards and a new key.
 Resume a pending upload from `source inspect`'s `pending_publications`; preserve its operation
 and key. Completing an already authorized publication needs no second routing question.
 
@@ -109,8 +108,9 @@ dependency. Verify the connected account and workspace using the get-started Ski
    needs its recorded failure diagnosed. When `initialization_operation_id` is returned, follow
    that actual child operation with `operation_get`; otherwise use the returned
    `initialization_error_code`. An `authorization_changed` failure needs the current account, role and token access checked through **ohmyhost-get-started** before retrying the source action.
-   A `managed_source_dispatch_failed` failure means the platform ended the queued initialization before it ran, so no
-   child publication exists. Reread `source_get` to confirm the source is still unbound, then `source_initialize` may create the explicitly chosen template again with a new key.
+   If initialization ends with `managed_source_dispatch_failed`, read the current source and follow any
+   returned child operation. If the source is still unbound and no initialization is pending, use
+   `source_initialize` with the explicitly chosen template and a new key.
    For an existing project with no source and no pending
    initialization, `source_initialize` can create the explicitly chosen template under the
    current generation and a saved key. Observe that accepted operation and reread `source_get`
@@ -203,8 +203,10 @@ no pending initialization.
    finalize key. Use `source_switch` only for switch mode, as described below.
 4. Observe the same `operation_get` and `source_upload`. Require operation `succeeded`
    and receipt `state: "committed"` before treating the receipt's own `commit_sha` as saved.
-   A sealed receipt can already name an unpushed candidate; it is not deployable proof.
-   Current main can later advance, so keep this operation's own committed SHA for its build.
+   The service continues checking a sealed candidate even if the original chat disconnects.
+   Follow its existing operation. If you repeat the source mutation to wake processing, keep its
+   original arguments and key. For finalization, retain the same complete manifest, generation,
+   operation ID and finalize key. Build from the committed SHA returned for that operation.
 
 `source_upload` reports state, original generation/parent, expiry and commit; it is not a
 file inventory. Recover a lost blob receipt by repeating identical `source_blob_put`
