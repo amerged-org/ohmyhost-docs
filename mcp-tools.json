@@ -4667,7 +4667,7 @@
     },
     {
       "name": "deployment_plan",
-      "description": "Plan an immutable deployment. Preserve the customer's existing authentication integration, such as Better Auth or WorkOS. The explicitly selected managed Better Auth bridge requires the managed database; managed mail is optional. The unreleased omh-native capability is an explicit Paid choice with separate prerequisites. Never assume platform login proves application login. With no environment, the server chooses Dev if it exists, otherwise Prod. An explicit prod plan builds straight into Prod; shared data can affect Prod during migrations. Review the returned plan before deployment. The plan stays valid for 24 hours.",
+      "description": "Plan an immutable deployment. Preserve the customer's existing authentication integration, such as Better Auth or WorkOS. The explicitly selected managed Better Auth bridge requires the managed database; managed mail is optional. Omh Native Auth requires project rollout approval. A missing approval returns native_auth_launch_unavailable before a build is reserved. Never assume platform login proves application login. With no environment, the server chooses Dev if it exists, otherwise Prod. An explicit prod plan builds straight into Prod; shared data can affect Prod during migrations. Review the returned plan before deployment. The plan stays valid for 24 hours.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4707,7 +4707,7 @@
     },
     {
       "name": "deployment_create",
-      "description": "Start a reviewed deployment plan",
+      "description": "Start a reviewed deployment plan. Native Auth rollout access is checked again before build reservation.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",

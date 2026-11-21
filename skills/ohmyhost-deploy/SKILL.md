@@ -144,7 +144,9 @@ dependency. Verify the connected account and workspace using the get-started Ski
    unconfirmed writes before retrying them. Keep the link private and values out of source, chat and
    tool arguments.
 6. Call `deployment_plan` for the exact accepted commit and the requested environment (`dev` for
-   a preview or `prod` for a direct production deployment); review its
+   a preview or `prod` for a direct production deployment). For `auth.provider: omh-native`,
+   `native_auth_launch_unavailable` means the project needs rollout approval from ohmyho.st.
+   Preserve the current project and saved commit. Once approval is confirmed, plan the commit again. Review its
    real costs/effects within the user's existing authorization, then `deployment_create` with
    the plan and one saved key. Follow the same `operation_get` until its terminal state; use
    `deployment_get` and `deployment_logs` for diagnosis. A running operation is not a reason

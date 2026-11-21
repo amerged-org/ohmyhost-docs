@@ -5462,7 +5462,9 @@ paths:
         then affect both environments when Dev exists. Managed mail requires a confirmed Paid
         service period; it is checked again before build reservation. Selecting the managed Better
         Auth bridge does not require managed mail or Paid access. An old sender configuration is
-        not Paid authority. A commit the platform does not admit answers 409 with a nonretryable
+        not Paid authority. Native Auth requires rollout approval for this workspace and project;
+        a missing approval returns 409 native_auth_launch_unavailable before a build is reserved.
+        A commit the platform does not admit answers 409 with a nonretryable
         problem code; for framework_conversion_required, detail is a fixed catalog sentence that
         names the file, the rule and the required change whenever the refusal is typed.
       parameters:
@@ -5514,7 +5516,9 @@ paths:
         Reserves the quoted build credits from the shared organization pool and starts the
         exact reviewed plan as one durable operation. Insufficient available credits or an explicit
         project stop budget rejects before operation creation or provider work. Repeating the
-        accepted request never reserves twice.
+        accepted request never reserves twice. Native Auth rollout access is checked again before
+        accepting a new request. A pre-provider loss of access during initial Native setup ends
+        the operation with native_auth_launch_unavailable.
       parameters:
         - $ref: "#/components/parameters/RequestId"
         - $ref: "#/components/parameters/ProjectId"
@@ -13178,6 +13182,7 @@ components:
           enum:
             - operation_failed
             - operation_abandoned
+            - native_auth_launch_unavailable
             - authorization_changed
             - source_commit_conflict
             - source_snapshot_invalid

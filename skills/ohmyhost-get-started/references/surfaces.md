@@ -278,7 +278,7 @@ reference describes server support; a host may still be checking a new or change
 - `source_link` — Link a repository covered by the workspace GitHub connection.
 - `source_get` — Get linked source status.
 - `deployment_plan` — Plan an immutable deployment.
-- `deployment_create` — Start a reviewed deployment plan
+- `deployment_create` — Start a reviewed deployment plan.
 - `deployments_list` — List project deployments
 - `deployment_get` — Get one deployment
 - `deployment_logs` — List the newest normalized diagnostics of one deployment (build, control, runtime and function failures with catalog codes).
@@ -503,7 +503,7 @@ account rights and credential restrictions are checked by the canonical API on e
 
 ## Master Tool Contract and API reference
 
-Master Tool Contract SHA-256: `99da3b404be30539e086a7972dca78e3d0270117abf06d1b83522d5b095d571d`.
+Master Tool Contract SHA-256: `1cb53afbb2abd3322167436062b0925bc9d931a34da1ab5d9bb33dff0abf8e3c`.
 
 The complete public OpenAPI contract is at <https://ohmyho.st/api> and mirrored per release.
 Its MCP metadata accounts for every API operation: a named tool, a protected handoff, an
