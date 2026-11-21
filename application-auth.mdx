@@ -21,6 +21,8 @@ Omh Native Auth manages application users and sessions for projects approved for
 4. Protect server routes with `createNativeAuthServer(env.OHMYHOST_AUTH)` from `@ohmyhost/customer-runtime/auth-server`. Call `getSession(request)` or `requireUser(request)`, then check the user's permissions for the requested record or action. Static files remain public.
 5. Deploy to Dev and read readiness again. The first Native-capable deployment provisions Auth storage. Check that `paid`, `sender`, `origin` and `storage` are all ready. Exercise sign-up or invitation, email verification, sign-in, a protected action, reload and sign-out on the deployed origin. Confirm that protected access is denied after sign-out. Configure Prod separately and repeat the checks on its own origin.
 
+If the deployment plan or deployment request returns [`native_auth_launch_unavailable`](/errors/native-auth-launch-unavailable) (HTTP 409), ask ohmyho.st support to check rollout access for your workspace and project. If access changes after a deployment is accepted, its operation can fail with the same code before database provisioning starts. After support confirms access, plan the saved commit again and check readiness for the selected environment.
+
 Native Auth uses a separately metered Auth database, with separate Dev and Prod user directories even when the application shares business data. A business database is optional. For signup, verification and password-reset mail requests, generate an operation key with `createNativeAuthIdempotencyKey` from `@ohmyhost/customer-runtime/auth-browser`. Send it as the `Idempotency-Key` header in the client fetch options and reuse the same key after an uncertain result.
 
 ## Add Google or GitHub to Omh Native Auth
