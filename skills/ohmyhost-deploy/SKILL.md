@@ -1,6 +1,6 @@
 ---
 name: ohmyhost-deploy
-description: Develop, version, preview and publish an application with ohmyho.st from a local checkout or a connected native chat. Reuse the saved project and source, select managed source or GitHub only when needed, and switch an existing project only on request. From a native chat, also set private application secrets with a one-hour link that needs no sign-in. Use troubleshooting for a stuck deployment.
+description: Develop and version an application with ohmyho.st, open a private live preview, and deploy or publish on request from a local checkout or a connected native chat. Reuse the saved project and source, select managed source or GitHub only when needed, and switch an existing project only on request. From a native chat, also set private application secrets with a one-hour link that needs no sign-in. Use troubleshooting for a stuck deployment.
 ---
 
 # Develop and deploy an app
@@ -9,6 +9,26 @@ Read available MCP tool schemas or installed CLI help. Complete access with
 **ohmyhost-get-started**, preserving the user's selected account, organization and project.
 Keep explanations in the user's language; users need app versions, a preview and a working
 address, not the storage provider's implementation details.
+Use two short sentences, one link and at most one question.
+Share IDs, commit hashes, state words, codes and tool names only on request.
+
+## Show the app to the user
+
+Use `preview_open` after a save, when continuing an existing project even if no save is
+needed, or when the user asks to see the app. Read the project's workspace plan with
+`organization_account_get` and pass `environment: dev` for `plan: paid` or
+`environment: prod` for `plan: free`. If plan access is denied, ask the workspace Owner
+to confirm the plan.
+
+Follow the readiness checks in step 4 below. Give the returned preview `url` only when
+`ready_to_show` is true. On the first handoff, ask whether the user wants to see the app.
+On later handoffs, give the link without repeating the question. Apply these rules to
+any link or question in `next_step` and `say_to_user`. Keep the link out of source, notes
+and logs.
+
+Dev site and Prod addresses are for deployed versions. Give a Dev site link only when
+the user asks for the deployed Dev site, and give only the `share_url` returned by
+`project_dev_share_link_get`. If no share link is available, explain the limitation.
 
 ## Select the source once
 
@@ -126,25 +146,45 @@ dependency. Verify the connected account and workspace using the get-started Ski
    the returned executable flags when editing existing files. Reuse the idempotency key after an uncertain
    response. If another chat advanced the source, read the current version and reconcile the
    changes; never force-overwrite the other chat's work. Follow each accepted source operation
-   to success, then read `source_get` for its persisted commit before planning a build.
+   to success, then read `source_get` for its persisted commit.
    Source generation changes when a binding is initialized or switched, not on every commit;
    concurrent edits are guarded by the expected commit. Copy both guards from current state.
    A change batch accepts at most 2 MiB of decoded content. For a complete atomic tree or
    related edits larger than that batch, use the remote upload flow below rather than
    splitting one intended version into several unrelated commits.
-4. Use `source_versions` and `source_diff` to inspect saved work. `source_restore` creates a
+4. After the source save succeeds, call `preview_open` for the project using the workspace
+   plan and environment above. While `ready_to_show` is false, read
+   `preview_get` for the same project and environment about every 10 seconds for at most 2 minutes.
+   Follow `next_step` and say `say_to_user` in the user's language when provided, applying the
+   handoff rules above to any link or question. If the preview still needs time after polling,
+   tell the user it is still getting ready.
+
+   A database or sign-in app needs a first deployment in that environment before its preview can
+   load data. If it has no deployment there, explain this in one sentence. For Prod, explain in
+   that sentence that the site will go live. Once the user asks or agrees to that deployment,
+   deploy once using the steps below and check the live preview again.
+
+   When `ready_to_show` is true and any required first deployment has succeeded, use the live
+   preview handoff above.
+   For example, “Deine Seite ist als private Vorschau fertig: `<Link>`. Möchtest du sie dir ansehen?”
+   Later saves update the same preview without a deployment. Once a later save is ready to show,
+   say what changed and repeat the link.
+
+5. Use `source_versions` and `source_diff` to inspect saved work. `source_restore` creates a
    new version from the selected earlier commit under the same revision guards; it does not
    delete history or roll back database migrations. Observe its accepted operation before
    reading the resulting current commit.
-5. Set required application credentials with one `secret_input_request` for the chosen project and
-   environment. Pass up to ten distinct secret names in `names` and give the single `url` to the
-   person who sets the values. The page needs no sign-in and has Dice, Copy and Show/Hide buttons
+6. Set credentials required for the authorized deployment with one `secret_input_request` for the
+   chosen project and environment. Pass up to ten distinct secret names in `names` and give the
+   single `url` to the person who sets the values. The page needs no sign-in and has Dice, Copy and Show/Hide buttons
    for each field. One valid Save consumes the link. It expires after one hour. Use
    `connection_status` for the result by name. Request a fresh link for failed names and confirm
    unconfirmed writes before retrying them. Keep the link private and values out of source, chat and
    tool arguments.
-6. Call `deployment_plan` for the exact accepted commit and the requested environment (`dev` for
-   a preview or `prod` for a direct production deployment). For `auth.provider: omh-native`,
+7. Deploy or publish only when the user asks or agrees to that action. A request that already says
+   deploy, publish or go live counts.
+   Call `deployment_plan` for the exact accepted commit and the requested environment (`dev` for
+   the private Dev site or `prod` for a direct production deployment). For `auth.provider: omh-native`,
    `native_auth_launch_unavailable` means the project needs rollout approval from ohmyho.st.
    Preserve the current project and saved commit. Once approval is confirmed, plan the commit again. Review its
    real costs/effects within the user's existing authorization, then `deployment_create` with
@@ -152,24 +192,25 @@ dependency. Verify the connected account and workspace using the get-started Ski
    `deployment_get` and `deployment_logs` for diagnosis. A running operation is not a reason
    to start another build. A workspace has at most four open builds: `build_capacity_reached` (429)
    means wait for one to finish, then start the deployment again with a new key.
-7. Read `project_status` for the selected URL. For Dev, check its access mode: public Dev opens directly. For
-   protected Dev, give the user the private reusable `share_url` from
-   `project_dev_share_link_get`. To inspect it as the agent, use `project_dev_access_create`
-   and open its one-time `redeem_url`; do not issue another ticket while the first is unused. A repeated request revokes the unused ticket, and a key does not replay it.
-   Then verify the clean preview URL; for a direct Prod deployment verify the Prod URL instead.
+8. After deployment, use `project_status` to find the deployed address for verification.
+   For protected Dev, inspect the site with `project_dev_access_create` and its one-time
+   `redeem_url`. Do not issue another ticket while the first is unused. A repeated request
+   revokes the unused ticket, and a key does not replay it.
+   Open a public Dev site or direct Prod deployment at its deployed address for verification.
    Keep these entry links out of notes, source and logs.
    Verify the app's meaningful
    interaction, expected content and any requested data flow before calling it ready. If the
-   chat cannot inspect the preview, say exactly what remains unverified and keep the same project.
-8. If step 6 already deployed to Prod, verify that operation and do not create another deployment.
+   chat cannot inspect the site, say exactly what remains unverified and keep the same project.
+9. If step 7 already deployed to Prod, verify that operation and do not create another deployment.
    Otherwise publish only when requested and authorized by the current role and token. Use
    `promotion_plan` then `deployment_promote` for the verified Dev deployment, including the
    exact ETag, confirmation and idempotency guards. Alternatively plan an exact commit into
    Prod when that is the requested route, including with shared data. Prod needs its own secret inputs;
    they are not copied from Dev. Poll the accepted operation and verify the public result.
 
-Return the project's working address, exact commit and verification result, plus any required
-user action. Do not claim a plugin installation, finished OAuth page, saved commit or accepted
+Report the deployment verification result and any required user action. For a requested Prod
+deployment or publication, give the verified public address. To show the app, use the live preview
+handoff above. Do not claim a plugin installation, finished OAuth page, saved commit or accepted
 deployment proves that the app is live.
 
 ## Save a complete tree in native chat

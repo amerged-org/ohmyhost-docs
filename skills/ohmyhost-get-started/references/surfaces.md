@@ -251,8 +251,8 @@ reference describes server support; a host may still be checking a new or change
 - `project_get` — Get one project
 - `project_status` — Get source, existing environment IDs, deployment URLs, custom production domains, Dev access mode, latest operation and cleanup status.
 - `project_development_add` — Add Dev to an existing project.
-- `preview_get` — Read the private stable preview URL and source state for this project environment.
-- `preview_open` — Open or create a private stable preview URL.
+- `preview_get` — Read the stable private preview of this exact environment: its link, state, saved and applied version, and ready_to_show.
+- `preview_open` — Open or create the stable private preview of this exact environment and return its link, state and ready_to_show.
 - `preview_stop` — Stop the preview and remove backups while preserving its URL.
 - `preview_rotate` — Rotate the preview URL and close old connections.
 - `project_dev_share_link_get` — Owner only: get or create the persistent protected Dev link.
@@ -503,7 +503,7 @@ account rights and credential restrictions are checked by the canonical API on e
 
 ## Master Tool Contract and API reference
 
-Master Tool Contract SHA-256: `1cb53afbb2abd3322167436062b0925bc9d931a34da1ab5d9bb33dff0abf8e3c`.
+Master Tool Contract SHA-256: `61ed92a391a6fc6c187cab53c0e0307dcc45652563857384745d0d8aab25dde0`.
 
 The complete public OpenAPI contract is at <https://ohmyho.st/api> and mirrored per release.
 Its MCP metadata accounts for every API operation: a named tool, a protected handoff, an

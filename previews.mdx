@@ -18,7 +18,7 @@ ohmyhost project preview open --project "$PROJECT_ID" --environment prod --json
 ohmyhost project preview get --project "$PROJECT_ID" --environment prod --json
 ```
 
-Open the returned `url` in your browser. `status` is `cold`, `starting`, `ready` or `sleeping`. The URL shows progress while the app starts. Keep the preview open, save the next source version, and wait for the framework to apply the change. The URL stays the same.
+Open the returned `url` in your browser. `status` is `cold`, `starting`, `ready` or `sleeping`. The URL shows progress while the app starts. `source` identifies the saved version selected for the preview and `applied_source` identifies the version it has applied. Either can be `null`. Share the preview when `ready_to_show` is true, which means the preview is ready and the two version sequences match. The URL stays the same as you save later versions.
 
 Anyone with this URL can view and use the app without a platform login. Share it only with intended viewers. Application login, when configured, still applies.
 
@@ -60,7 +60,11 @@ Keep each request's original key after an uncertain response. With managed Nativ
 
 ## Use MCP or REST
 
-Local and remote MCP expose `preview_get`, `preview_open`, `preview_stop` and `preview_rotate`. Pass the project and `environment` returned by your current tool schema. The corresponding REST operations are:
+Local and remote MCP expose `preview_get`, `preview_open`, `preview_stop` and `preview_rotate`. Pass the project and `environment` returned by your current tool schema. `preview_open` allows up to 20 seconds for wake-up and readiness checks. If it returns while the preview is still starting or applying a version, use `preview_get` to check again.
+
+MCP results can include `next_step` for the agent and `say_to_user` to relay in the user's language. Follow the deploy Skill for when to open the preview, check readiness and share the link. [Deploy Skill](https://ohmyho.st/skills/ohmyhost-deploy/SKILL.md)
+
+The same actions are available through REST.
 
 | Operation                   | Endpoint                                                             |
 | --------------------------- | -------------------------------------------------------------------- |

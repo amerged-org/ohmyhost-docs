@@ -13851,7 +13851,9 @@
           "environment",
           "status",
           "url",
-          "source"
+          "source",
+          "applied_source",
+          "ready_to_show"
         ],
         "properties": {
           "id": {
@@ -13882,31 +13884,44 @@
             "description": "Stable private capability URL without an expiration time."
           },
           "source": {
-            "oneOf": [
-              {
-                "type": "null"
-              },
-              {
-                "type": "object",
-                "additionalProperties": false,
-                "required": [
-                  "sequence",
-                  "commit_sha"
-                ],
-                "properties": {
-                  "sequence": {
-                    "type": "integer",
-                    "minimum": 1
-                  },
-                  "commit_sha": {
-                    "type": "string",
-                    "pattern": "^[0-9a-f]{40}$"
-                  }
-                }
-              }
-            ]
+            "description": "The saved version selected for this preview, or null if there is none.",
+            "$ref": "#/components/schemas/PreviewSource"
+          },
+          "applied_source": {
+            "description": "The version applied to the preview, or null if no version has been applied.",
+            "$ref": "#/components/schemas/PreviewSource"
+          },
+          "ready_to_show": {
+            "type": "boolean",
+            "description": "True when the preview is ready and its applied version has the same sequence as the saved version."
           }
         }
+      },
+      "PreviewSource": {
+        "oneOf": [
+          {
+            "type": "null"
+          },
+          {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "sequence",
+              "commit_sha"
+            ],
+            "properties": {
+              "sequence": {
+                "type": "integer",
+                "minimum": 1,
+                "maximum": 9007199254740991
+              },
+              "commit_sha": {
+                "type": "string",
+                "pattern": "^(?!0{40}$)[0-9a-f]{40}$"
+              }
+            }
+          }
+        ]
       },
       "ConnectionBegin": {
         "type": "object",

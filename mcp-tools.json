@@ -3608,7 +3608,7 @@
     },
     {
       "name": "preview_get",
-      "description": "Read the private stable preview URL and source state for this project environment.",
+      "description": "Read the stable private preview of this exact environment: its link, state, saved and applied version, and ready_to_show. The link is for the user: hand it over when ready_to_show is true. Private means: keep it out of source files, notes and logs.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3644,7 +3644,7 @@
     },
     {
       "name": "preview_open",
-      "description": "Open or create a private stable preview URL. Saved source updates it without deploying; the URL has no expiry until rotated.",
+      "description": "Open or create the stable private preview of this exact environment and return its link, state and ready_to_show. Source saves update it without a deployment. The link is for the user: hand it over when ready_to_show is true. Private means: keep it out of source files, notes and logs. It has no expiry until rotated.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
