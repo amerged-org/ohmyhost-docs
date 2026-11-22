@@ -1,18 +1,18 @@
 ---
 title: "Your first deployment"
-description: "Save a managed or GitHub version, deploy one app and verify its Dev URL."
+description: "Save an app version, deploy it and open a live preview."
 robots: "index, follow"
 ---
 
-Start with the app you want to deploy, in a local checkout or a connected chat. Continue its saved managed or GitHub source. A new app developed entirely in chat uses managed source; a local checkout without a saved binding can use managed source or GitHub. Signing up is open. [Sources and versions](/sources).
+Start with the app you want to deploy, in a local checkout or a connected chat. Continue its saved managed or GitHub source. A new app developed entirely in chat uses managed source. For an unbound checkout, publish the current files as managed source unless you explicitly select GitHub. Signing up is open. [Sources and versions](/sources).
 
 ## 1. Give your agent the task
 
-> Read https://ohmyho.st/llms.txt and https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md. Connect this agent to ohmyho.st and deploy this app using only the capabilities it needs. Keep its existing source binding, or choose managed source or GitHub if it is unbound. Follow the deployment Skill, preserve my project decisions and verify the app.
+> Read https://ohmyho.st/llms.txt and https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md. Connect this agent to ohmyho.st and deploy this app using only the capabilities it needs. Keep its saved source binding. For an unbound checkout, publish the current files as managed source unless I ask for GitHub. Show the result in Live Preview. Follow the deployment Skill, preserve my project decisions and verify the app.
 
-Your agent uses the [get-started Skill](https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md). A local agent first checks what is installed and whether you are signed in, installs the current CLI/MCP only if required, and gives you a sign-in link when needed. Open it, check the confirmation code, sign in or create your account on that page, and tell the agent when you are done. It confirms the result with `identity_get` or `ohmyhost whoami --json`.
+Your agent uses the [get-started Skill](https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md). An agent with a shell checks `ohmyhost whoami --json` and installs or upgrades the clients when needed. If you are signed out, open the link it gives you, confirm the code, and sign in or create an account. This also works in a Linux cloud session or container. The agent confirms your account and workspace with `ohmyhost whoami --json`; local MCP registration is optional.
 
-A connected chat uses managed OAuth and verifies the intended account, workspace and project before continuing. Current membership, role and any token restrictions determine access; no local CLI installation or copied API token is needed. [Connect MCP](/agents/mcp).
+A connected chat without a shell uses managed OAuth and verifies the intended account and workspace with `identity_get`. Unattended CI or scheduled automation uses a private `OHMYHOST_TOKEN`. [Connect MCP](/agents/mcp) · [Login and API tokens](/login-tokens).
 
 Reuse the workspace for this app. A local agent reads the organizations returned by `whoami` and follows the get-started Skill if none exists. A connected chat with no workspace uses the `workspace_setup` portal handoff and verifies its identity again. If you already have projects, select the existing project instead of creating another.
 
@@ -48,9 +48,7 @@ In a connected chat, the agent reads the selected project's source and context b
 
 Upgrade local CLI and MCP clients to the [current release](/cli) first. When the inspection reports `runtime.packages.customerRuntime` for any framework (also exposed under companion/worker packages), install the application runtime under its import name as exactly that npm alias, for example `"@ohmyhost/customer-runtime": "npm:@amerged/ohmyhost-runtime@<version>"` in `package.json`, then refresh and save the lockfile with the source. Every `@ohmyhost/customer-runtime/*` import stays unchanged. A bare `@ohmyhost/customer-runtime` version fails the platform build. Replace a runtime pinned to an `ohmyho.st/releases/` URL with the alias: only the current release is served there, and older versions carry no compatibility promise.
 
-For data-backed apps, choose isolated Dev/Prod databases and files or shared data. Creation defaults to shared when `data_mode` is omitted; later guarded [data changes](/environments#change-data-assignments) never copy data. Isolation is recommended; two databases consume credits independently. [How environments work](/environments).
-
-For a new project, choose whether the Dev URL should be protected by a reusable share link (the default) or public without a platform token. The agent records the choice and preserves existing project decisions.
+The first deployment uses shared data and protected Dev by default. You can request [public Dev](/environments#choose-who-can-open-dev) or [isolated Dev and Prod data](/environments#change-data-assignments). The agent preserves existing project settings.
 
 For a new project, choose **US or EU** before creation. An explicit choice overrides any browser-location suggestion; an existing project's region is preserved. US is the API default when no region is supplied. New projects provision their PGCF database, new files and builds in the selected US or EU region. Existing projects moved to US with their owner's authorization use US databases. Read `database compute get` for the actual database region. Existing R2 object locations remain recorded through database migration. The customer API cannot change the region later and prices are identical. Preserve an existing `storage.jurisdiction`: the recorded R2 bucket or reservation location remains authoritative after an operator project-region migration. Only new storage without a recorded bucket uses the current project region. Transactional mail is processed in the US by the platform's mail provider, whatever the project's region. A cloud agent's own IP address does not establish your preferred hosting region.
 
@@ -72,7 +70,7 @@ The response supplies an operation ID. The agent observes that operation until i
 
 ## 5. Verify the app
 
-The agent reads `dev_access_mode` and the URL from project status. For protected Dev it obtains the persistent owner-only share link; for public Dev it opens the clean URL directly. Check navigation and, where used, application login and a real data read/write. A successful build alone is not the finished app.
+After the first deployment, the agent checks project status and opens [Live Preview](/previews). Open the link once the preview is ready and has applied the saved source. Check navigation and, where used, application login and a real data read/write. The agent retrieves the protected Dev share link only if you ask for the deployed Dev site.
 
 When you request publication, the agent checks current authorization, creates a promotion plan and publishes the verified artifact to Prod. Isolated promotion applies migrations without copying Dev records into Prod. Prod receives its own private secret inputs. The agent can also build a commit straight into Prod, including with shared data. With shared data, schema changes affect Dev too. For a Prod-only project, an omitted deployment environment selects Prod; explicit Dev requires Dev to exist. [Deploy to Prod](/environments#deploy-to-prod).
 

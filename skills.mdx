@@ -15,13 +15,11 @@ npx skills add amerged-org/ohmyhost-docs -s ohmyhost-get-started
 
 [`ohmyhost-get-started`](https://ohmyho.st/skills/ohmyhost-get-started/SKILL.md) is the entry point. It teaches your agent to:
 
-1. check what is installed and who is signed in, and install or upgrade the CLI and MCP server only when needed;
-2. register the MCP server with your harness (Codex, Claude Code, Cursor, Hermes or OpenClaw) and confirm the tools are loaded;
-3. send you one sign-in link with a confirmation code, and wait until you finish;
-4. select or create your workspace, and keep several accounts on one computer apart;
-5. keep access for later sessions, or create a non-expiring API token for automation;
-6. connect GitHub once per workspace and hand over to the deployment Skill;
-7. get you support: it reports bugs and requests with a receipt ID (see [Support](/support)).
+- **Desktop, cloud shell or container.** Reuse the saved login or sign in through one browser link and confirmation code. MCP registration is optional.
+- **Connected chat without a shell.** Use managed OAuth and verify the account with `identity_get`.
+- **Unattended automation.** Load a private `OHMYHOST_TOKEN` in the process environment and verify its workspace. [Login and API tokens](/login-tokens).
+
+Once the account and workspace are verified, the router hands off to the matching Skill. For deployment, the agent keeps the saved source binding and opens [Live Preview](/previews) after the first deployment.
 
 Every step ends with a command that proves it, so a saved configuration or a closed browser tab is never mistaken for a working connection. Read the file yourself if you want the exact wording; it is the same text your agent follows.
 

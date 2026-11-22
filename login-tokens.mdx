@@ -36,7 +36,9 @@ ohmyhost whoami --json
 
 Open the returned link, check its displayed confirmation code against the CLI's code, and sign in or sign up. Direct signup, including a malformed referral source, creates a Free **My workspace**; a valid referral may add its configured benefit. `ohmyhost whoami --json` confirms the actual selection. Reuse an existing workspace. With several organizations, bind an unbound login using `ohmyhost organization use --organization ULID --json`; if none exists, use `organization create`. A saved login keeps its workspace (`profile_organization_fixed`): add a separate login with `ohmyhost login --organization ULID --json` for another workspace. Existing customers can return through [login](https://app.ohmyho.st/login).
 
-Sessions are kept in the operating system's credential store, also read by local MCP. On `credential_store_unavailable`, unlock the desktop store and retry; a headless/CI host can use a private `OHMYHOST_TOKEN` from the portal instead. `logout --json` removes the selected saved login; `--revoke` also ends its server session. Neither revokes an API token.
+On Linux, including cloud sessions and containers, the CLI saves the login in owner-only files under `~/.ohmyhost/profiles/`. Local MCP reads the same login. On macOS and Windows the CLI uses the operating system's credential store. `ohmyhost login --json` checks that it can save the login before issuing a link. If it returns `credential_store_unavailable`, follow the reason it gives. If a new container loses the home directory, sign in again with a new link and code.
+
+`logout --json` removes the selected saved login on this machine. Add `--revoke` to end its server session as well. To revoke an automation token, use the separate [token revocation command](#use-and-revoke).
 
 ## Several accounts on one computer
 

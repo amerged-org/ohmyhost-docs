@@ -1,0 +1,3 @@
+# Prepare a domain before the first deployment
+
+A customer can authorize Cloudflare before the website is live. Follow the domains Skill: plan the requested hostname, apply it once and retain its idempotency key. `awaiting_deployment` means the name is declared, with no DNS changes, certificate or domain charges yet. Return the Cloudflare authorization URL, verify consent, then deploy and verify Prod on the platform address. Repeat the same domain apply to activate the hostname. The callback and a successful deployment never switch customer DNS by themselves. A current CLI/MCP is required to read the new state.

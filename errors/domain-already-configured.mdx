@@ -7,6 +7,6 @@ The API, CLI and MCP return `domain_already_configured` with HTTP 409. Repeating
 
 ## What to do
 
-This project already has one Paid domain connection, for another hostname or one a different member configured. Read it with 'ohmyhost domain paid status --project ULID --json'. Delete it with 'ohmyhost domain paid delete --project ULID --hostname CURRENT_HOST --yes --json' only to replace it, then repeat this request with a new idempotency key. Repeating it unchanged cannot work.
+This project already has one Paid domain connection, for another hostname or one a different member configured. Read it with 'ohmyhost domain paid status --project ULID --json'. Delete it with 'ohmyhost domain paid delete --project ULID --hostname CURRENT_HOST --idempotency-key KEY --yes --json' only to replace it, then repeat this request with a new idempotency key. Repeating it unchanged cannot work.
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

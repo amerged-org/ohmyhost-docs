@@ -1,0 +1,3 @@
+# Connected MCP clients of a workspace
+
+A workspace Owner can see which MCP clients are connected to the workspace and disconnect one from that workspace only. `ohmyhost organization mcp-connections list --organization ULID --json` (MCP `organization_mcp_connections_list`) lists one entry per member, client and consent; disconnected consents are not listed. `ohmyhost organization mcp-connections revoke --organization ULID --connection UUID --yes --json` (MCP `organization_mcp_connection_revoke` with `confirmed: true`) disconnects one client from that workspace only, and the member's other workspaces are unaffected. It answers `pending` while an active use drains, so repeat the same command until it answers `revoked`.

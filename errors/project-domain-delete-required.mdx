@@ -7,6 +7,6 @@ The API, CLI and MCP return `project_domain_delete_required` with HTTP 409. Repe
 
 ## What to do
 
-This project still has a live or pending custom-domain connection. Read 'ohmyhost domain paid status --project ULID --json', remove that connection with 'ohmyhost domain paid delete --project ULID --hostname HOST --yes --json', then create a fresh project deletion plan. Repeating while it remains connected cannot work.
+This project still has a live or pending custom-domain connection. Read 'ohmyhost domain paid status --project ULID --json', remove that connection with 'ohmyhost domain paid delete --project ULID --hostname HOST --idempotency-key KEY --yes --json', then create a fresh project deletion plan. Repeating while it remains connected cannot work.
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

@@ -1,6 +1,6 @@
 ---
 name: ohmyhost-deploy
-description: Develop and version an application with ohmyho.st, open a private live preview, and deploy or publish on request from a local checkout or a connected native chat. Reuse the saved project and source, select managed source or GitHub only when needed, and switch an existing project only on request. From a native chat, also set private application secrets with a one-hour link that needs no sign-in. Use troubleshooting for a stuck deployment.
+description: Develop and version an application with ohmyho.st, open a private live preview, and deploy or publish on request from a local checkout or a connected native chat. Reuse the saved project and source; an unbound local checkout is published as it is, without GitHub, and GitHub is the later step for deployment on every push. Switch an existing project only on request. From a native chat, also set private application secrets with a one-hour link that needs no sign-in. Use troubleshooting for a stuck deployment.
 ---
 
 # Develop and deploy an app
@@ -40,20 +40,77 @@ For generation-aware inspection, initialization, commits or a source switch, req
 the opt-in returns the exact source connection and generation. Managed source already includes
 those guards in either view. `ohmyhost source status` opts in for the local source workflow.
 
-| Situation                                                           | Continue with                                                |
-| ------------------------------------------------------------------- | ------------------------------------------------------------ |
-| Existing managed binding                                            | Managed source on that project                               |
-| Existing GitHub binding                                             | **ohmyhost-deploy-github**                                   |
-| Explicit request to use GitHub                                      | **ohmyhost-deploy-github**, including GitHub setup if needed |
-| Explicit request to store/deploy directly with ohmyho.st            | Managed source                                               |
-| New application developed entirely in native chat                   | Managed source                                               |
-| Unbound local checkout with a selected GitHub remote                | **ohmyhost-deploy-github**                                   |
-| Unbound local checkout without GitHub and no explicit source choice | Ask once: "Keep versions with ohmyho.st, or set up GitHub?"  |
+| Situation                                                | Continue with                                                |
+| -------------------------------------------------------- | ------------------------------------------------------------ |
+| Existing managed binding                                 | Managed source on that project                               |
+| Existing GitHub binding                                  | **ohmyhost-deploy-github**                                   |
+| Explicit request to use GitHub                           | **ohmyhost-deploy-github**, including GitHub setup if needed |
+| Explicit request to store/deploy directly with ohmyho.st | Managed source                                               |
+| New application developed entirely in native chat        | Managed source                                               |
+| Unbound local checkout, nothing else said                | Publish the working directory as it is: the local section    |
 
-A local `.git` directory may belong to a non-GitHub host or have no remote. A copied GitHub
-remote alone does not override the saved project binding. If the existing source conflicts
+An unbound checkout is published as it is whether or not it has a GitHub remote and whether or
+not the workspace has a GitHub installation; a remote can be a local Git proxy or another host,
+and a copied GitHub remote alone neither overrides a saved binding nor sends the checkout to
+GitHub. GitHub is the later step, for deployment on every push. If the existing source conflicts
 with an explicit new choice, use the source-switch flow after its concrete effects are reviewed.
 The direct managed route requires neither GitHub signup nor a copied platform/device token.
+
+## Local checkout: first deployment
+
+Decide first whether this checkout is bound, before anything is created.
+`ohmyhost source inspect` shows only the local Git state and unfinished publications; it does not
+show a binding. The link is read by any project command that leaves out `--project`:
+
+```
+ohmyhost whoami --json
+ohmyhost project status --json
+ohmyhost project list --json
+```
+
+- `project status` answers with a project: the checkout is bound. Continue that project with the
+  source its `source` field names; do not create one.
+- It answers that several links match: ask the customer once which workspace is meant.
+- It answers `invalid_command`: there is no usable local link, either none or one that cannot be
+  read. A new container has none even for an app that exists. Read the whole project list,
+  following `next_cursor` with `--cursor` until there is none.
+  - The workspace has no project: this is a new app. Go on with the commands below.
+  - The workspace has projects: nothing is created silently. If exactly one project carries the
+    name the customer gave, or exactly one has this checkout's repository as its saved source
+    (`ohmyhost source status --project PROJECT_ULID --json`), continue that project and say so.
+    If several match, or none, ask once, with the handles and IDs, which project is meant or
+    whether this is a new app, before anything is published or deployed.
+
+Only for an unbound checkout, in this order:
+
+```
+ohmyhost project create --organization ORGANIZATION_ULID --name NAME --region eu --idempotency-key KEY --json
+ohmyhost operation get OPERATION_ULID --json
+ohmyhost init --dry-run --region eu --json
+ohmyhost init --region eu --json
+ohmyhost source publish --project PROJECT_ULID --mode initialize --expected-source-generation 0 --message "Initial version" --idempotency-key KEY --wait --json
+ohmyhost deploy --project PROJECT_ULID --commit COMMIT_SHA --environment dev --idempotency-key KEY --yes --wait --json
+ohmyhost project status --project PROJECT_ULID --json
+ohmyhost project preview open --project PROJECT_ULID --environment dev --json
+```
+
+- `project create` answers `accepted`; read its operation until it succeeds.
+- An existing `ohmyhost.yaml` is kept: only analyse it with `--dry-run`, and run the second `init` only when there is none.
+- The region is the customer's one answer (`eu` or `us`) and goes to `project create` and `init`. Dev access (protected) and data mode (shared) take the platform defaults: report them with the commands that change them, do not ask. Public Dev is `ohmyhost project dev-access mode --project PROJECT_ULID --mode public --idempotency-key KEY --yes --json`; isolated data is the confirmed flow of **ohmyhost-deploy-github**, starting with `ohmyhost project data plan --project PROJECT_ULID --change isolate_prod_keeps_data --json`.
+- Every `--idempotency-key` is 1 to 128 characters of letters, digits and `.`, `_`, `:`, `-`; any other key answers `invalid_command` without saying why.
+- A first publication is generation 0 without a connection. Later ones take the generation and connection from `ohmyhost source status --project PROJECT_ULID --json`.
+- A publication that is still pending is finished with `ohmyhost source publish complete`, below.
+- The commit to deploy is `receipt.commit_sha` of the publication.
+- Stop before the upload on `application_root_ambiguous` (ask once which root) and on a snapshot over 2 MiB a file, 8 MiB in total or 2,000 files, or with a symbolic link. Report the named error and what the limit is, and ask the customer how to go on; do not promise that the GitHub route takes the same checkout, because it has limits of its own.
+- Show the app through the live preview with the last command and the handoff rules above. Read the protected Dev share link (`ohmyhost project dev-share link --project PROJECT_ULID --json`) and send the customer its `share_url` only when they ask for the deployed Dev site. Do not request a second one-time ticket while the first is unused, and do not report the deployment as unverified only because you have no browser.
+
+An app that needs private values (the customer is at a terminal, because a local agent has no other way to take a value): one command per secret, with the value on standard input and never in the arguments, the chat or the logs:
+
+```
+printf '%s' "$SECRET_VALUE" | ohmyhost secret set NAME --project PROJECT_ULID --environment ENVIRONMENT_ULID --idempotency-key KEY --stdin --json
+```
+
+`ENVIRONMENT_ULID` is the Dev or Prod environment ID from `ohmyhost project status --project PROJECT_ULID --json`; Prod has its own secrets and none is copied from Dev. The protected one-hour form (`secret_input_request`) exists only in the remote connection.
 
 ## Local managed checkout
 
@@ -194,8 +251,10 @@ dependency. Verify the connected account and workspace using the get-started Ski
    means wait for one to finish, then start the deployment again with a new key.
 8. After deployment, use `project_status` to find the deployed address for verification.
    For protected Dev, inspect the site with `project_dev_access_create` and its one-time
-   `redeem_url`. Do not issue another ticket while the first is unused. A repeated request
-   revokes the unused ticket, and a key does not replay it.
+   `redeem_url`; an agent without a browser reports what it could not inspect and gives the
+   private `share_url` only when the user asks for the deployed Dev site. Do not issue another
+   ticket while the first is unused. A repeated request revokes the unused ticket, and a key
+   does not replay it.
    Open a public Dev site or direct Prod deployment at its deployed address for verification.
    Keep these entry links out of notes, source and logs.
    Verify the app's meaningful

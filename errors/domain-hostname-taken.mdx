@@ -7,6 +7,6 @@ The API, CLI and MCP return `domain_hostname_taken` with HTTP 409. Repeating the
 
 ## What to do
 
-A live connection holds it; its holder removes it with ohmyhost domain paid delete --project ULID --hostname HOST --yes --json. To connect it here, add the _omh-project.HOST TXT record that ohmyhost domain paid status --project ULID --json shows for it, then apply again with ohmyhost domain paid apply --project ULID --hostname HOST --idempotency-key KEY --json.
+A live connection holds it; its holder removes it with ohmyhost domain paid delete --project ULID --hostname HOST --idempotency-key KEY --yes --json. To connect it here, add the _omh-project.HOST TXT record that ohmyhost domain paid status --project ULID --json shows for it, then apply again with ohmyhost domain paid apply --project ULID --hostname HOST --idempotency-key KEY --yes --json.
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.
