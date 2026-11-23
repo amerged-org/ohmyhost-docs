@@ -88,10 +88,10 @@ Observe the returned source-link operation; it needs no second browser authoriza
 
 ### Deploy the saved commit
 
-Use the full SHA of the saved managed version or pushed GitHub commit as `COMMIT_SHA`:
+Use the full SHA of the saved managed version or pushed GitHub commit as `COMMIT_SHA`. The example targets Prod. To deploy the Paid Dev site, choose `--environment dev`.
 
 ```sh
-ohmyhost plan --project "$PROJECT_ID" --commit "$COMMIT_SHA" --json
+ohmyhost plan --project "$PROJECT_ID" --commit "$COMMIT_SHA" --environment prod --json
 ```
 
 Read the plan, its requirements and credit effects. Set application [runtime secrets](/secrets) if required. Take `PLAN_ID` from `plan.id`, retain a new `DEPLOY_REQUEST_KEY`, and execute the approved plan:
@@ -105,10 +105,12 @@ ohmyhost deploy --project "$PROJECT_ID" --plan-id "$PLAN_ID" --idempotency-key "
 ```sh
 ohmyhost operation get "$OPERATION_ID" --json
 ohmyhost project status --project "$PROJECT_ID" --json
-ohmyhost project dev-share link --project "$PROJECT_ID" --json
+ohmyhost project preview open --project "$PROJECT_ID" --environment prod --json
 ```
 
-`OPERATION_ID` is the deploy response's `operation.id`. A wait timeout leaves the accepted operation running; inspect it without submitting another deployment. Follow returned polling guidance. If `dev_access_mode` is `protected`, the clean URL answers 404 without a session: open the reusable `share_url` first, then test the clean Dev URL. If it is `public`, open the clean Dev URL directly. Keep the share link out of logs and project notes. The Owner can change the mode with `ohmyhost project dev-access mode`, replace the link with `ohmyhost project dev-share rotate`, or revoke it with `ohmyhost project dev-share revoke`.
+`OPERATION_ID` is the deploy response's `operation.id`. A wait timeout leaves the accepted operation running. Follow the polling guidance for that operation. After a successful deployment, the CLI note points to [live preview](/previews) first. Use `--environment dev` on Paid when the project has Dev, or `--environment prod` on Free or when Dev is absent. Share the preview when `ready_to_show` is true.
+
+If asked for the deployed Paid Dev site, use `ohmyhost project dev-share link --project "$PROJECT_ID" --json` for protected Dev, or open the clean Dev URL when `dev_access_mode` is `public`. Keep protected links out of logs and project notes. See [Dev access controls](/environments#choose-who-can-open-dev).
 
 ## Common follow-ups
 

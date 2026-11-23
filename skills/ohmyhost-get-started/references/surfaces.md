@@ -239,7 +239,7 @@ reference describes server support; a host may still be checking a new or change
 - `token_create` — Create your own non-expiring API token after interactive login and save it to the selected private env file.
 - `tokens_list` — List your token metadata after interactive login.
 - `token_revoke` — Revoke one of your own API tokens after explicit confirmation and interactive login.
-- `identity_get` — Get the ohmyho.st customer/agent identity this call acts as: user and account email, scoped organization IDs and names and, in context, the saved login or OHMYHOST_TOKEN that supplied it.
+- `identity_get` — Get the ohmyho.st customer/agent identity this call acts as: user and account email, scoped organization IDs and names, plan and remaining credits when authorized and available, and, in context, the saved login or OHMYHOST_TOKEN that supplied it.
 - `project_handle_check` — Check whether a project address is free before offering it to the customer.
 - `project_handle_set` — Move a project to an address the customer chose, after project_handle_check said it is free.
 - `project_data_plan` — Owner only: plan a Dev/Prod data assignment change and review the data, files, deployments and database logins it keeps or removes.
@@ -251,17 +251,17 @@ reference describes server support; a host may still be checking a new or change
 - `project_get` — Get one project
 - `project_status` — Get source, existing environment IDs, deployment URLs, custom production domains, Dev access mode, latest operation and cleanup status.
 - `project_development_add` — Add Dev to an existing project.
-- `preview_get` — Read the stable private preview of this exact environment: its link, state, saved and applied version, and ready_to_show.
-- `preview_open` — Open or create the stable private preview of this exact environment and return its link, state and ready_to_show.
+- `preview_get` — Read the stable private live preview for this project and environment: its link, state, saved and applied version, and ready_to_show.
+- `preview_open` — Open or create the stable private live preview for this project and environment and return its link, state and ready_to_show.
 - `preview_stop` — Stop the preview and remove backups while preserving its URL.
 - `preview_rotate` — Rotate the preview URL and close old connections.
-- `project_dev_share_link_get` — Owner only: get or create the persistent protected Dev link.
+- `project_dev_share_link_get` — Owner only: get or create the persistent share link for the protected Dev site (Paid only).
 - `project_dev_access_mode_set` — Owner only: choose public Dev (no platform token) or protected Dev (share link required).
 - `powered_by_flag_get` — Read whether the production site shows the opt-in "Powered by ohmyho.st" flag.
 - `powered_by_flag_set` — Owner only, ask the human first: show or hide a small "Powered by ohmyho.st" flag on the right edge of the production site.
 - `project_dev_share_link_rotate` — Owner only: replace the persistent Dev link and immediately revoke old links and sessions.
 - `project_dev_share_link_revoke` — Owner only: revoke the persistent Dev link and active sessions immediately without changing the Dev access mode.
-- `project_dev_access_create` — Create an owner-only one-hour single-use access link for the protected Dev app.
+- `project_dev_access_create` — Create an owner-only one-hour single-use access link for the protected Dev site (Paid only).
 - `integration_connection_begin` — Create a protected Make consent link for the selected workspace and signed-in user.
 - `integration_connection_list` — List the caller's workspace connection grants.
 - `integration_connection_status` — Read a consent request status.
@@ -276,16 +276,16 @@ reference describes server support; a host may still be checking a new or change
 - `organization_mcp_connections_list` — Owner only: list the MCP clients connected to this workspace and the member who connected each, one entry per member, client and consent.
 - `organization_mcp_connection_revoke` — Owner only: disconnect one MCP client from this workspace only; the member's other workspaces are unaffected.
 - `source_link` — Link a repository covered by the workspace GitHub connection.
-- `source_get` — Get linked source status.
+- `source_get` — Get linked source status and preparation guidance when pending.
 - `deployment_plan` — Plan an immutable deployment.
 - `deployment_create` — Start a reviewed deployment plan.
 - `deployments_list` — List project deployments
 - `deployment_get` — Get one deployment
 - `deployment_logs` — List the newest normalized diagnostics of one deployment (build, control, runtime and function failures with catalog codes).
-- `operation_get` — Get durable operation status and current deployment progress/reconciliation guidance.
+- `operation_get` — Read the original operation’s state, work kind, current step, age, usual duration, wait reason and next step.
 - `operation_logs` — Read available operation events for at most ten seconds, stopping earlier at max_events or a terminal event.
 - `function_runs_list` — List the newest scheduled function runs (functions.crons) of an environment: one run per due UTC minute with state, attempt, the status the scheduled handler returned and timing.
-- `operation_reconcile` — Start an explicitly confirmed provider reconciliation attempt
+- `operation_reconcile` — Recovers an operation after operation_get reports reconciliation_required.
 - `workspace_mail_domain_dns_revoke` — Revoke the selected workspace sender DNS grant at its current revision with explicit confirmation.
 - `application_domain_identity_authorization_revoke` — Revoke the current application identity DNS grant with explicit confirmation.
 - `workspace_mail_domains_list` — List only workspace sender domains this account and connected client may read.
@@ -315,7 +315,7 @@ reference describes server support; a host may still be checking a new or change
 - `mail_domain_set` — Configure the project's one production mail domain using its Prod environment ID.
 - `mail_domain_status` — Read separate sending and receiving readiness and exact DNS records for the project’s production mail domain.
 - `mail_domain_delete` — Retire the project's mail domain while the project stays active; use its Prod environment ID.
-- `native_auth_config_get` — Read Owner Native Auth configuration and readiness.
+- `native_auth_config_get` — Read Native Auth policy for one environment.
 - `native_auth_config_set` — Update Owner Native Auth configuration at the current revision.
 - `native_auth_provider_get` — Read provider setup without its secret.
 - `native_auth_provider_set` — Update provider settings without submitting a secret.
@@ -365,7 +365,7 @@ account rights and credential restrictions are checked by the canonical API on e
 - `database_execution_usage_get` — Use tools/list for database_execution_usage_get's registered MCP description and exact input schema.
 - `database_query` — Read one owner-authorized Dev or Prod database query (at most 100 rows, five-second timeout).
 - `database_schedule_delete` — Remove one database schedule so it never runs again.
-- `database_schedule_get` — Read one database schedule
+- `database_schedule_get` — Read one database schedule or its setup step when the schedule is missing.
 - `database_schedule_list` — Use tools/list for database_schedule_list's registered MCP description and exact input schema.
 - `database_schedule_run_list` — Use tools/list for database_schedule_run_list's registered MCP description and exact input schema.
 - `database_schedule_run_now` — Queue one immediate run of a database schedule.
@@ -503,7 +503,7 @@ account rights and credential restrictions are checked by the canonical API on e
 
 ## Master Tool Contract and API reference
 
-Master Tool Contract SHA-256: `61ed92a391a6fc6c187cab53c0e0307dcc45652563857384745d0d8aab25dde0`.
+Master Tool Contract SHA-256: `3a293efd8e3f7abfcfda8b592fe0eaa81240690beb34432fc6f23a7a123bbbf8`.
 
 The complete public OpenAPI contract is at <https://ohmyho.st/api> and mirrored per release.
 Its MCP metadata accounts for every API operation: a named tool, a protected handoff, an

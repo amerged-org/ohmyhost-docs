@@ -1,0 +1,12 @@
+---
+title: "Source syntax error"
+description: "What the `source_syntax_error` error means and what to do next."
+---
+
+The API, CLI and MCP return `source_syntax_error` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Fix the syntax at the reported line and column, save or push the corrected source and plan the new commit.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

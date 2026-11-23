@@ -6,9 +6,7 @@ CLI; a connected native chat uses the remote MCP server. Both use the same produ
 
 See [amerged-org/ohmyhost](https://github.com/amerged-org/ohmyhost) for the ohmyho.st hosting platform (OMH) and [amerged-org/cloudflare-postgres](https://github.com/amerged-org/cloudflare-postgres) for its PostgreSQL infrastructure (PGCF).
 
-Source can be a connected GitHub repository or an ohmyho.st-managed repository. Deploy an exact commit to Dev or Prod,
-verify the app, and promote a tested Dev artifact when appropriate. Dev is protected by default;
-the deployment Skill handles public Dev, data choices and the effects of shared databases.
+Source can be a connected GitHub repository or an ohmyho.st-managed repository. Use a private live preview on Free or Paid to show the saved version without deploying. The Dev site is a deployed test site for Paid workspaces and is protected by default. Prod is the deployed live site. The deployment Skill explains Dev access, promotion and shared data.
 You can also give the app Postgres, private runtime secrets, Cloudflare R2 files, optional
 transactional mail, LLMs, images, speech, classifiers and OCR through an OpenAI-compatible gateway, and a custom domain, export its database as an encrypted SQL ZIP, and read
 usage, credits and project budgets. The customer chooses application authentication.

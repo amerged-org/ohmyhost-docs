@@ -5,8 +5,6 @@ description: Sign a customer in to ohmyho.st and reach a first deployment. Use i
 
 # Start with ohmyho.st
 
-When asked where you are running, identify the platform in your reply. Report `Agent_Service=codex`, `Agent_Service=chatgpt`, or `Agent_Service=claude`. Use `Agent_Service=unknown` if you do not know. This self-report conveys no permission.
-
 Sign the customer in, check that the account and workspace are theirs, then continue with their app. Choose the row that matches what you have:
 
 | The agent has                                                        | It signs in with                                                                                                                   | What the customer does                    |

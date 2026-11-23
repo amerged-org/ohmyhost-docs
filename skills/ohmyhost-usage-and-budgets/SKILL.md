@@ -5,8 +5,6 @@ description: Explain ohmyho.st measured usage, remaining credits and project spe
 
 # Explain usage and spending
 
-When asked where you are running, identify the platform in your reply. Report `Agent_Service=codex`, `Agent_Service=chatgpt`, or `Agent_Service=claude`. Use `Agent_Service=unknown` if you do not know. This self-report conveys no permission.
-
 Use `identity_get` to select the organization, then `organization_credits_get` and `organization_usage_get`, which lists the billed charges of the last up to 14 UTC days by day, project and meter and each project's use so far this month. Older days are not kept. Read `project_budget_get` for a project-specific limit and `project_context_get` for current project actions.
 
 Report the available balance, reserved credits, the days covered and the largest project/environment/meter costs. Distinguish billed consumption from reservations. Settlement lag varies by meter, and recent usage can still be pending. Explain quantities and credits together, for example database RAM and active time versus separately metered customer files. Reporting remains available at zero credits.

@@ -14,10 +14,12 @@ Share IDs, commit hashes, state words, codes and tool names only on request.
 
 ## Show the app to the user
 
-Use `preview_open` after a save, when continuing an existing project even if no save is
+Free and Paid workspaces can open a private live preview without deploying. Use
+`preview_open` after a save, when continuing an existing project even if no save is
 needed, or when the user asks to see the app. Read the project's workspace plan with
-`organization_account_get` and pass `environment: dev` for `plan: paid` or
-`environment: prod` for `plan: free`. If plan access is denied, ask the workspace Owner
+`identity_get` or `organization_account_get` and its environments with `project_status`. Pass `environment: dev`
+if the workspace is Paid and the project has Dev. Otherwise pass `environment: prod`.
+If plan access is denied, ask the workspace Owner
 to confirm the plan.
 
 Follow the readiness checks in step 4 below. Give the returned preview `url` only when
@@ -26,13 +28,14 @@ On later handoffs, give the link without repeating the question. Apply these rul
 any link or question in `next_step` and `say_to_user`. Keep the link out of source, notes
 and logs.
 
-Dev site and Prod addresses are for deployed versions. Give a Dev site link only when
+The Dev site is a deployed test site for Paid workspaces. Prod is the deployed live site. Give a Dev site link only when
 the user asks for the deployed Dev site, and give only the `share_url` returned by
 `project_dev_share_link_get`. If no share link is available, explain the limitation.
 
 ## Select the source once
 
 The saved project binding and `source_get` determine how to continue an existing application.
+When the source is pending, follow its polling guidance and keep the original initialization.
 Reuse them before interpreting local Git remotes. Never silently replace a source because the
 agent changed, a checkout was cloned, or a GitHub remote is missing on this computer.
 For generation-aware inspection, initialization, commits or a source switch, request
@@ -102,6 +105,7 @@ ohmyhost project preview open --project PROJECT_ULID --environment dev --json
 - A publication that is still pending is finished with `ohmyhost source publish complete`, below.
 - The commit to deploy is `receipt.commit_sha` of the publication.
 - Stop before the upload on `application_root_ambiguous` (ask once which root) and on a snapshot over 2 MiB a file, 8 MiB in total or 2,000 files, or with a symbolic link. Report the named error and what the limit is, and ask the customer how to go on; do not promise that the GitHub route takes the same checkout, because it has limits of its own.
+- The `deploy` line is for a Paid workspace, the only one with a Dev site. On a Free workspace skip it and open the preview with `ohmyhost project preview open --project PROJECT_ULID --environment prod --json`; deploy to Prod only when the customer asks to go live.
 - Show the app through the live preview with the last command and the handoff rules above. Read the protected Dev share link (`ohmyhost project dev-share link --project PROJECT_ULID --json`) and send the customer its `share_url` only when they ask for the deployed Dev site. Do not request a second one-time ticket while the first is unused, and do not report the deployment as unverified only because you have no browser.
 
 An app that needs private values (the customer is at a terminal, because a local agent has no other way to take a value): one command per secret, with the value on standard input and never in the arguments, the chat or the logs:
@@ -173,7 +177,8 @@ dependency. Verify the connected account and workspace using the get-started Ski
    Dev is included, its access mode, `source_provider: "managed"` and the intended `template`. Choose `vite-react`
    for a basic web app, or `empty` for a specifically chosen supported stack. Preserve an
    existing project's region and data; do not infer region from an
-   agent's IP. Dev and Prod are created by default; set `include_development_environment: false`
+   agent's IP. Project creation defaults to Dev and Prod environment records. Deploying a Dev site
+   requires a Paid workspace. Set `include_development_environment: false`
    only for an explicitly requested Prod-only project, and use `project_development_add` to add
    Dev later. Both shared and isolated data allow a direct Prod deployment. Shared data means
    database migrations and writes also affect Dev when it exists; isolated environments incur
@@ -216,13 +221,10 @@ dependency. Verify the connected account and workspace using the get-started Ski
    handoff rules above to any link or question. If the preview still needs time after polling,
    tell the user it is still getting ready.
 
-   A database or sign-in app needs a first deployment in that environment before its preview can
-   load data. If it has no deployment there, explain this in one sentence. For Prod, explain in
-   that sentence that the site will go live. Once the user asks or agrees to that deployment,
-   deploy once using the steps below and check the live preview again.
+   A preview of a database or sign-in app cannot load data until its preview database exists.
+   Tell the user about this limitation. Deploy only when the user requests a deployment.
 
-   When `ready_to_show` is true and any required first deployment has succeeded, use the live
-   preview handoff above.
+   When `ready_to_show` is true, use the live preview handoff above.
    For example, “Deine Seite ist als private Vorschau fertig: `<Link>`. Möchtest du sie dir ansehen?”
    Later saves update the same preview without a deployment. Once a later save is ready to show,
    say what changed and repeat the link.
@@ -241,7 +243,7 @@ dependency. Verify the connected account and workspace using the get-started Ski
 7. Deploy or publish only when the user asks or agrees to that action. A request that already says
    deploy, publish or go live counts.
    Call `deployment_plan` for the exact accepted commit and the requested environment (`dev` for
-   the private Dev site or `prod` for a direct production deployment). For `auth.provider: omh-native`,
+   the Paid-only Dev site or `prod` for the live site). For `auth.provider: omh-native`,
    `native_auth_launch_unavailable` means the project needs rollout approval from ohmyho.st.
    Preserve the current project and saved commit. Once approval is confirmed, plan the commit again. Review its
    real costs/effects within the user's existing authorization, then `deployment_create` with

@@ -1,4 +1,4 @@
-Master Tool Contract SHA-256: `61ed92a391a6fc6c187cab53c0e0307dcc45652563857384745d0d8aab25dde0`. These are the shared remote server's named tools; discover the current host's exact input schema with `tools/list`. New definitions may still be undergoing host checks.
+Master Tool Contract SHA-256: `3a293efd8e3f7abfcfda8b592fe0eaa81240690beb34432fc6f23a7a123bbbf8`. These are the shared remote server's named tools; discover the current host's exact input schema with `tools/list`. New definitions may still be undergoing host checks.
 
 | Tool | Purpose |
 | --- | --- |
@@ -25,7 +25,7 @@ Master Tool Contract SHA-256: `61ed92a391a6fc6c187cab53c0e0307dcc456525638573847
 | `database_execution_usage_get` | Use tools/list for database_execution_usage_get's registered MCP description and exact input schema. |
 | `database_query` | Read one owner-authorized Dev or Prod database query (at most 100 rows, five-second timeout). |
 | `database_schedule_delete` | Remove one database schedule so it never runs again. |
-| `database_schedule_get` | Read one database schedule |
+| `database_schedule_get` | Read one database schedule or its setup step when the schedule is missing. |
 | `database_schedule_list` | Use tools/list for database_schedule_list's registered MCP description and exact input schema. |
 | `database_schedule_run_list` | Use tools/list for database_schedule_run_list's registered MCP description and exact input schema. |
 | `database_schedule_run_now` | Queue one immediate run of a database schedule. |

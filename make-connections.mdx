@@ -97,6 +97,8 @@ Ask for an import when you want to save a connection reference in a particular a
 
 Use `integration_connection_import` in chat or the following CLI command with IDs from discovery and project context.
 
+In a connected chat, the import checks access to the selected project and environment as well as the workspace's Make grant. Verify the saved reference with `integration_connection_list` for that project and environment. If the destination cannot be found, check the project, environment and your access before retrying.
+
 ```sh
 ohmyhost connection import \
   --organization ORGANIZATION_ULID \

@@ -14,6 +14,8 @@ Skills recommend isolation and explain the credit difference. An explicit custom
 
 ## Choose who can open Dev
 
+The deployed Dev site is available on Paid. Use a private [live preview](/previews) to share a saved version on any plan.
+
 Before creating a project, your agent asks whether Dev should be **protected** or **public**. Protected is the default. Public lets anyone with the clean Dev URL open it without a platform token, even when Dev and Prod use shared data. Your application's own login remains separate.
 
 For protected Dev, the Owner gets one reusable bearer link with `ohmyhost project dev-share link --project "$PROJECT_ID" --json` or MCP `project_dev_share_link_get`. The same `share_url` works for multiple visitors and has no automatic expiry. Opening it starts a 12-hour browser session and redirects to the clean Dev URL; the link can be opened again after that session ends. Keep it with the people you intend to admit, and do not put it in source, logs or project notes.

@@ -546,7 +546,7 @@
     },
     {
       "name": "database_compute_get",
-      "description": "Read current managed database memory, total storage, region and observed state without running SQL or waking the database. Shared Dev/Prod resolves to one physical database. First provisioning is distinct from cold (sleeping) and warm (running). A null database means no confirmed placement. A configured size does not prove an in-progress resize finished. This read never resizes or changes billing.",
+      "description": "Read current managed database memory, total storage, region and observed state without running SQL or waking the database. Shared Dev/Prod resolves to one physical database. First provisioning is distinct from cold (sleeping) and warm (running). An existing environment without a confirmed database placement returns not_set_up with guidance for provisioning or setup. A configured size does not prove an in-progress resize finished. This read never resizes or changes billing.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3113,7 +3113,7 @@
     },
     {
       "name": "identity_get",
-      "description": "Get the ohmyho.st customer/agent identity this call acts as: user and account email, scoped organization IDs and names and, in context, the saved login or OHMYHOST_TOKEN that supplied it. Compare it with the user and organization the customer named before any change. This does not authenticate the hosted application's end users or provision a customer AuthKit tenant; application authentication is the customer's chosen integration.",
+      "description": "Get the ohmyho.st customer/agent identity this call acts as: user and account email, scoped organization IDs and names, plan and remaining credits when authorized and available, and, in context, the saved login or OHMYHOST_TOKEN that supplied it. Compare it with the user and organization the customer named before any change. This does not authenticate the hosted application's end users or provision a customer AuthKit tenant; application authentication is the customer's chosen integration.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3545,7 +3545,7 @@
     },
     {
       "name": "project_status",
-      "description": "Get source, existing environment IDs, deployment URLs, custom production domains, Dev access mode, latest operation and cleanup status. Dev may be absent; add it with project_development_add. Protected Dev needs project_dev_share_link_get for a persistent share link. Select environments by name; never infer a Prod ID from the default environment.",
+      "description": "Get source, existing environment IDs, deployment URLs, custom production domains, Dev access mode, latest operation and cleanup status. Dev may be absent; add it with project_development_add. Use preview_open to show the app, with environment dev on Paid when the project has Dev, or prod on Free or when Dev is absent. Give the protected Dev share_url from project_dev_share_link_get only when the user asks for the deployed Dev site. Select environments by name; never infer a Prod ID from the default environment.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3608,7 +3608,7 @@
     },
     {
       "name": "preview_get",
-      "description": "Read the stable private preview of this exact environment: its link, state, saved and applied version, and ready_to_show. The link is for the user: hand it over when ready_to_show is true. Private means: keep it out of source files, notes and logs.",
+      "description": "Read the stable private live preview for this project and environment: its link, state, saved and applied version, and ready_to_show. The link is for the user: hand it over when ready_to_show is true. Private means: keep it out of source files, notes and logs.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3644,7 +3644,7 @@
     },
     {
       "name": "preview_open",
-      "description": "Open or create the stable private preview of this exact environment and return its link, state and ready_to_show. Source saves update it without a deployment. The link is for the user: hand it over when ready_to_show is true. Private means: keep it out of source files, notes and logs. It has no expiry until rotated.",
+      "description": "Open or create the stable private live preview for this project and environment and return its link, state and ready_to_show. Available on Free and Paid. Source saves update it without a deployment. The link is for the user: hand it over when ready_to_show is true. Private means: keep it out of source files, notes and logs. It has no expiry until rotated.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3766,7 +3766,7 @@
     },
     {
       "name": "project_dev_share_link_get",
-      "description": "Owner only: get or create the persistent protected Dev link. The same link works for multiple visitors and has no automatic expiry. Keep it out of notes and logs.",
+      "description": "Owner only: get or create the persistent share link for the protected Dev site (Paid only). The same link works for multiple visitors and has no automatic expiry. Keep it out of notes and logs.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -3974,7 +3974,7 @@
     },
     {
       "name": "project_dev_access_create",
-      "description": "Create an owner-only one-hour single-use access link for the protected Dev app. Anonymous Dev HTTP 404 is expected; it does not prove deployment failure. Open redeem_url once in the intended browser or isolated cookie jar, then use the clean origin with its session cookie. Keep the link and cookie private, out of reports, logs and project notes. A new ticket invalidates earlier one-time ticket sessions and unused owner tickets but not the persistent share link; do not blindly retry an uncertain request. This grants no customer application login or Prod access.",
+      "description": "Create an owner-only one-hour single-use access link for the protected Dev site (Paid only). Anonymous Dev HTTP 404 is expected; it does not prove deployment failure. Open redeem_url once in the intended browser or isolated cookie jar, then use the clean origin with its session cookie. Keep the link and cookie private, out of reports, logs and project notes. A new ticket invalidates earlier one-time ticket sessions and unused owner tickets but not the persistent share link; do not blindly retry an uncertain request. This grants no customer application login or Prod access.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4635,7 +4635,7 @@
     },
     {
       "name": "source_get",
-      "description": "Get linked source status. Set include_binding to true to read the source connection ID and generation before managed changes or an explicit source switch.",
+      "description": "Get linked source status and preparation guidance when pending. include_binding true reads the connection ID and generation for managed changes or an explicit source switch.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4865,7 +4865,7 @@
     },
     {
       "name": "operation_get",
-      "description": "Get durable operation status and current deployment progress/reconciliation guidance. Follow progress.phase and progress.suggested_action. waiting_for_mail requires the mail domain status now for the current verification issue and DNS records (use mail_domain_status in either MCP transport or GET /v1/projects/{project_id}/environments/{environment_id}/mail-domain over REST); publishing means the build completed but runtime preparation/publication is unfinished. Poll this operation after progress.next_poll_after_seconds. A queued/running operation with reconciliation.state=required needs one confirmed operation_reconcile using the same operation; pending means poll this operation after 60 seconds. Never infer deployment success from a completed reconciliation attempt or start another build to recover it. A deploy, promotion or rollback names its deployment_id in every state; when state is failed, read that deployment with deployment_logs and follow error.suggested_action before changing source.",
+      "description": "Read the original operation’s state, work kind, current step, age, usual duration, wait reason and next step. A deployment failure includes the deployment ID for deployment_logs. For waiting_for_mail, read mail_domain_status or GET /v1/projects/{project_id}/environments/{environment_id}/mail-domain.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -4967,7 +4967,7 @@
     },
     {
       "name": "operation_reconcile",
-      "description": "Start an explicitly confirmed provider reconciliation attempt",
+      "description": "Recovers an operation after operation_get reports reconciliation_required. Use the original write’s idempotency key and confirm one attempt. The receipt identifies the original operation for a follow-up operation_get. If recovery is exhausted, stop and keep the original resource.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",
@@ -6299,7 +6299,7 @@
     },
     {
       "name": "native_auth_config_get",
-      "description": "Read Owner Native Auth configuration and readiness.",
+      "description": "Read Native Auth policy for one environment. If setup is missing, returns readiness for the plan, project approval, sender domain and application identity.",
       "inputSchema": {
         "type": "object",
         "$schema": "https://json-schema.org/draft/2020-12/schema",

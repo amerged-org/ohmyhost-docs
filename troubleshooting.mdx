@@ -15,6 +15,10 @@ ohmyhost logs "$OPERATION_ID" --follow --json
 
 Read the stable error code, suggested action and any retry interval. Keep source-admission failures, build failures and pending DNS/mail separate.
 
+For an invalid `ohmyhost.yaml`, read the structured `fields` in the MCP result and use `valid_example` when supplied. Correct the named fields and preserve settings that are already valid. For `source_syntax_error`, use the returned `path`, `line` and `column` to fix the source. Save the correction and plan that version again.
+
+Read `operation_get` for the original operation. Its `work` object reports the step, `age_seconds`, `usual_duration_seconds` and, when available, the reason for the wait and the next step. Follow the returned polling interval. In MCP, use the returned `next_step` to continue.
+
 For a connected chat, verify the intended account, workspace and current role through the [connection flow](/agents/mcp). Read the saved source and keep its original upload or deployment operation after uncertainty. If another chat changed the source, reconcile the current files before saving a new version. Private credentials use the [secret link](/secrets#set-a-secret-from-a-connected-chat); a missing secret is not a reason to paste it into chat.
 
 | Result                                                                            | Next action                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                              |
@@ -72,7 +76,7 @@ keys, signed URLs or raw upstream responses in feedback.
 ohmyhost operation reconcile "$OPERATION_ID" --idempotency-key "$RECONCILE_KEY" --yes --json
 ```
 
-Use this when the operation reports reconciliation is required and no attempt is pending. Retain the same request key across uncertainty. A completed reconciliation attempt does not itself mean the original deployment succeeded.
+Read `reconciliation.failing_step`, `cause` and `can_reconcile`. Causes include `provider_observation_uncertain`, `workflow_ended`, `delivery_unconfirmed` and `unknown`. Confirm reconciliation of the original operation if `can_reconcile` is true. If an attempt is pending, wait and poll. If recovery is unavailable, report the operation through [feedback](/feedback). Retain the request key across uncertainty and verify the original operation and application after recovery.
 
 ## Read diagnostic pages
 
