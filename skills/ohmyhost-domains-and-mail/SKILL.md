@@ -120,7 +120,7 @@ To stop receiving, `mail_webhook_disable` removes the webhook and makes stored m
 
 ## Waiting and resuming
 
-Follow `next_check_after_seconds`; while DNS/DKIM/TLS is pending, tell the customer to ask their agent to check again after the returned delay (60 seconds for mail). This instruction does not schedule an automatic wake-up. If the customer already authorized a supported scheduler, it may perform the check.
+Follow `next_check_after_seconds`; while DNS/DKIM/TLS is pending, tell the customer to ask their agent to check again after the returned delay (60 seconds for mail). This instruction does not schedule an automatic wake-up. A supported scheduler the customer has set up may perform the check.
 Hostname DNS/TLS status returns no delay: check again after sixty minutes. While mail gates an accepted deployment, verification runs each minute for its first ten minutes, then hourly for at most 72 checks (about 62 hours), before reconciliation; keep the original operation.
 
 A cancelled subscription loses Paid at its period end; an unpaid renewal retains Paid for up to fourteen days. When Paid or a time-limited grant ends, mail stops and a custom domain answers 402 unless that project shows the powered-by flag. The funded platform address may keep serving; credit exhaustion and Stop budgets remain separate. Changes to serving admission appear within about five minutes.

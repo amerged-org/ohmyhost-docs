@@ -3,6 +3,16 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
+## Client release 0.1.78 (November 23, 2026)
+
+Install the matching CLI and MCP. Clients older than 0.1.78 reject the new preview result and can fail their preview commands:
+
+```sh
+npm install --global @amerged/ohmyhost-cli@0.1.78 @amerged/ohmyhost-mcp@0.1.78
+```
+
+- **Preview lifetime and start failures.** A preview now works for 24 hours (`expires_at`); afterwards `preview_open` creates a new preview with a new link. A preview that did not start returns `failure` with a `code`, `retryable` and a `next_step`, and `retry_after_seconds` after a failure that a retry can change. [Live previews](/previews#preview-lifetime).
+
 ## Client release 0.1.59 (November 16, 2026)
 
 Install the matching CLI and MCP. No command, tool or API changed.
