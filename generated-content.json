@@ -1,7 +1,7 @@
 {
-  "source_commit": "72e5bff3be8815ddfe337ea6e3780d9acb873337",
+  "source_commit": "c5037f75286d016b59a5c3cf49f36a1b66e57a96",
   "source_dirty": false,
-  "release": "0.1.78",
+  "release": "0.1.79",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -485,7 +485,7 @@
     },
     {
       "path": "skills/ohmyhost-deploy/SKILL.md",
-      "sha256": "30acf19e77c5bc90ac5b0c3061227f7ac23e714d34d61e4c92b315ede7907d03"
+      "sha256": "0b8227d5f746e66794a3346808022961533c9400ebf02d133003c68fb555032f"
     },
     {
       "path": "skills/ohmyhost-domains-and-mail/SKILL.md",
@@ -549,7 +549,7 @@
     },
     {
       "path": "skills/ohmyhost-get-started/references/surfaces.md",
-      "sha256": "6fdceda48331d60b9ae0c0648016d7d9020ae6ec5ab5a82ccbce8a5f338ba06c"
+      "sha256": "8c3ce3aae5cb779d2b17adde224453393d4adc5b55802a3ab1578d876d1169d2"
     },
     {
       "path": "skills/ohmyhost-get-started/references/workspace.md",
@@ -585,11 +585,11 @@
     },
     {
       "path": "openapi.yaml",
-      "sha256": "e230b5ad9060914abbdd32e6af6c771d8bdaddbece8baaa97b8473b152049dc0"
+      "sha256": "490aa1498f7b0887e7cafed48cb135af556b874bdd4eaade777ed87cada96f90"
     },
     {
       "path": "openapi.json",
-      "sha256": "29f1eaaba1c597da76ba21d01b6baeea4de5088fc7032a215a1fec65350d7d3b"
+      "sha256": "e3cb599fd7bafdd43c06d20e579664daa52bc72f3aa0b4bcf753766968bf339c"
     },
     {
       "path": "mcp-tools.json",
@@ -601,11 +601,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "6809f5020f657460b3f1adb5ea87d2abf620ff0e95d71e20f92b79c5fac1cc47"
+      "sha256": "7ef53101180f6951dacce204e55f5ff2bde773eaad327c8339f3a948240b6c61"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "5cfea748c500c09436177aa207d47d298e9e3458beb268a685d4875627d2c789"
+      "sha256": "84166d26e662ee96c2be1ce7b689a4a6b71d0c47a1b20effbde10d35d60882e1"
     },
     {
       "path": "snippets/skill-catalog.mdx",
@@ -617,7 +617,7 @@
     },
     {
       "path": "snippets/remote-mcp-tools.mdx",
-      "sha256": "70671f5bb234ca7e48db7b79e6ed5430cbbfb0eaa68434d3932dc1f5c9495ada"
+      "sha256": "50dc2cbeef6ed062490dc5029b7a4d56480fe5f3d4cb5a7d9d26738014a0fd85"
     },
     {
       "path": "logo/light.svg",
