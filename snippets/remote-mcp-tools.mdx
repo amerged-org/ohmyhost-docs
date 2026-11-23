@@ -1,4 +1,4 @@
-Master Tool Contract SHA-256: `3a293efd8e3f7abfcfda8b592fe0eaa81240690beb34432fc6f23a7a123bbbf8`. These are the shared remote server's named tools; discover the current host's exact input schema with `tools/list`. New definitions may still be undergoing host checks.
+Master Tool Contract SHA-256: `29f1eaaba1c597da76ba21d01b6baeea4de5088fc7032a215a1fec65350d7d3b`. These are the shared remote server's named tools; discover the current host's exact input schema with `tools/list`. New definitions may still be undergoing host checks.
 
 | Tool | Purpose |
 | --- | --- |
@@ -42,8 +42,8 @@ Master Tool Contract SHA-256: `3a293efd8e3f7abfcfda8b592fe0eaa81240690beb34432fc
 | `database_webhook_subscription_deactivate` | Deactivate one generation. |
 | `database_webhook_subscription_status` | Use tools/list for database_webhook_subscription_status's registered MCP description and exact input schema. |
 | `database_webhook_test` | Send one signed test request to the selected existing database webhook and report the outcome synchronously. |
-| `database_write` | Execute one explicitly authorized INSERT, UPDATE or DELETE/upsert in the chosen Dev or Prod database. |
-| `delete_execute` | Execute the exact whole-project deletion covered by the user's authorization and a fresh delete_plan. |
+| `database_write` | Execute one INSERT, UPDATE or DELETE/upsert in the chosen Dev or Prod database. |
+| `delete_execute` | Execute the whole-project deletion described by a fresh delete_plan. |
 | `delete_plan` | Prepare a ten-minute persisted deletion plan for exactly the selected project_id. |
 | `deployment_create` | Use tools/list for deployment_create's registered MCP description and exact input schema. |
 | `deployment_get` | Use tools/list for deployment_get's registered MCP description and exact input schema. |
@@ -113,7 +113,7 @@ Master Tool Contract SHA-256: `3a293efd8e3f7abfcfda8b592fe0eaa81240690beb34432fc
 | `project_budget_set` | Set an owner's optional monthly project budget in microcredits (1000000 = one credit). |
 | `project_context_get` | Use tools/list for project_context_get's registered MCP description and exact input schema. |
 | `project_create` | Use tools/list for project_create's registered MCP description and exact input schema. |
-| `project_data_change` | Owner only: execute the exact reviewed project_data_plan after explicit customer confirmation. |
+| `project_data_change` | Owner only: execute the exact reviewed project_data_plan. |
 | `project_data_plan` | Owner only: plan a Dev/Prod data assignment change and review the data, files, deployments and database logins it keeps or removes. |
 | `project_dev_access_create` | Use tools/list for project_dev_access_create's registered MCP description and exact input schema. |
 | `project_dev_access_mode_set` | Owner only: anyone with the URL can reach public Dev without platform authentication. |
@@ -132,7 +132,7 @@ Master Tool Contract SHA-256: `3a293efd8e3f7abfcfda8b592fe0eaa81240690beb34432fc
 | `promotion_plan` | Use tools/list for promotion_plan's registered MCP description and exact input schema. |
 | `referral_link_get` | Read the workspace's referral link to share. |
 | `rollback_plan` | Use tools/list for rollback_plan's registered MCP description and exact input schema. |
-| `secret_delete` | Delete only the named secret in the explicitly selected project_id and environment_id when the user's authorization covers that exact removal. |
+| `secret_delete` | Delete only the named secret in the selected project_id and environment_id. |
 | `secret_input_request` | Use the existing secret_input_request portal form; plaintext secrets never enter MCP arguments. Follow tools/list for this workflow's exact MCP arguments; never submit secret values in chat or tool arguments. |
 | `secrets_list` | Use tools/list for secrets_list's registered MCP description and exact input schema. |
 | `source_auto_deploy_get` | Get automatic GitHub push deployment status |

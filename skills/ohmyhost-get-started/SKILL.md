@@ -123,7 +123,7 @@ Which Skill to read next:
 - One action per message, in short plain sentences. Give the link, then what they will see. Write in the language the customer writes in.
 - Keep messages about the action and why it is needed; do not narrate routine internal steps. Keep raw account IDs, permission tables and routine access diagnostics out of normal replies; use recognizable account or application names when a choice is needed.
 - After the verified connection, if the customer has not said what to host, ask only "What would you like to host?" in their language; if the app is already known, continue.
-- Wait for required browser input before actions that depend on it. Independent repository inspection can continue while they sign in. Respect the customer's existing authorization and scope.
+- Wait for required browser input before actions that depend on it. Independent repository inspection can continue while they sign in.
 - Explain an actual limitation when it prevents the requested work, and do not repeat an instruction without new information. OpenAI and Claude use the same remote server catalog even when their imported Skills cover different workflows.
 - After they report back, verify with a command.
 

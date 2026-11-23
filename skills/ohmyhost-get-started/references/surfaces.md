@@ -211,7 +211,7 @@ reference describes server support; a host may still be checking a new or change
 - `organization_use` — Bind a saved login that has no organization yet to one workspace, so later calls act inside it.
 - `profile_list` — List the saved ohmyho.st logins on this computer: each has a name, a user and an organization, never a token.
 - `database_query` — Read one owner-authorized Dev or Prod database query (at most 100 rows, five-second timeout).
-- `database_write` — Execute one explicitly authorized INSERT, UPDATE or DELETE/upsert in the chosen Dev or Prod database.
+- `database_write` — Execute one INSERT, UPDATE or DELETE/upsert in the chosen Dev or Prod database.
 - `database_access_create` — Issue a time-bound PostgreSQL credential for this project's own Dev or Prod database.
 - `database_access_list` — List this project's issued database credentials with their state (active, expired or revoked).
 - `database_access_revoke` — Revoke one issued database credential immediately: open sessions end and its PostgreSQL role is removed.
@@ -243,7 +243,7 @@ reference describes server support; a host may still be checking a new or change
 - `project_handle_check` — Check whether a project address is free before offering it to the customer.
 - `project_handle_set` — Move a project to an address the customer chose, after project_handle_check said it is free.
 - `project_data_plan` — Owner only: plan a Dev/Prod data assignment change and review the data, files, deployments and database logins it keeps or removes.
-- `project_data_change` — Owner only: execute the exact reviewed project_data_plan after explicit customer confirmation.
+- `project_data_change` — Owner only: execute the exact reviewed project_data_plan.
 - `projects_list` — List projects visible to the current identity
 - `feedback_submit` — Report a bug, suspected issue or feature request to ohmyho.st.
 - `feedback_status` — Read the status of a feedback receipt you submitted and ohmyho.st's customer-visible replies: received, in_review, planned, in_progress, resolved (the fix is live in the named release) or closed (with an explanation).
@@ -251,10 +251,10 @@ reference describes server support; a host may still be checking a new or change
 - `project_get` — Get one project
 - `project_status` — Get source, existing environment IDs, deployment URLs, custom production domains, Dev access mode, latest operation and cleanup status.
 - `project_development_add` — Add Dev to an existing project.
-- `preview_get` — Read the stable private live preview for this project and environment: its link, state, saved and applied version, and ready_to_show.
-- `preview_open` — Open or create the stable private live preview for this project and environment and return its link, state and ready_to_show.
-- `preview_stop` — Stop the preview and remove backups while preserving its URL.
-- `preview_rotate` — Rotate the preview URL and close old connections.
+- `preview_get` — Read the private live preview for this project and environment: its link, state, saved and applied version, expires_at, failure and ready_to_show.
+- `preview_open` — Open or create the private live preview for this project and environment and return its link, state, expires_at, failure and ready_to_show.
+- `preview_stop` — Stop the preview and remove backups while preserving its URL until its 24-hour deadline.
+- `preview_rotate` — Rotate the preview URL and close old connections; the preview keeps its 24-hour deadline.
 - `project_dev_share_link_get` — Owner only: get or create the persistent share link for the protected Dev site (Paid only).
 - `project_dev_access_mode_set` — Owner only: choose public Dev (no platform token) or protected Dev (share link required).
 - `powered_by_flag_get` — Read whether the production site shows the opt-in "Powered by ohmyho.st" flag.
@@ -382,8 +382,8 @@ account rights and credential restrictions are checked by the canonical API on e
 - `database_webhook_subscription_deactivate` — Deactivate one generation.
 - `database_webhook_subscription_status` — Use tools/list for database_webhook_subscription_status's registered MCP description and exact input schema.
 - `database_webhook_test` — Send one signed test request to the selected existing database webhook and report the outcome synchronously.
-- `database_write` — Execute one explicitly authorized INSERT, UPDATE or DELETE/upsert in the chosen Dev or Prod database.
-- `delete_execute` — Execute the exact whole-project deletion covered by the user's authorization and a fresh delete_plan.
+- `database_write` — Execute one INSERT, UPDATE or DELETE/upsert in the chosen Dev or Prod database.
+- `delete_execute` — Execute the whole-project deletion described by a fresh delete_plan.
 - `delete_plan` — Prepare a ten-minute persisted deletion plan for exactly the selected project_id.
 - `deployment_create` — Use tools/list for deployment_create's registered MCP description and exact input schema.
 - `deployment_get` — Use tools/list for deployment_get's registered MCP description and exact input schema.
@@ -453,7 +453,7 @@ account rights and credential restrictions are checked by the canonical API on e
 - `project_budget_set` — Set an owner's optional monthly project budget in microcredits (1000000 = one credit).
 - `project_context_get` — Use tools/list for project_context_get's registered MCP description and exact input schema.
 - `project_create` — Use tools/list for project_create's registered MCP description and exact input schema.
-- `project_data_change` — Owner only: execute the exact reviewed project_data_plan after explicit customer confirmation.
+- `project_data_change` — Owner only: execute the exact reviewed project_data_plan.
 - `project_data_plan` — Owner only: plan a Dev/Prod data assignment change and review the data, files, deployments and database logins it keeps or removes.
 - `project_dev_access_create` — Use tools/list for project_dev_access_create's registered MCP description and exact input schema.
 - `project_dev_access_mode_set` — Owner only: anyone with the URL can reach public Dev without platform authentication.
@@ -472,7 +472,7 @@ account rights and credential restrictions are checked by the canonical API on e
 - `promotion_plan` — Use tools/list for promotion_plan's registered MCP description and exact input schema.
 - `referral_link_get` — Read the workspace's referral link to share.
 - `rollback_plan` — Use tools/list for rollback_plan's registered MCP description and exact input schema.
-- `secret_delete` — Delete only the named secret in the explicitly selected project_id and environment_id when the user's authorization covers that exact removal.
+- `secret_delete` — Delete only the named secret in the selected project_id and environment_id.
 - `secret_input_request` — Use the existing secret_input_request portal form; plaintext secrets never enter MCP arguments. Follow tools/list for this workflow's exact MCP arguments; never submit secret values in chat or tool arguments.
 - `secrets_list` — Use tools/list for secrets_list's registered MCP description and exact input schema.
 - `source_auto_deploy_get` — Get automatic GitHub push deployment status
@@ -503,7 +503,7 @@ account rights and credential restrictions are checked by the canonical API on e
 
 ## Master Tool Contract and API reference
 
-Master Tool Contract SHA-256: `3a293efd8e3f7abfcfda8b592fe0eaa81240690beb34432fc6f23a7a123bbbf8`.
+Master Tool Contract SHA-256: `29f1eaaba1c597da76ba21d01b6baeea4de5088fc7032a215a1fec65350d7d3b`.
 
 The complete public OpenAPI contract is at <https://ohmyho.st/api> and mirrored per release.
 Its MCP metadata accounts for every API operation: a named tool, a protected handoff, an

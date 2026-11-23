@@ -1,6 +1,6 @@
 ---
 title: "Live previews"
-description: "Open a stable preview and see saved source changes through your framework's development server."
+description: "Open a preview that lasts 24 hours and see saved source changes through your framework's development server."
 ---
 
 A live preview is a private link to your app's development server and is available on every plan. Open it after saving a version, before publishing. Save a version through [managed source](/sources), or push to the selected [GitHub branch](/github), to update the same awake preview. Code changes use the framework's hot reload. Package, lockfile or runtime-configuration changes can restart its server.
@@ -20,7 +20,15 @@ ohmyhost project preview open --project "$PROJECT_ID" --environment prod --json
 ohmyhost project preview get --project "$PROJECT_ID" --environment prod --json
 ```
 
-Open the returned `url` in your browser. `status` is `cold`, `starting`, `ready` or `sleeping`. The URL shows progress while the app starts. `source` identifies the saved version selected for the preview and `applied_source` identifies the version it has applied. Either can be `null`. Share the preview when `ready_to_show` is true, which means the preview is ready and the two version sequences match. The URL stays the same as you save later versions.
+Open the returned `url` in your browser. `status` is `cold`, `starting`, `ready` or `sleeping`. The URL shows progress while the app starts. `source` identifies the saved version selected for the preview and `applied_source` identifies the version it has applied. Either can be `null`. Share the preview when `ready_to_show` is true, which means the preview is ready and the two version sequences match. The URL stays the same as you save later versions, until the preview expires.
+
+## Preview lifetime
+
+Every preview works for 24 hours after it was created. `expires_at` in the result is that deadline. Activity, saves, stop and rotate never move it. From that moment the link stops working and shows a page that says it is not valid or has expired. The next `preview_open` creates a new preview with a new link, so share only the newest link. Expiry removes the preview's runtime and saved dependencies, never the project environment's database.
+
+## If the preview does not start
+
+When the last start attempt failed, `failure` carries a `code`, `retryable` and a `next_step` that names the file or action that fixes it. A refused name, source or configuration fails the same way for the same saved version, so save the fix first and then open the preview again. When `retry_after_seconds` is set, wait that long before opening it again. For example, `source_migration_filename_noncanonical` lists migration files that must be renamed to `YYYYMMDDHHMMSS_name.sql` ([migrations](/migrations)). A failure of an older saved version is not reported. `failure` is `null` when the preview starts.
 
 Anyone with this URL can view and use the app without a platform login. Share it only with intended viewers. Application login, when configured, still applies.
 
@@ -38,20 +46,20 @@ Preview startup does not run customer migrations. Apply an intended schema chang
 
 A preview sleeps after ten minutes without meaningful use. An idle tab, hot-reload connection or automatic polling does not keep it awake. Open the URL or use its wake action to continue.
 
-Dependencies are retained for thirty days after the last preview use. After that, the next open prepares them again. Sleeping has no compute charge; awake usage follows [the preview rate](/pricing).
+Dependencies are retained until the preview expires. After that, a new preview prepares them again. Sleeping has no compute charge; awake usage follows [the preview rate](/pricing).
 
 A compressed dependency snapshot can be at most 2 GiB. Reduce large dependencies or generated files if the preview exceeds this limit. A snapshot belongs only to the selected project's environment; publication still builds the saved source separately.
 
 ## Stop or replace the link
 
-Stop clears the current runtime and dependency cache. A later open prepares the saved source at the same URL:
+Stop clears the current runtime and dependency cache. A later open prepares the saved source at the same URL until the preview expires:
 
 ```sh
 ohmyhost project preview stop --project "$PROJECT_ID" --environment prod \
   --idempotency-key "$STOP_REQUEST_KEY" --yes --json
 ```
 
-Rotate when you want a new link. The old URL stops working and its open connections close:
+Rotate when you want a new link. The old URL stops working and its open connections close. The preview keeps its 24-hour deadline:
 
 ```sh
 ohmyhost project preview rotate --project "$PROJECT_ID" --environment prod \

@@ -26,7 +26,8 @@ Follow the readiness checks in step 4 below. Give the returned preview `url` onl
 `ready_to_show` is true. On the first handoff, ask whether the user wants to see the app.
 On later handoffs, give the link without repeating the question. Apply these rules to
 any link or question in `next_step` and `say_to_user`. Keep the link out of source, notes
-and logs.
+and logs. A preview link works for at most 24 hours (`expires_at`); afterwards it stops working
+and `preview_open` creates a new preview with a new link, so hand over only the newest link.
 
 The Dev site is a deployed test site for Paid workspaces. Prod is the deployed live site. Give a Dev site link only when
 the user asks for the deployed Dev site, and give only the `share_url` returned by
@@ -143,7 +144,7 @@ under the same login. This confirms the persisted version and finishes the local
 A terminal `managed_source_dispatch_failed` ends that publication. Read `source_get` to check its
 current commit. If the intended change is still missing, use fresh source guards and a new key.
 Resume a pending upload from `source inspect`'s `pending_publications`; preserve its operation
-and key. Completing an already authorized publication needs no second routing question.
+and key.
 
 | Local task                               | Installed command                                                                                                 |
 | ---------------------------------------- | ----------------------------------------------------------------------------------------------------------------- |
@@ -221,7 +222,12 @@ dependency. Verify the connected account and workspace using the get-started Ski
    handoff rules above to any link or question. If the preview still needs time after polling,
    tell the user it is still getting ready.
 
-   A preview of a database or sign-in app cannot load data until its preview database exists.
+   If a result carries `failure`, stop polling and follow its `next_step`: it names the file or
+   action that fixes the start. When the `next_step` asks for a fix, call `preview_open` again only after the fix is saved,
+   because the same saved version fails the same way. When it says to wait, open the preview
+   again in a few seconds. The ohmyhost-troubleshoot-deployment Skill lists the codes.
+
+   A preview of a database or sign-in app uses the database of the environment you chose for it (Dev or Prod) and loads data only once that environment has one.
    Tell the user about this limitation. Deploy only when the user requests a deployment.
 
    When `ready_to_show` is true, use the live preview handoff above.
@@ -240,13 +246,12 @@ dependency. Verify the connected account and workspace using the get-started Ski
    `connection_status` for the result by name. Request a fresh link for failed names and confirm
    unconfirmed writes before retrying them. Keep the link private and values out of source, chat and
    tool arguments.
-7. Deploy or publish only when the user asks or agrees to that action. A request that already says
-   deploy, publish or go live counts.
+7. Deploy or publish when the user asks for that action; "deploy", "publish" and "go live" each ask for it.
    Call `deployment_plan` for the exact accepted commit and the requested environment (`dev` for
    the Paid-only Dev site or `prod` for the live site). For `auth.provider: omh-native`,
    `native_auth_launch_unavailable` means the project needs rollout approval from ohmyho.st.
    Preserve the current project and saved commit. Once approval is confirmed, plan the commit again. Review its
-   real costs/effects within the user's existing authorization, then `deployment_create` with
+   real costs and effects, then `deployment_create` with
    the plan and one saved key. Follow the same `operation_get` until its terminal state; use
    `deployment_get` and `deployment_logs` for diagnosis. A running operation is not a reason
    to start another build. A workspace has at most four open builds: `build_capacity_reached` (429)
