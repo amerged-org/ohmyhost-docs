@@ -3,6 +3,18 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
+## Client release 0.1.79 (November 23, 2026)
+
+Install the matching CLI and MCP. No command or tool was removed:
+
+```sh
+npm install --global @amerged/ohmyhost-cli@0.1.79 @amerged/ohmyhost-mcp@0.1.79
+```
+
+- **Deletion progress in chat clients.** While a project is being deleted, `operation_get` and `project_status` keep answering: the operation reports `queued` or `running` with its work progress and ends as `succeeded`, and the project reports the lifecycle `deleting` instead of a not-found error. A deletion with many files can take about ten minutes. Writes to a deleting project are still refused.
+- **Damaged preview link.** A preview link that is incomplete or was changed in transit now answers 404 with a short page that says the link is incomplete or damaged and asks you to have your assistant give you the preview link again; non-browser requests receive the same sentence as plain text.
+- **Secret input requests in the API reference.** The [API reference](/api) now lists `createSecretInputRequest` and `getSecretInputRequest` (`/v1/projects/{project_id}/environments/{environment_id}/secret-input-requests`), the protected form that lets a person enter a secret value without it passing through a chat.
+
 ## Client release 0.1.78 (November 23, 2026)
 
 Install the matching CLI and MCP. Clients older than 0.1.78 reject the new preview result and can fail their preview commands:

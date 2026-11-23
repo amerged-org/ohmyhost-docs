@@ -23,7 +23,7 @@ If plan access is denied, ask the workspace Owner
 to confirm the plan.
 
 Follow the readiness checks in step 4 below. Give the returned preview `url` only when
-`ready_to_show` is true. On the first handoff, ask whether the user wants to see the app.
+`ready_to_show` is true, exactly as returned: a shortened, retyped or broken link stops working. On the first handoff, ask whether the user wants to see the app.
 On later handoffs, give the link without repeating the question. Apply these rules to
 any link or question in `next_step` and `say_to_user`. Keep the link out of source, notes
 and logs. A preview link works for at most 24 hours (`expires_at`); afterwards it stops working
