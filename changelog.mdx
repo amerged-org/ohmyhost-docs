@@ -3,6 +3,17 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
+## Client release 0.1.81 (November 24, 2026)
+
+Install the matching CLI and MCP. No command or tool was removed:
+
+```sh
+npm install --global @amerged/ohmyhost-cli@0.1.81 @amerged/ohmyhost-mcp@0.1.81
+```
+
+- **Replace functions and triggers in a migration.** A later migration can now change the body of a function or the definition of a trigger that an earlier applied migration created, with `CREATE OR REPLACE FUNCTION` or `CREATE OR REPLACE TRIGGER`, in the `public` or `private` schema. The deployment plan, `ohmyhost init --dry-run` (`migrationEffects`) and the promotion plan list each replacement before anything runs, and a refused replacement rolls back the pending files. Dependent constraints, indexes, defaults and policies are refused. [Replace a function or trigger](/migrations#replace-a-function-or-trigger).
+- **Temporary database access names its network needs.** The Skills now say that the credential needs outbound TLS and WebSocket access to the `websocket_url` host on port 443, and that direct PostgreSQL TCP on port 5432 is unavailable. [Connect with psql](/database#connect-with-psql-or-a-sql-client).
+
 ## Client release 0.1.80 (November 24, 2026)
 
 Install the matching CLI and MCP. No command or tool was removed:

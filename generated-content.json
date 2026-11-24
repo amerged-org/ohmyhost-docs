@@ -1,7 +1,7 @@
 {
-  "source_commit": "e0e0611e12a9b6fc2d05e849870749a0ffe7e118",
+  "source_commit": "20d7e4998ab3eb47518245d896338d0ed8cc46f2",
   "source_dirty": false,
-  "release": "0.1.80",
+  "release": "0.1.81",
   "files": [
     {
       "path": "snippets/credit-pricing-table.mdx",
@@ -469,7 +469,7 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/SKILL.md",
-      "sha256": "66708c4185a1b9d984ae97a8989f87c55d5f9ab168df653fba5cfd8fc2f3a6f8"
+      "sha256": "83f21ad3b92c62ff02a91a84a1526988b922afa1b5041dab301b48fc3d596e7d"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/ai.md",
@@ -481,11 +481,11 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/cli-deploy.md",
-      "sha256": "d0efcfd6fd936f9a1c357d20829b0941190e90e7aa2cc33952501b980da17128"
+      "sha256": "09b0e943320068162a3e36becac9a95aa942e4783ce8c1cdcb241ab5bdafe51f"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/database-runtime.md",
-      "sha256": "18e17ff6caef938f3c72fc77eccfa9356c0e142183693a11456e7b0fc52dd64f"
+      "sha256": "9f7a64a523cce58023623bdb7398c188a6f6eb8be7469180dcfcda5fbdf99b4c"
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/mail.md",
@@ -497,7 +497,7 @@
     },
     {
       "path": "skills/ohmyhost-build-portable-app/references/stack-contracts.md",
-      "sha256": "fee1fd2d49b4a8878fe7c0058907649df234864cdfee7a1932e4f96cca05af71"
+      "sha256": "d36c1444d83048e6b90bded6dfc4154a3f86e420fc5b1db58f6f49199dcd6145"
     },
     {
       "path": "skills/ohmyhost-deploy-github/SKILL.md",
@@ -577,7 +577,7 @@
     },
     {
       "path": "skills/ohmyhost-manage-database/SKILL.md",
-      "sha256": "ae763d709258d08d58b451c3cbba3523101dcb185fd7ad02911e394ec1ad7b40"
+      "sha256": "222208259bac964acca4ca4a004281e72d2950863535440760eef47445342cb7"
     },
     {
       "path": "skills/ohmyhost-migrate-supabase-postgres/SKILL.md",
@@ -621,11 +621,11 @@
     },
     {
       "path": "snippets/install-clients.mdx",
-      "sha256": "91f2df492f7141006c37bff82a1007936361e2fde939a2f9e9e143ded477cc25"
+      "sha256": "1a00d53ebfe6ea0bce1edb49cc4c0a1a0e5f4b203e8a045140cd33c0a20acfdb"
     },
     {
       "path": "snippets/install-sdk.mdx",
-      "sha256": "c83ac85dda4c2ac8ca7bc55e1cea4472a39a678dd2935012a44713c634ce3d12"
+      "sha256": "5db8cd9e7d736f206501de464efe350dd53b04c3ef283d7d6c6fa5a8eac555bb"
     },
     {
       "path": "snippets/skill-catalog.mdx",
