@@ -5,7 +5,7 @@ description: "Version SQL migrations and preserve existing production data."
 
 Keep migrations in the directory selected by application inspection. Filenames use `YYYYMMDDHHMMSS_name.sql`: a 14-digit UTC prefix and lowercase descriptive name. Read `ohmyhost init --dry-run --json` for the exact source contract.
 
-Ordinary schema migrations are expand-only. Admitted statements create tables, types, domains, sequences, views/materialized views, triggers, indexes or SQL/PLpgSQL functions (SECURITY DEFINER requires SET search_path); ALTER TABLE ... ADD, COMMENT ON, CREATE SCHEMA IF NOT EXISTS auth|extensions|private, CREATE EXTENSION IF NOT EXISTS pgcrypto|btree_gist|unaccent, and SET check_function_bodies=false are the other allowed forms. Ordinary DROP/TRUNCATE, row changes, CREATE OR REPLACE, other schema ALTER, GRANT, DO and transaction control are refused. Supabase/storage dependencies, unsupported auth references and provider-role authority remain unsupported. Init reports `migration_sql_not_admitted` with the refused file/reason.
+Ordinary schema migrations are expand-only. Admitted statements create tables, types, domains, sequences, views/materialized views, triggers, indexes or SQL/PLpgSQL functions (SECURITY DEFINER requires SET search_path); ALTER TABLE ... ADD, COMMENT ON, CREATE SCHEMA IF NOT EXISTS auth|extensions|private, CREATE EXTENSION IF NOT EXISTS pgcrypto|btree_gist|unaccent, and SET check_function_bodies=false are the other allowed forms. Ordinary DROP/TRUNCATE, row changes, other schema ALTER, GRANT, DO and transaction control are refused. CREATE OR REPLACE is admitted only for the [replacements described below](#replace-a-function-or-trigger). Supabase/storage dependencies, unsupported auth references and provider-role authority remain unsupported. Init reports `migration_sql_not_admitted` with the refused file/reason.
 
 The coordinated 0.1.30 or later release adds a bounded [RLS policy lifecycle](/row-level-security#change-policies-through-migrations): CREATE POLICY, ALTER POLICY conditions, atomic DROP POLICY/recreation and single ENABLE/FORCE statements on explicitly named, migrator-owned ordinary tables in `public` or `private`. Use `TO PUBLIC` or omit the role. Every touched table must finish enabled and forced. Only the provided `ohmyhost.user_id()` and `ohmyhost.claims()` helper calls are allowed within the reserved schema; platform objects remain protected. DISABLE/NO FORCE, CASCADE, role/grant changes and destructive schema changes are still refused.
 
@@ -16,6 +16,15 @@ Source planning checks canonical filenames, not complete SQL admission. Run init
 Deployment logs can also show a `DATABASE_MIGRATION_FAILED` item with a catalog reason. Fix the named cause and plan the new commit; never reset to repair a failed migration.
 
 Declare `pg_trgm`, `citext` or `ltree` in a pending migration with `CREATE EXTENSION IF NOT EXISTS <name> WITH SCHEMA extensions`. Create the `extensions` schema first if it does not exist. These extensions are opt-in. Test the types and indexes you use with the scoped migration and application roles.
+
+## Replace a function or trigger
+
+With client 0.1.81 or newer, a later migration can replace a function or trigger that an earlier applied migration created. Use schema-qualified names in `public` or `private`. The same function signature, or the same trigger on the same table, must exist from an earlier applied file; on a fresh database an earlier file of the same run counts.
+
+- **Function.** `CREATE OR REPLACE FUNCTION` changes only the quoted body of a SQL or PL/pgSQL `SECURITY INVOKER` function. Copy the argument types, return type, language and attributes. A replacement is refused when PostgreSQL records a direct or indirect dependency from a CHECK, exclusion or domain constraint, an index expression or predicate, a column default, a generated column or an RLS policy. Add a new function and migrate the dependent object instead. Review the calls inside the body and dynamic SQL against representative data.
+- **Trigger.** Use `CREATE OR REPLACE TRIGGER` on an ordinary table that your migration role owns, or an adjacent `DROP TRIGGER IF EXISTS name ON schema.table` and `CREATE TRIGGER name ... ON schema.table ...` pair in the same file that keeps the trigger name, table and firing mode and uses `RESTRICT`. Internal, constraint, partition, extension, data-event and watch triggers are protected.
+
+The deployment plan (`deployment_plan`, `risks`), `ohmyhost init --dry-run` (`migrationEffects`) and the promotion plan list the replacement candidates from the exact saved source. `database_migrate` has no dry run, so read the plan for the same commit and environment first. A refused replacement rolls back all pending files with their ledger entries. To undo a committed replacement, add a later migration that restores the previous definition; applied files stay unchanged.
 
 ## Make an additive change
 
