@@ -1,0 +1,12 @@
+---
+title: "Database migrate files invalid"
+description: "What the `database_migrate_files_invalid` error means and what to do next."
+---
+
+The API, CLI and MCP return `database_migrate_files_invalid` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+A migration file in the saved version is empty, larger than 256 KiB, not UTF-8 text, starts with a byte-order mark, contains NUL or carriage-return line endings, or the folder holds more than 128 files. Correct the files, save or push the corrected version, then request the migration again for its commit.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

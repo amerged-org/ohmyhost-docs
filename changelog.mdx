@@ -3,6 +3,20 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
+## Client release 0.1.80 (November 24, 2026)
+
+Install the matching CLI and MCP. No command or tool was removed:
+
+```sh
+npm install --global @amerged/ohmyhost-cli@0.1.80 @amerged/ohmyhost-mcp@0.1.80
+```
+
+- **Database migrations from chat.** `database_migrate` (MCP), `ohmyhost database migrate` and `POST /v1/projects/{project_id}/database/migrations` (`migrateDatabase`) apply the migration files of one saved version to the Dev or Prod database of a project and create that database first when the environment has none. Your assistant asks where to apply them: a Free workspace and a project without a Dev site apply to Prod; with a Dev site you choose Dev only or Dev and Prod. A refused file is named in the error; add a new migration file instead of editing one that was applied. The new error codes are listed in the [error codes](/troubleshooting#error-codes), for example [`database_migrate_paid_required`](/errors/database-migrate-paid-required).
+- **The preview shows the app, saving works after publishing.** The preview link now arrives at once, without waiting for the database. A preview shows the app only and does not save data; saving works once the app is published (the Dev site on Paid, the live site on Free) after the database changes were applied. [Live previews](/previews).
+- **Large saves.** Saving a version with many or large files to a managed project no longer fails.
+- **Clearer refusal to switch a managed project to GitHub.** Linking a managed project to GitHub answers `409 source_switch_unsupported` with the next step instead of a generic 503. [`source_switch_unsupported`](/errors/source-switch-unsupported).
+- **Starter runtime dependency.** The `vite-react` starter now lists `@ohmyhost/customer-runtime` (an alias for `@amerged/ohmyhost-runtime`) in its dependencies, so publishing an app that uses the database clients works from a chat without installing anything.
+
 ## Client release 0.1.79 (November 23, 2026)
 
 Install the matching CLI and MCP. No command or tool was removed:

@@ -1,0 +1,12 @@
+---
+title: "Database migrate paid required"
+description: "What the `database_migrate_paid_required` error means and what to do next."
+---
+
+The API, CLI and MCP return `database_migrate_paid_required` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+A Free workspace has no Dev database. Call database_migrate with environment prod and the same commit_sha, or ask the organization Owner to activate Paid through billing checkout and then migrate Dev. The saved version and its files are unchanged.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

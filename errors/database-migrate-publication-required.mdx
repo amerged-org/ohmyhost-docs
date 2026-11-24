@@ -1,0 +1,12 @@
+---
+title: "Database migrate publication required"
+description: "What the `database_migrate_publication_required` error means and what to do next."
+---
+
+The API, CLI and MCP return `database_migrate_publication_required` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Prod, and a Dev environment that shares its database with Prod, change live data, which needs publication permission on this connection. Reconnect the client with publication permission, or have a user with that permission migrate. Nothing was applied.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

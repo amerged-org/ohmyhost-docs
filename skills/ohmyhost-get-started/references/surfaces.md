@@ -72,6 +72,8 @@ reference describes server support; a host may still be checking a new or change
 - `ohmyhost project handle set` — ohmyhost project handle set --project ULID --handle HANDLE --if-match ETAG --idempotency-key KEY --json (moves the project to a free address; the old one stops working and anyone may claim it)
 - `ohmyhost database compute set` — ohmyhost database compute set --project ULID --environment dev|prod --memory-mib 256|512|1024|2048|4096 --idempotency-key KEY --yes [--wait] --json
 
+- `ohmyhost database migrate` — ohmyhost database migrate --project ULID --environment dev|prod --commit SHA --idempotency-key KEY --yes [--wait] --json
+
 - `ohmyhost database compute get` — ohmyhost database compute get --project ULID [--environment dev|prod] --json
 - `ohmyhost database write` — ohmyhost database write --project ULID --environment dev|prod --statement-file PATH --idempotency-key KEY [--parameters-json JSON] --yes --json
 - `ohmyhost database query` — ohmyhost database query --project ULID --environment dev|prod --statement SQL [--parameters-json JSON] --json
@@ -184,6 +186,7 @@ reference describes server support; a host may still be checking a new or change
 - `source_upload` — Observe the exact managed snapshot upload after an uncertain response.
 - `database_compute_get` — Read current managed database memory, total storage, region and observed state without running SQL or waking the database.
 - `database_compute_set` — Choose fixed database RAM: 256, 512, 1024, 2048 or 4096 MiB.
+- `database_migrate` — Apply the migration files of one saved version to the Dev or Prod database of this project, and create that database first when the environment has none.
 - `project_context_get` — Read fresh project status, DNS/mail next actions, authorized usage and bounded shared notes.
 - `project_notes_set` — Save shared project to-dos, at most 250 lines / 16384 UTF-8 bytes.
 - `domain_cloudflare_authorize` — Check domain_cloudflare_status first and reuse a valid matching grant.
@@ -251,8 +254,8 @@ reference describes server support; a host may still be checking a new or change
 - `project_get` — Get one project
 - `project_status` — Get source, existing environment IDs, deployment URLs, custom production domains, Dev access mode, latest operation and cleanup status.
 - `project_development_add` — Add Dev to an existing project.
-- `preview_get` — Read the private live preview for this project and environment: its link, state, saved and applied version, expires_at, failure and ready_to_show.
-- `preview_open` — Open or create the private live preview for this project and environment and return its link, state, expires_at, failure and ready_to_show.
+- `preview_get` — Read the private live preview for this project and environment: its link, state, saved and applied version, expires_at, failure, data and ready_to_show.
+- `preview_open` — Open or create the private live preview for this project and environment and return its link, state, expires_at, failure, data and ready_to_show.
 - `preview_stop` — Stop the preview and remove backups while preserving its URL until its 24-hour deadline.
 - `preview_rotate` — Rotate the preview URL and close old connections; the preview keeps its 24-hour deadline.
 - `project_dev_share_link_get` — Owner only: get or create the persistent share link for the protected Dev site (Paid only).
@@ -363,6 +366,7 @@ account rights and credential restrictions are checked by the canonical API on e
 - `database_compute_get` — Read current managed database memory, total storage, region and observed state without running SQL or waking the database.
 - `database_compute_set` — Choose fixed database RAM: 256, 512, 1024, 2048 or 4096 MiB.
 - `database_execution_usage_get` — Use tools/list for database_execution_usage_get's registered MCP description and exact input schema.
+- `database_migrate` — Apply the migration files of one saved version to the Dev or Prod database of this project, and create that database first when the environment has none.
 - `database_query` — Read one owner-authorized Dev or Prod database query (at most 100 rows, five-second timeout).
 - `database_schedule_delete` — Remove one database schedule so it never runs again.
 - `database_schedule_get` — Read one database schedule or its setup step when the schedule is missing.
@@ -503,7 +507,7 @@ account rights and credential restrictions are checked by the canonical API on e
 
 ## Master Tool Contract and API reference
 
-Master Tool Contract SHA-256: `e3cb599fd7bafdd43c06d20e579664daa52bc72f3aa0b4bcf753766968bf339c`.
+Master Tool Contract SHA-256: `e3b994d04ab3f97174c28f77921f16c763ea6dc839bcd883e6a730ed18bfd927`.
 
 The complete public OpenAPI contract is at <https://ohmyho.st/api> and mirrored per release.
 Its MCP metadata accounts for every API operation: a named tool, a protected handoff, an
