@@ -7,6 +7,6 @@ The API, CLI and MCP return `project_operation_in_progress` with HTTP 409. Repea
 
 ## What to do
 
-Another change to this project, such as a database write, a compute change or a data change, has not finished. Read the project with 'ohmyhost project status --project ULID --json', wait until it completes, then repeat the request with a new idempotency key. A deletion is also refused while a SQL export of the project is being captured, for up to about ten minutes ('ohmyhost export get').
+Another change to this project, such as a database write, a compute change, a database migration or a data change, has not finished. Read the project with 'ohmyhost project status --project ULID --json', wait until it completes, then repeat the request with a new idempotency key. A deletion is also refused while a SQL export of the project is being captured, for up to about ten minutes ('ohmyhost export get').
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

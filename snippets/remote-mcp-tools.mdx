@@ -1,4 +1,4 @@
-Master Tool Contract SHA-256: `e3cb599fd7bafdd43c06d20e579664daa52bc72f3aa0b4bcf753766968bf339c`. These are the shared remote server's named tools; discover the current host's exact input schema with `tools/list`. New definitions may still be undergoing host checks.
+Master Tool Contract SHA-256: `e3b994d04ab3f97174c28f77921f16c763ea6dc839bcd883e6a730ed18bfd927`. These are the shared remote server's named tools; discover the current host's exact input schema with `tools/list`. New definitions may still be undergoing host checks.
 
 | Tool | Purpose |
 | --- | --- |
@@ -23,6 +23,7 @@ Master Tool Contract SHA-256: `e3cb599fd7bafdd43c06d20e579664daa52bc72f3aa0b4bcf
 | `database_compute_get` | Read current managed database memory, total storage, region and observed state without running SQL or waking the database. |
 | `database_compute_set` | Choose fixed database RAM: 256, 512, 1024, 2048 or 4096 MiB. |
 | `database_execution_usage_get` | Use tools/list for database_execution_usage_get's registered MCP description and exact input schema. |
+| `database_migrate` | Apply the migration files of one saved version to the Dev or Prod database of this project, and create that database first when the environment has none. |
 | `database_query` | Read one owner-authorized Dev or Prod database query (at most 100 rows, five-second timeout). |
 | `database_schedule_delete` | Remove one database schedule so it never runs again. |
 | `database_schedule_get` | Read one database schedule or its setup step when the schedule is missing. |

@@ -1,0 +1,12 @@
+---
+title: "Database migrate no files"
+description: "What the `database_migrate_no_files` error means and what to do next."
+---
+
+The API, CLI and MCP return `database_migrate_no_files` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+The saved version declares no database or its migrations folder holds no file. Set database.enabled: true and database.migrations in ohmyhost.yaml, add migration files named YYYYMMDDHHMMSS_name.sql, save or push the corrected version, then request the migration again for its commit.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.
