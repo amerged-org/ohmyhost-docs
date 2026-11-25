@@ -55,6 +55,8 @@ The optional [Kysely dialect](/database#optional-kysely-dialect) implements the 
 
 ### App-owned password hashing
 
+Release 0.1.82 will offer an optional private password service. If your app uses it, the service may briefly process a submitted password outside your project's hosting region. During verification it may also process the stored password hash there. Your project database stays in the selected region.
+
 When the app hashes passwords in a Worker, verify a real registration and subsequent sign-in on the deployed environment. In ohmyho.st hosted tests, Workers WebCrypto PBKDF2-HMAC-SHA-256 rejected 250,000 and 260,000 iterations. Registration and sign-in succeeded with 100,000. These results describe compatibility on the tested Workers. Workerd checks a runtime-specific iteration limit. [Cloudflare’s implementation](https://github.com/cloudflare/workerd/blob/3e1baad7d6f7a71b3e8e1bb23d34a6b8107559b9/src/workerd/api/crypto/pbkdf2.c%2B%2B#L66)
 
 Choose password-hashing parameters according to your security policy. Keep the algorithm version, salt and work factor with each stored hash and use those parameters to verify existing accounts. If your policy or existing hashes require a higher work factor than the deployed Worker supports, use a maintained authentication implementation on a compatible runtime.
