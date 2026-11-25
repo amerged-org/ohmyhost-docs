@@ -3,6 +3,12 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
+## Client release 0.1.82
+
+Apps using managed PostgreSQL can use the private database binding to hash and verify app-owned passwords. New hashes use Better Auth scrypt. Existing stock Better Auth hashes and supported 160,000-iteration PBKDF2-v1 records can be verified in place. See [application authentication](/application-auth#app-owned-password-hashing) for setup, password processing location and reset retries.
+
+When the provider ends a customer Worker invocation for a resource limit, the gateway returns HTTP 503. A confirmed CPU termination can appear as `CPU_LIMIT_EXCEEDED` in deployment logs. See [limits](/limits).
+
 ## Client release 0.1.81 (November 24, 2026)
 
 Install the matching CLI and MCP. No command or tool was removed:
