@@ -55,6 +55,12 @@ The optional [Kysely dialect](/database#optional-kysely-dialect) implements the 
 
 ### App-owned password hashing
 
+On a deployed Dev or Prod app with managed PostgreSQL, the server-side `OHMYHOST_DATABASE` binding provides `hashPassword(password)` and `verifyPassword({ hash, password })`. Pass them to Better Auth's `emailAndPassword.password` callbacks in your app and deploy the updated handler. New passwords use Better Auth's scrypt format. Verification also accepts existing `pbkdf2-sha256-v1` records with exactly 160,000 iterations, a 16-byte salt and a 32-byte digest encoded as unpadded base64url. Keep the existing password column and verify a previously registered account when you change the handler.
+
+Password computation runs in a private, stateless platform Worker. The submitted password and, during verification, the stored hash may be processed briefly outside the project's hosting region. The service has no password storage or request logging. The database stays in the selected region.
+
+Map a temporary `password_hash_unavailable` result to HTTP 503 and pass its `retry_after_seconds` value in `Retry-After`. A Better Auth 1.7.7 reset link can be consumed before hashing completes. Offer a fresh link after the indicated wait. Test activation, reset and subsequent sign-in on the deployed app.
+
 When the app hashes passwords in a Worker, verify a real registration and subsequent sign-in on the deployed environment. In ohmyho.st hosted tests, Workers WebCrypto PBKDF2-HMAC-SHA-256 rejected 250,000 and 260,000 iterations. Registration and sign-in succeeded with 100,000. These results describe compatibility on the tested Workers. Workerd checks a runtime-specific iteration limit. [Cloudflare’s implementation](https://github.com/cloudflare/workerd/blob/3e1baad7d6f7a71b3e8e1bb23d34a6b8107559b9/src/workerd/api/crypto/pbkdf2.c%2B%2B#L66)
 
 Choose password-hashing parameters according to your security policy. Keep the algorithm version, salt and work factor with each stored hash and use those parameters to verify existing accounts. If your policy or existing hashes require a higher work factor than the deployed Worker supports, use a maintained authentication implementation on a compatible runtime.

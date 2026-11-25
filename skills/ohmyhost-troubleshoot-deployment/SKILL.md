@@ -59,10 +59,7 @@ These gateway answers identify a platform check or runtime failure:
   `runtime.browser.cors.credentials: true`, or it carries cookies without `Origin`. Use a
   same-origin route or declare the exact authorized browser origins and application CORS;
   see the portable-app Skill's [runtime contracts](../ohmyhost-build-portable-app/references/stack-contracts.md).
-- `429 Runtime limit exceeded`: one request exceeded 50 ms of CPU time. Reduce work per request;
-  this is not a request-rate limit, and repeating unchanged does not help. The deploy health
-  check reports it too, as `HEALTH_CHECK_FAILED` with status 429, when the health route is that
-  expensive.
+- For `503 Runtime resource limit exceeded` with `x-ohmyhost-error: runtime_resource_limit_exceeded`, look for `CPU_LIMIT_EXCEEDED` or `RUNTIME_RESOURCE_LIMIT_EXCEEDED` in `deployment_logs`. The Tail records the CPU-specific code when Cloudflare reports a matching `exceededCpu` outcome for the dispatched customer Worker. The generic code reports a possible CPU or memory limit. A known literal route path appears when available, with no query string. If hashing inside the customer Worker triggered the failure, use [the private password hashing binding](../ohmyhost-build-portable-app/references/stack-contracts.md#app-owned-password-hashing) or choose Native Auth for a new login flow. A compute failure in the private password Worker yields `503 password_hash_unavailable` with a 60-second backoff through that binding and its Better Auth example. Ordinary application 503 responses keep their original status and meaning.
 - `502 Upstream unavailable`: the app threw or did not answer. Read that deployment's runtime
   diagnostics with `deployment_logs`. The diagnostics are sampled to about six per environment per minute per location, so
   their count is not the number of failures.

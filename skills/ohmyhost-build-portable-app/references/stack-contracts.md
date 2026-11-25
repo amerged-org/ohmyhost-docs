@@ -12,7 +12,7 @@ Use this reference only when implementing framework or capability code. Product 
 
 ## The customer chooses application authentication
 
-Hosting does not automatically add end-user authentication. The customer or their agent integrates the chosen library/service into the application and owns its user flows, authorization and provider account/configuration. This is separate from WorkOS authenticating the customer to ohmyho.st, `ohmyhost login`, `OHMYHOST_TOKEN`, GitHub consent and protected Dev browser access. Never reuse ohmyho.st's WorkOS tenant, platform keys or agent token for an application's users.
+For new login flows, choose ohmyho.st Native Auth first when the project meets its rollout and readiness requirements. Hosted Native Auth handles passwords in a private platform Worker. Hosting does not automatically add end-user authentication. The customer or their agent integrates the chosen library/service into the application and owns its user flows, authorization and provider account/configuration. This is separate from WorkOS authenticating the customer to ohmyho.st, `ohmyhost login`, `OHMYHOST_TOKEN`, GitHub consent and protected Dev browser access. Never reuse ohmyho.st's WorkOS tenant, platform keys or agent token for an application's users.
 
 The supported application-auth interfaces include [Better Auth](https://better-auth.com/docs/installation) and customer-owned [WorkOS AuthKit](https://workos.com/docs/authkit/). Better Auth has retained integration proof; hosted WorkOS Next.js has proof, while other framework/provider combinations need their own hosted evidence. Other OAuth/OIDC integrations must satisfy the actual browser, server, secrets and egress contracts and pass their application tests; a declared origin does not establish complete provider support. Public applications need no auth. Keep other existing customer choices; framework/runtime capability checks apply equally to all dependencies. Use the provider's current first-party SDK/guide for the actual browser or server runtime. Browser integrations use their documented public client identifiers and origin/callback settings; do not request or expose server API/client secrets in a Vite browser bundle. Server integrations use only customer-owned server runtime secrets.
 
@@ -42,6 +42,7 @@ Example feedback: “This app uses your WorkOS AuthKit account. The ohmyho.st CL
 - Call the database with `createPrivateDatabaseClient` from `@ohmyhost/customer-runtime`; see [database-runtime.md](database-runtime.md) for the working example, what is not available and what it costs. There is no connection string or customer socket; interactive transactions use the bounded `withConnection(callback)` scope. Keep canonical expand-only migrations under the path reported by init.
 - A held scope allows two concurrent transaction/auth connections per physical data area (shared Dev/Prod share them), 100 statements, 30 seconds total and five seconds idle. Close it before storage transfers, email, AI calls or other network waits. An adapter for an existing acquire/close port must release the underlying scope in `finally`; never keep a request-wide transaction open while processing a file.
 - An optional Kysely `0.29.5` dialect is available from `@ohmyhost/customer-runtime/database-kysely`: `createPrivateDatabaseDialect(env.OHMYHOST_DATABASE)` for `new Kysely({ dialect })`. Its `db.transaction().execute(async trx => ...)` uses the actual leased connection with BEGIN/COMMIT or ROLLBACK and close; the same bounds apply. For application-owned Better Auth `1.7.7`, use its own migrated schema, normally `public`: `database: { db: db.withSchema("public"), type: "postgres", transaction: true }`. This is separate from the managed auth-lane bridge; `auth.provider: none` provisions no auth tables. The library transaction path is tested; hosted signup/mail still needs application verification. This does not claim Drizzle transaction support.
+- For application-owned Better Auth, [initialize once per Worker isolate](#app-owned-password-hashing) and set `advanced.database.validateSchema: false` when migrations apply and validate the auth schema before deployment.
 - SQL `DATE` and `date[]` elements retain the `YYYY-MM-DD` wire string. They are calendar days, not timezone-bearing JavaScript dates; preserve existing timestamp decoding and normalize only the field that the application's contract requires.
 - When the customer selects the verified Better Auth integration, it owns schema `auth`, UUID IDs, `/api/auth`, secure host-only cookies, database sessions, verification/reset callbacks, and session revocation. Mail is selected separately; preserve the customer's configured sender. Authorization remains explicit in each use case.
 - Read hosted secrets/bindings from the framework context: for Next.js on this runtime, `getCloudflareContext({ async: true }).env`. Keep an explicit local test adapter where useful, but do not activate a localhost-only test factory in production or trust the request Host header as configuration. Check the session, tenant and application repositories through the same hosted database adapter as health.
@@ -54,7 +55,7 @@ Application background: [Better Auth PostgreSQL](https://better-auth.com/docs/ad
 ## Files, mail, functions, and secrets
 
 - Import the storage client from `@ohmyhost/customer-runtime/storage`. The Storage Gateway owns raw R2 bindings, signed operations, quotas, receipts, and cleanup. `storage.jurisdiction` accepts `us` or `eu` and must match the project's recorded R2 bucket jurisdiction, including an existing bucket reservation. Existing buckets retain their location through a database or project-region migration; do not rewrite their configuration to the current project region. For a project without a recorded bucket or reservation, the chosen project region is used (`--region`, default `us`). A mismatch fails the plan with `storage_jurisdiction_conflict`. Read the `Storage jurisdiction` line in `ohmyhost project context --project ULID --json` (MCP `project_context_get`) before changing storage configuration. If it reports `unavailable`, report the request through feedback; do not substitute the current project region. `ohmyhost init` is offline: it writes `us` unless `--region eu` is supplied and preserves an existing configuration. Preserve established storage configuration when resuming a project; use its chosen region only when preparing new storage.
-- Upgrade the CLI/MCP to the current published version first. Then install the runtime under its import name with this exact line in the `dependencies` of `package.json`: `"@ohmyhost/customer-runtime": "npm:@amerged/ohmyhost-runtime@0.1.80"`. The `vite-react` starter already contains it and its lockfile resolves it: never remove it, and a chat client without init or npm keeps that line and adds no other spec. A local checkout may read the current version from what init reports under `runtime.packages.customerRuntime` (`companion.packages.customerRuntime` and `worker.packages.customerRuntime` are equivalent fields); the form is always `"@ohmyhost/customer-runtime": "npm:@amerged/ohmyhost-runtime@<version>"`. Refresh and commit the lockfile with the project's package manager. Every `@ohmyhost/customer-runtime/*` import stays unchanged. A bare `@ohmyhost/customer-runtime` version fails the platform build, and an `https://ohmyho.st/releases/…` runtime URL stops resolving once a later release replaces the website downloads, so replace such a URL with the alias. Use the version init reports; older runtime versions carry no compatibility promise.
+- Upgrade the CLI/MCP to the current published version first. Then install the runtime under its import name with this exact line in the `dependencies` of `package.json`: `"@ohmyhost/customer-runtime": "npm:@amerged/ohmyhost-runtime@0.1.81"`. The `vite-react` starter already contains it and its lockfile resolves it: never remove it, and a chat client without init or npm keeps that line and adds no other spec. A local checkout may read the current version from what init reports under `runtime.packages.customerRuntime` (`companion.packages.customerRuntime` and `worker.packages.customerRuntime` are equivalent fields); the form is always `"@ohmyhost/customer-runtime": "npm:@amerged/ohmyhost-runtime@<version>"`. Refresh and commit the lockfile with the project's package manager. Every `@ohmyhost/customer-runtime/*` import stays unchanged. A bare `@ohmyhost/customer-runtime` version fails the platform build, and an `https://ohmyho.st/releases/…` runtime URL stops resolving once a later release replaces the website downloads, so replace such a URL with the alias. Use the version init reports; older runtime versions carry no compatibility promise.
 - A storage-enabled deployment needs four runtime values and **no** `FILES` bucket binding: the plain values `OHMYHOST_STORAGE_GATEWAY_URL`, `OHMYHOST_PROJECT_ID`, `OHMYHOST_ENVIRONMENT_ID`, and the secret `OHMYHOST_STORAGE_KEY`. Resolve them from the server framework context or Worker request and use `(request) => fetch(request)` for both `fetch` and `capabilityFetch`. A legacy customer gateway binding may remain attached until a later platform release removes it; that transport is unsupported. Invalid options answer non-retryable `gateway_configuration_invalid` naming the option; the clients run only on the server.
 - The gateway hop is global `fetch` to `OHMYHOST_STORAGE_GATEWAY_URL`: the egress policy handles the injected origin and forwards supported fixed POST routes to the private gateway. The origin is allowed automatically, does not count among the 11 customer origins, and never goes in `runtime.egress.allow`. Signed R2 URLs use global `fetch` too. Non-retryable 403 `gateway_not_enabled` means enable the capability and redeploy; 403 `gateway_route_denied` means use the current client's supported route, method and query. Neither is fixed by editing the allow-list. Mail and storage share a project-keyed Cloudflare limiter of 1,200 calls per minute per Cloudflare location; it is approximate rather than a globally strict quota. 429 `gateway_rate_limited` and transient 503 `gateway_unavailable` are retryable with a delay and the original idempotency keys. Malformed/non-JSON answers are `gateway_response_invalid` with the received status and no upstream text.
 - Files are create-once logical names within an immutable data area: shared Dev/Prod use one namespace, isolated environments use separate namespaces. Each name is at most 512 UTF-8 bytes; slash-separated segments start/end with letters or digits and contain only letters, digits, `.`, `_` and `-`, with no traversal. Idempotency keys are 1–128 letters/digits/`._:-`. Content type is a lowercase `type/subtype` without parameters. Uploads and the physical bucket quota are at most 1 GiB, including open reservations; signed capabilities last five minutes. A deletion never makes a used name reusable inside that identity. A reset creates a fresh namespace, so the same logical name can be used again. `storage_quota_exceeded` needs deleting unneeded objects or a smaller upload; `storage_conflict` needs resolving the original name/key receipt rather than retrying a conflicting payload. `storage_upload_expired` needs a new objectKey and idempotencyKey. `storage_delete_pending` means wait until retryAt, then repeat the original deletion; `data_change_in_progress` means observe that operation; `storage_binding_data_changed` means this environment's data area changed during the request: read its current state and issue a new request. After an isolate or reset, redeploy the affected environment before relying on its files: until then a previous deployment follows the environment's current file area while its database calls already fail. Data assignment changes retain exact existing locators, without moving blobs.
@@ -67,7 +68,7 @@ Application background: [Better Auth PostgreSQL](https://better-auth.com/docs/ad
 - Use authenticated same-origin framework routes for bounded request work. Vite may use the companion source contract returned by init; TanStack Start and Next.js retain their native server routes/functions. A project without a web framework sets `runtime.mode: functions` and writes `src/ohmyhost/worker.ts` as a module Worker: `export default { async fetch(request, env, ctx) {…}, async scheduled(controller, env, ctx) {…} }`. It keeps `build.install` only and receives the same database, files, mail, secret and egress bindings as an edge app.
 - Declare scheduled work only through `functions.crons` in `ohmyhost.yaml`: one to eight unique five-field UTC crons with a five-minute minimum. A field is `*` or one canonical integer; minute is an integer or `*/5` through `*/59`, never bare `*`. Sunday is `0`; ranges, lists, names and shortcuts are refused. Day-of-month and weekday must both match when both are fixed. The handler is the `scheduled(controller, env, ctx)` member of the **default export** of `src/ohmyhost/worker.ts` (functions runtime, Next.js, TanStack Start) or of the Vite companion `src/ohmyhost/companion.ts`. Named exports are never invoked; init blocks `worker_module_default_export_required` and `scheduled_handler_required` with the file path. The platform runs one attempt per cron and UTC minute with a 120-second deadline, retries a thrown error or platform failure up to three attempts, and honors `controller.noRetry()`. Retries retain the original `scheduledTime`, so make side effects idempotent. Dev and Prod schedules follow their own active deployments and can both write the same shared data; decide which owns a task. Finished runs are retained seven days. Each run is billed as one request plus its CPU credits. Runs are visible through `ohmyhost function runs` / MCP `function_runs_list` (per environment, newest first), not through deployment logs.
 - `src/ohmyhost/worker.ts` is bundled by the platform on its own, outside the framework build: tsconfig `paths` resolve, but Vite-only aliases, framework virtual modules and modules that declare TanStack Start server functions or Next.js route handlers do not. Import plain application modules (repositories, storage and database clients from `@ohmyhost/customer-runtime/database`, `/storage` or `/mail`) and keep framework entry code out of the Worker module.
-- HTTP and scheduled customer Workers have 50 ms CPU and ten subrequests per invocation. Network waiting does not consume CPU, but database, gateway and signed-object calls consume requests; batch and page work accordingly. A runtime limit answers HTTP 429 beginning `Runtime limit exceeded`. A functions module must always export a default `fetch`, including a schedules-only application. Init blocks `functions.crons` on a static runtime as `runtime_mode_unsupported`.
+- HTTP and scheduled customer Workers have 50 ms CPU and ten subrequests per invocation. Network waiting does not consume CPU, but database, gateway and signed-object calls consume requests; batch and page work accordingly. A resource-limit dispatch failure answers HTTP 503 with `x-ohmyhost-error: runtime_resource_limit_exceeded`. A trusted Cloudflare outcome can later confirm `CPU_LIMIT_EXCEEDED` in the sampled deployment log, with the literal route path when available. A functions module must always export a default `fetch`, including a schedules-only application. Init blocks `functions.crons` on a static runtime as `runtime_mode_unsupported`.
 - Select a small work batch and per-call timeouts that fit the 120-second scheduled deadline. Persist claims, retry state and cleanup progress before acknowledging work; close database scopes before provider calls. Import narrow runtime modules rather than barrel files that pull Next.js routes into the scheduled bundle. Verify that a due run actually completes through `function_runs_list`.
 - For LLMs, images, speech, classifiers and OCR through the ohmyho.st AI gateway, declare `ai: { enabled: true, jurisdiction: eu | any }` in `ohmyhost.yaml` (the jurisdiction has no default) and redeploy. The platform injects `OHMYHOST_AI_BASE_URL` (the gateway origin plus `/v1`) and the secret `OHMYHOST_AI_KEY` into the Worker; use an OpenAI-compatible SDK with those two values from server code only. The gateway origin is allowed automatically and never listed in `runtime.egress.allow`. The gateway authorizes the key against the active revision's plan, so a rollback or promotion without `ai` stops the calls. A static runtime refuses `ai` as `runtime_mode_unsupported`. Calls answer `402 paid_plan_required` on a Free workspace; see [the AI gateway reference](ai.md) for the error codes.
 - For ohmyho.st-managed transactional mail, use `createTransactionalMailClient` from `@ohmyhost/customer-runtime/mail` with `OHMYHOST_MAIL_GATEWAY_URL`, `OHMYHOST_MAIL_KEY`, `OHMYHOST_PROJECT_ID` and `fetch: (request) => fetch(request)` from server code. The egress policy delivers `POST /v1/send` to the private gateway; the injected origin is allowed automatically and never listed. A send can take several seconds: `timeoutMilliseconds` defaults to 10000, accepts 100–30000, and bounds response headers. Keep the same message and idempotency key after uncertainty. A missing URL or key is a configuration error. Enable the capability and redeploy for `gateway_not_enabled`; use supported routes for `gateway_route_denied`; report persistent gateway faults with `feedback_submit`. Legacy customer mail gateway bindings are unsupported. Do not call mail or storage from health routes: the deploy-time probe runs under the same limits and egress policy as live traffic (50 ms CPU, 10 subrequests), and a health check must not send mail. Verification/reset mail owned by an external identity provider stays with that integration. The mail runtime values exist only when deployed source sets `mail.enabled: true`; a verified domain alone does not install them, and promotion/rollback of undeclared source removes them. Install application-owned private values through stdin-based CLI commands; source lists secret names, never values. See [mail.md](mail.md) for sending and receiving; runtime attachment downloads are currently unsupported.
@@ -164,6 +165,154 @@ Frames, workers and external resources stay blocked when undeclared; service wor
 The gateway replaces application CSP and drops Set-Cookie with a Domain attribute; keep session
 cookies host-only. OAuth form-post callbacks must satisfy the explicit CORS/origin policy;
 verify the provider's chosen callback mode instead of assuming a redirect proves a session.
+
+## App-owned password hashing
+
+For a deployed Dev or Prod Worker using managed PostgreSQL (`database.enabled: true`), use the existing server-side `OHMYHOST_DATABASE` binding. Pass it from the actual request context. This example configures the `emailAndPassword.password` callbacks for [Better Auth](https://better-auth.com/docs/authentication/email-password) with `auth.provider: none` in `ohmyhost.yaml`.
+
+```ts
+import { APIError } from "better-auth/api";
+
+type CustomerPasswordUnavailable = {
+  readonly status: 503;
+  readonly code: "password_hash_unavailable";
+  readonly retry_after_seconds: number;
+};
+
+export type CustomerPasswordBinding = {
+  hashPassword(password: string): Promise<string | CustomerPasswordUnavailable>;
+  verifyPassword(input: {
+    hash: string;
+    password: string;
+  }): Promise<boolean | CustomerPasswordUnavailable>;
+};
+
+async function callPasswordBinding<Result>(call: () => Promise<Result>): Promise<Result> {
+  try {
+    return await call();
+  } catch (error) {
+    if (
+      error instanceof Error &&
+      (error.message === "password_hash_input_invalid" ||
+        error.message === "project_database_unavailable")
+    ) {
+      throw error;
+    }
+    temporarilyUnavailable(60);
+  }
+}
+
+function temporarilyUnavailable(retryAfterSeconds: number): never {
+  throw new APIError(
+    "SERVICE_UNAVAILABLE",
+    {
+      code: "password_hash_unavailable",
+      message: "Password checks are temporarily unavailable.",
+      retry_after_seconds: retryAfterSeconds,
+    },
+    { "Retry-After": String(retryAfterSeconds) },
+  );
+}
+
+export function emailAndPassword(binding: CustomerPasswordBinding) {
+  return {
+    enabled: true,
+    password: {
+      async hash(password: string) {
+        const result = await callPasswordBinding(() => binding.hashPassword(password));
+        if (typeof result !== "string") temporarilyUnavailable(result.retry_after_seconds);
+        return result;
+      },
+      async verify(input: { hash: string; password: string }) {
+        const result = await callPasswordBinding(() => binding.verifyPassword(input));
+        if (typeof result !== "boolean") temporarilyUnavailable(result.retry_after_seconds);
+        return result;
+      },
+    },
+  };
+}
+```
+
+Keep the Better Auth instance and its Kysely adapter at module scope. Initialize them lazily from the first auth request's environment bindings and reuse them for the life of the isolate. For a migrated schema, `advanced.database.validateSchema: false` disables Better Auth 1.7.7's automatic database introspection at initialization and on the request path. Apply and validate the schema with migrations before directing traffic to the handler.
+
+Bursts beyond the project's database connection capacity can raise retryable `database_unavailable` errors. Surface them from the auth handler as HTTP 503 with `Retry-After` and let the client retry after that interval.
+
+```ts
+import { betterAuth } from "better-auth";
+import { APIError, isAPIError } from "better-auth/api";
+import { Kysely } from "kysely";
+import { CustomerRuntimeError, type CustomerDatabaseBinding } from "@ohmyhost/customer-runtime";
+import { createPrivateDatabaseDialect } from "@ohmyhost/customer-runtime/database-kysely";
+import { emailAndPassword, type CustomerPasswordBinding } from "./password-binding";
+
+type AuthEnvironment = {
+  OHMYHOST_DATABASE: CustomerDatabaseBinding & CustomerPasswordBinding;
+  APP_AUTH_SECRET: string;
+  APP_URL: string;
+};
+
+const databaseUnavailableBody = {
+  code: "database_unavailable",
+  message: "Sign-in is temporarily unavailable. Please try again shortly.",
+};
+const databaseUnavailableHeaders = { "Retry-After": "1" };
+
+function isDatabaseUnavailable(error: unknown) {
+  return (
+    error instanceof CustomerRuntimeError &&
+    error.code === "database_unavailable" &&
+    error.retryable
+  );
+}
+
+function createAuth(env: AuthEnvironment) {
+  const db = new Kysely({ dialect: createPrivateDatabaseDialect(env.OHMYHOST_DATABASE) });
+  return betterAuth({
+    baseURL: env.APP_URL,
+    secret: env.APP_AUTH_SECRET,
+    database: { db: db.withSchema("public"), type: "postgres", transaction: true },
+    advanced: { database: { validateSchema: false } },
+    emailAndPassword: emailAndPassword(env.OHMYHOST_DATABASE),
+    onAPIError: {
+      onError(error, ctx) {
+        if (isDatabaseUnavailable(error)) {
+          throw new APIError(
+            "SERVICE_UNAVAILABLE",
+            databaseUnavailableBody,
+            databaseUnavailableHeaders,
+          );
+        }
+        if (!isAPIError(error) || error.status === "INTERNAL_SERVER_ERROR") {
+          ctx.logger.error("Auth handler failed", error);
+        }
+      },
+    },
+  });
+}
+
+let auth: ReturnType<typeof createAuth> | undefined;
+
+export async function handleAuth(request: Request, env: AuthEnvironment): Promise<Response> {
+  try {
+    auth ??= createAuth(env);
+    return await auth.handler(request);
+  } catch (error) {
+    if (!isDatabaseUnavailable(error)) throw error;
+    return Response.json(databaseUnavailableBody, {
+      status: 503,
+      headers: databaseUnavailableHeaders,
+    });
+  }
+}
+```
+
+Keep the starter's `0.1.81` runtime pin and the application's existing secrets, tables and mail callbacks. The platform runs the default Better Auth scrypt algorithm and returns the same `salt:digest` format. A stock Better Auth verifier can read these hashes after rollback. For existing credentials the binding also verifies `pbkdf2-sha256-v1$160000$<salt>$<digest>` with a 16-byte salt and 32-byte digest encoded as canonical unpadded base64url. Verification preserves stored records and their work factor.
+
+Keep Better Auth's password policy and the app's account-level attempt limits. The binding rejects raw input over 4 KiB before normalization. Hashing and verification share about 600 calls per minute per project and customer environment at each Cloudflare location. The callback maps returned service failures and rejected password RPCs to `503 password_hash_unavailable` with `Retry-After`. Rejected calls use a 60-second delay. Explicit input and registration denials still propagate. The stateless service can process the password and, during verification, the existing hash transiently outside the project region.
+
+When the UI receives `password_hash_unavailable`, use `Retry-After` or `retry_after_seconds` for the wait. For sign-in and other reusable requests, show “Please try again shortly” and allow a retry after that interval. Better Auth 1.7.7 consumes the reset token before hashing. On the reset screen, tell the user to request a fresh reset link after the stated wait and send them to the reset-link request form.
+
+Live Preview's database binding supports SQL only. Test the password flow on a deployed Dev site. Apps without managed PostgreSQL can use Native Auth or an external identity provider that performs password hashing on its own service.
 
 ## Form and admin apps
 

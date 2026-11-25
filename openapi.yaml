@@ -5643,6 +5643,11 @@ paths:
           - deployment_logs
         adapter: existing
       summary: List normalized deployment diagnostics
+      description: >-
+        CPU_LIMIT_EXCEEDED records a matching Cloudflare Tail CPU outcome. The gateway
+        returns HTTP 503 for a dispatch resource limit. RUNTIME_RESOURCE_LIMIT_EXCEEDED
+        reports a possible CPU or memory limit in the deployment log. Either code can
+        include a known literal path without a query string.
       parameters:
         - $ref: "#/components/parameters/RequestId"
         - $ref: "#/components/parameters/ProjectId"
