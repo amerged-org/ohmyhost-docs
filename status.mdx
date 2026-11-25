@@ -34,6 +34,8 @@ For a live event stream:
 ohmyhost logs "$OPERATION_ID" --follow --json
 ```
 
+During provider verification, `operation_get` reports the last recorded check in `work.step` when available. For example, `verifying_build` means the platform last checked the build artifact, even after compilation finished. Compare `reconciliation.observed_at` across reads of the same operation. A pending attempt carries its `attempt_id` and the next polling interval in its guidance.
+
 MCP `operation_logs` returns a bounded snapshot. Use `operation_get` for current completion rather than assuming the snapshot waits until done.
 
 ## Verify success

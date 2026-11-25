@@ -6,4 +6,4 @@ OpenAPI, executable Skills, tool schemas, install snippets and Ω assets are syn
 
 Install a Skill with `npx skills add amerged-org/ohmyhost-docs -s ohmyhost-get-started`. Validate content and broken links with the official Mintlify CLI before publishing.
 
-See [amerged-org/ohmyhost](https://github.com/amerged-org/ohmyhost) for the ohmyho.st hosting platform (OMH) and [amerged-org/cloudflare-postgres](https://github.com/amerged-org/cloudflare-postgres) for its PostgreSQL infrastructure (PGCF). The hosting source uses Elastic License 2.0. PGCF uses Apache-2.0.
+Anyone can read the [ohmyho.st platform source](https://github.com/amerged-org/ohmyhost) to trace a build or deployment, and the [managed PostgreSQL source](https://github.com/amerged-org/cloudflare-postgres) to trace a database change. Your app’s code stays in your project. The hosting source uses Elastic License 2.0. PGCF uses Apache-2.0.
