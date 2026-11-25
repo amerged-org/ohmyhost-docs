@@ -9,6 +9,8 @@ Declare private storage only when the application needs it. `storage.jurisdictio
 
 Import `createPrivateStorageClient` from `@ohmyhost/customer-runtime/storage` in server code. A storage-enabled deployment provides four runtime values: `OHMYHOST_STORAGE_GATEWAY_URL`, `OHMYHOST_STORAGE_KEY`, `OHMYHOST_PROJECT_ID` and `OHMYHOST_ENVIRONMENT_ID`. Resolve them from your hosted framework request context or Worker `env`:
 
+For the 0.1.82 starter, set manual redirect mode on both fetch callbacks as shown below. An app built and redeployed with runtime 0.1.83 gets that mode for SDK gateway requests and signed uploads. When your app fetches a signed download itself, use the returned URL and required headers with `redirect: "manual"`.
+
 ```ts
 import { createPrivateStorageClient } from "@ohmyhost/customer-runtime/storage";
 
@@ -17,8 +19,8 @@ const files = createPrivateStorageClient({
   key: env.OHMYHOST_STORAGE_KEY,
   projectId: env.OHMYHOST_PROJECT_ID,
   environmentId: env.OHMYHOST_ENVIRONMENT_ID,
-  fetch: (request) => fetch(request),
-  capabilityFetch: (request) => fetch(request),
+  fetch: (request) => fetch(request, { redirect: "manual" }),
+  capabilityFetch: (request) => fetch(request, { redirect: "manual" }),
 });
 ```
 
