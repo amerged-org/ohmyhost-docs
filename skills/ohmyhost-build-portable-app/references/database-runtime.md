@@ -1,7 +1,7 @@
 # Calling the ohmyho.st database from your application
 
 The server binding is `OHMYHOST_DATABASE`. The imports below need this exact line in the `dependencies` of
-`package.json`, with the lockfile committed: `"@ohmyhost/customer-runtime": "npm:@amerged/ohmyhost-runtime@0.1.80"`. The `vite-react` starter already contains it
+`package.json`, with the lockfile committed: `"@ohmyhost/customer-runtime": "npm:@amerged/ohmyhost-runtime@0.1.81"`. The `vite-react` starter already contains it
 and its lockfile resolves it, so a project created from that starter must keep it and add no other spec for the
 runtime. A local checkout may read the current version from `ohmyhost init --dry-run --json` under
 `runtime.packages.customerRuntime`; the form is always `npm:@amerged/ohmyhost-runtime@<version>`. This applies to Next.js,
