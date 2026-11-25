@@ -55,7 +55,7 @@ The optional [Kysely dialect](/database#optional-kysely-dialect) implements the 
 
 ### App-owned password hashing
 
-On a deployed Dev or Prod app with managed PostgreSQL, the server-side `OHMYHOST_DATABASE` binding provides `hashPassword(password)` and `verifyPassword({ hash, password })`. Pass them to Better Auth's `emailAndPassword.password` callbacks in your app and deploy the updated handler. New passwords use Better Auth's scrypt format. Keep the existing password column and verify a previously registered account when you change the handler.
+On a deployed Dev or Prod app with managed PostgreSQL, the server-side `OHMYHOST_DATABASE` binding provides `hashPassword(password)` and `verifyPassword({ hash, password })`. Pass them to Better Auth's `emailAndPassword.password` callbacks in your app and deploy the updated handler. New passwords use Better Auth's scrypt format. Verification also accepts existing `pbkdf2-sha256-v1` records with exactly 160,000 iterations, a 16-byte salt and a 32-byte digest encoded as unpadded base64url. Keep the existing password column and verify a previously registered account when you change the handler.
 
 Password computation runs in a private, stateless platform Worker. The submitted password and, during verification, the stored hash may be processed briefly outside the project's hosting region. The service has no password storage or request logging. The database stays in the selected region.
 
