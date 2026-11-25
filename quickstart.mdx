@@ -28,7 +28,9 @@ Check that you completed the same sign-in flow your agent opened and that the ag
 
 ### Choose a framework for a new app
 
-Keep the framework and sign-in system you already use. For a new form with customer login, PostgreSQL and an admin view, start with **Next.js App Router and TypeScript**. Ask your agent to use an admitted version and save a real starter’s matching `package.json` and frozen lockfile. In native chat, select managed source with the `empty` template for this stack. [Next.js](/frameworks/nextjs) · [Application authentication](/application-auth)
+Keep the framework and sign-in system you already use. For a new application in a native chat, select the managed `vite-react` TypeScript template. Add the edge API companion for same-origin login and database requests. For Next.js App Router, use a checkout or bound GitHub project with an admitted version and a matching frozen lockfile. [Vite](/frameworks/vite) · [Next.js](/frameworks/nextjs) · [Application authentication](/application-auth)
+
+When adding pnpm dependencies to managed source, keep the existing lockfile. If the frozen install needs new entries, preview and build can resolve the additions without changing the saved source. Save a matching lockfile from a local checkout for upgrades or removals.
 
 For a small React form, the `vite-react` starter supplies a frontend. Put the form at `/` and send its server requests to same-origin `/api/*` routes in the Vite companion. A lightweight HTTP service or scheduled job can use a plain Worker. [Vite](/frameworks/vite) · [Functions and schedules](/functions)
 
