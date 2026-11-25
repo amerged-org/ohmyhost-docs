@@ -53,6 +53,8 @@ ohmyhost domain cloudflare authorize --project "$PROJECT_ID" --zone example.com 
 ohmyhost domain cloudflare status --project "$PROJECT_ID" --json
 ```
 
+If you use version 0.1.82 of the CLI or local MCP server, upgrade it to 0.1.83 or later to receive the new authorization link. Version 0.1.83 also accepts the earlier direct Cloudflare authorization URL.
+
 Give the private authorization URL to the DNS administrator for the exact zone. They can open it with their Cloudflare account. Read back the authorized zone and expiry. Consent is scoped to that project's domain setup and does not change DNS. If a rollout or rollback invalidates an outstanding handoff, generate a fresh authorization link in the project and give it to the DNS administrator.
 
 [Deploy to Prod](/environments#deploy-to-prod) or promote a verified Dev deployment, then check the application on the Prod hosting address from project status. Neither successful deployment nor Cloudflare consent automatically activates a reserved domain. When the application works, repeat the original apply with exactly the same hostname and key:
