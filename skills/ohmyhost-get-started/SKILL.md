@@ -1,9 +1,11 @@
 ---
 name: ohmyhost-get-started
-description: Sign a customer in to ohmyho.st and reach a first deployment. Use it first from a desktop, a cloud session or a container with a shell (one link, one code, one question, no token, no GitHub), from a chat that has the ohmyho.st remote tools, or from CI with a token. It checks that the account and workspace are the customer's, routes to the right Skill, and holds account selection, support, private automation credentials, the Owner's review of connected MCP clients and the routing of LLM, image, speech, classifier or OCR requests to the app Skill; use ohmyhost-deploy once access is ready.
+description: Connect to ohmyho.st, find the right workspace and show a first preview. Use it first from a desktop, a cloud session or a container with a shell (one link, one code, one question, no token, no GitHub), from a chat that has the ohmyho.st remote tools, or from CI with a token. It checks that the account and workspace are the customer's, routes to the right Skill, and holds account selection, support, private automation credentials, the Owner's review of connected MCP clients and the routing of LLM, image, speech, classifier or OCR requests to the app Skill; use ohmyhost-deploy once access is ready.
 ---
 
 # Start with ohmyho.st
+
+Use the [customer voice](references/customer-voice.md) in replies.
 
 Sign the customer in, check that the account and workspace are theirs, then continue with their app. Choose the row that matches what you have:
 
@@ -21,7 +23,7 @@ Connected remote tools never select the remote route for an agent that has a she
 ohmyhost whoami --json
 ```
 
-Read the answer. Say nothing about a state that needs nothing from the customer: a ready agent deploys without a single question, and a state is reported only in the message that also asks them to act.
+Read the answer. Continue with the requested app once the account and workspace are ready. Explain a sign-in or workspace issue when the customer needs to act.
 
 | `whoami` shows                                                                | State                                                | Do                                                                                                                                                                                                                                                                                                                                                                                              |
 | ----------------------------------------------------------------------------- | ---------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
@@ -93,9 +95,9 @@ If `whoami` still answers `authentication_required` after the customer says they
 ## After sign-in
 
 1. Confirm that the account and the workspace are the customer's before anything is created.
-2. Continue with **ohmyhost-deploy**. A first deployment publishes the working directory as it is; GitHub is the later step for deployment on every push (see [GitHub](references/github-connection.md)). The first project takes the platform defaults, Dev protected by a shareable link and shared data, and reports them; the one question was EU or US.
-3. An app that needs private values: a local agent sets each one through the CLI's standard input, with the complete command that **ohmyhost-deploy** shows, which needs a terminal on the customer's side. The protected one-hour form (`secret_input_request`) exists only in the remote connection; keep values out of chat, arguments and logs.
-4. Progress is "source saved", then "deployment succeeded and the app URL passes its checks". A saved MCP configuration, a reloaded tool list or a finished browser page proves none of it.
+2. Continue with **ohmyhost-deploy**. Save the working directory as it is and [show its preview](../ohmyhost-deploy/references/preview.md) before the requested deployment. GitHub is the later step for deployment on every push (see [GitHub](references/github-connection.md)). The first project takes the platform defaults, Dev protected by a shareable link and shared data, and reports them; the one question was EU or US.
+3. An app that needs private values: a local agent whose customer has no terminal creates the protected one-hour form with `ohmyhost secret form create` (tool `secret_form_request`), gives the person the link as the last line of the reply and reads `ohmyhost secret form status` (tool `secret_form_status`). A customer at a terminal uses the CLI's standard input. **ohmyhost-deploy** shows both routes. A chat with the remote tools uses `secret_input_request`. Keep values out of chat, arguments and logs.
+4. Verify the saved version and preview before sharing the link. After a requested deployment, check the deployed address and main app action.
 5. The customer's workspace, region and project are in [projects and region](references/projects-and-region.md); a workspace is selected as in [workspace](references/workspace.md).
 
 Which Skill to read next:
@@ -115,19 +117,16 @@ Which Skill to read next:
 
 ## Without a shell, and without a person
 
-- **A chat with the remote tools.** Call `identity_get`; do not install a CLI, start a device login or ask for an API key in this chat. The client completes the managed OAuth sign-in itself. An identity with no organization needs `workspace_setup`: show its returned portal URL, ask the customer to sign in there with the same connected account, then call `identity_get` again. Details, `api_reference`, `secret_input_request` and the local/remote tool names are in [remote chat](references/remote-chat.md). If the remote tools are unavailable, say that concrete gap; local device tokens do not stand in for a missing remote connection.
+- **A chat with the remote tools.** Follow [remote chat](references/remote-chat.md) for `identity_get`, workspace setup, `api_reference` and private setup links. Then save and [show the preview](../ohmyhost-deploy/references/preview.md).
 - **CI or scheduled automation.** `OHMYHOST_TOKEN` is the credential: verify its identity with `ohmyhost whoami --json` against the task. If it fails, ask the customer to update the private credential source, never to paste a value into chat, and never send them to a sign-in link: `ohmyhost login` refuses to run while the variable is set. [Automation tokens](references/automation-tokens.md) has the whole route, including Native Auth permissions.
 
-## How to talk to the customer
-
-- One action per message, in short plain sentences. Give the link, then what they will see. Write in the language the customer writes in.
-- Keep messages about the action and why it is needed; do not narrate routine internal steps. Keep raw account IDs, permission tables and routine access diagnostics out of normal replies; use recognizable account or application names when a choice is needed.
-- After the verified connection, if the customer has not said what to host, ask only "What would you like to host?" in their language; if the app is already known, continue.
-- Wait for required browser input before actions that depend on it. Independent repository inspection can continue while they sign in.
-- Explain an actual limitation when it prevents the requested work, and do not repeat an instruction without new information. OpenAI and Claude use the same remote server catalog even when their imported Skills cover different workflows.
-- After they report back, verify with a command.
+After sign-in, if the app is already known, continue. Otherwise ask what they would like to
+host. Wait for necessary browser input before dependent work. You can inspect the local app
+while the customer signs in. Verify access when they finish.
 
 ## More
 
 - [What ohmyho.st is](references/overview.md), [Make connections](references/make-connections.md), [domain preparation](references/domain-preparation.md), [Next.js preparation](references/nextjs-preparation.md), [connected MCP clients](references/connected-clients.md).
-- Support runs through this agent. When the customer needs help, reports a bug or asks for a feature, submit a redacted report with `feedback_submit` (CLI `ohmyhost feedback submit`), give them the receipt ID and read replies later with `feedback_status` or `ohmyhost feedback status FEEDBACK_ULID --json`; the **ohmyhost-troubleshoot-deployment** Skill describes a good report. Point the customer to <https://ohmyho.st/contact> only when they cannot sign in, a billing issue names `contact_support`, or they ask about privacy or the DPA. The customer page is <https://docs.ohmyho.st/support>.
+- Support runs through this agent. When the customer needs help, reports a bug or asks for a feature, submit a redacted report with `feedback_submit` (CLI `ohmyhost feedback submit`), keep the receipt for follow-up and read replies later with `feedback_status` or `ohmyhost feedback status FEEDBACK_ULID --json`; the **ohmyhost-troubleshoot-deployment** Skill describes a good report. Point the customer to <https://ohmyho.st/contact> only when they cannot sign in, a billing issue names `contact_support`, or they ask about privacy or the DPA. The customer page is <https://docs.ohmyho.st/support>.
+
+Skill release 0.1.83. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

@@ -1,0 +1,12 @@
+---
+title: "Database not set up"
+description: "What the `database_not_set_up` error means and what to do next."
+---
+
+The API, CLI and MCP return `database_not_set_up` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+For read requests, do not change source or data. For requested setup, choose where to apply the saved migrations first. Shared Dev and Prod use one database. Publishing a database-enabled app is a separate action.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

@@ -62,7 +62,7 @@ const mail = createTransactionalMailClient({
   endpoint: env.OHMYHOST_MAIL_GATEWAY_URL,
   key: env.OHMYHOST_MAIL_KEY,
   projectId: env.OHMYHOST_PROJECT_ID,
-  fetch: (request) => fetch(request),
+  fetch: (request) => fetch(request, { redirect: "manual" }),
   timeoutMilliseconds: 30_000,
 });
 const sent = await mail.send({

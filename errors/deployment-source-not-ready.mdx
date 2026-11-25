@@ -1,0 +1,12 @@
+---
+title: "Deployment source not ready"
+description: "What the `deployment_source_not_ready` error means and what to do next."
+---
+
+The API, CLI and MCP return `deployment_source_not_ready` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Read source_get or 'ohmyhost project status' and finish preparing the project's source. If it already shows ready, report this request_id through feedback.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

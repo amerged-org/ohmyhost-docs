@@ -7,6 +7,6 @@ The API, CLI and MCP return `database_watch_column_unavailable` with HTTP 409. R
 
 ## What to do
 
-List only existing column names exactly as written, names are case-sensitive. Delete the watch before a migration drops a published column, because the write would fail.
+List only existing column names exactly as written, names are case-sensitive. A migration can add a column and cannot drop one, so a listed column stays; to publish another column, create the watch again with the full new list, which replaces its trigger.
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

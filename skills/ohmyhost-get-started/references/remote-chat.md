@@ -9,14 +9,16 @@ OAuth sign-in itself. A configured plugin or completed browser page is not proof
 Verify the account with `identity_get` and use `project_list` to find the intended project.
 Current workspace membership, role and any explicit token restrictions determine access. Continue
 with the requested work when authorized; a role denial needs the appropriate workspace role,
-not a separate project approval. Do not create a replacement project to gain visibility.
+so tell the customer which workspace access is missing. Keep using the intended project.
 
-An identity with no organization needs `workspace_setup` before project work. Present its
+An identity with no organization needs `workspace_setup` before project work. In the portal,
+**Workspace** is the label. Present its
 returned portal URL and ask the customer to sign in there with the same connected account.
 After setup, call `identity_get` again. Never guess an organization from a project name.
 
 Continue with **ohmyhost-deploy**. A new application developed entirely in this chat uses managed
-source. Read the project's source and context before continuing a saved app; changing chats does
+source. Save the real app and [open its preview](../../ohmyhost-deploy/references/preview.md)
+before deploying. Read the project's source and context before continuing a saved app; changing chats does
 not create another project. Before using source connection/generation guards, request
 `source_get` with `include_binding: true`; ordinary source selection may use its default
 released GitHub view, while managed source includes those guards in either view.
@@ -38,14 +40,15 @@ For a Native Auth provider link, `secret_uncertain` means the person can reopen 
 protected form and use the same value to retry the same request. Use the local stdin path
 (`secret_set_command` or CLI stdin) for multiline values such as PEM keys. Keep secret values out
 of chat, tool arguments and logs. Use the connector's `tools/list` to find remote tools and the
-[surface reference](references/surfaces.md) to distinguish local from remote tools.
+[surface reference](surfaces.md) to distinguish local from remote tools.
 If the required remote tools are unavailable, state that concrete capability gap; local device
 tokens are not a substitute for a missing remote connection.
 
 For an unfamiliar capability, inspect the named tools and use remote `api_reference` when exposed.
 It reads bounded API summaries or schemas with the compiled contract hash and explains each operation's
 named tool, protected handoff, equivalent workflow or explicit exception. This Master Tool Contract is
-documentation, not an executable API proxy. A documented operation is not callable unless its named
+documentation, not an executable API proxy. The response also includes links to the hosting
+platform and PostgreSQL infrastructure source. A documented operation is not callable unless its named
 tool is available in this host. New/changed OpenAI tools can be held for continuous checks while old
 definitions remain available; imported Skill/listing changes have their own package review. Preserve
 working OAuth instead of reconnecting merely because a tool definition has not refreshed.

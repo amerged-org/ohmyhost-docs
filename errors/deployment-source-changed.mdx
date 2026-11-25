@@ -1,0 +1,12 @@
+---
+title: "Deployment source changed"
+description: "What the `deployment_source_changed` error means and what to do next."
+---
+
+The API, CLI and MCP return `deployment_source_changed` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Read source_get or 'ohmyhost project status', then plan the intended commit from the current source.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

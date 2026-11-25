@@ -5,6 +5,8 @@ description: Migrate customer-selected Supabase capabilities in a TypeScript app
 
 # Migrate a Supabase application
 
+Use the [customer voice](../ohmyhost-get-started/references/customer-voice.md) in replies.
+
 Keep the application working while converting only the capabilities the customer selected.
 
 ## Inspect and choose
@@ -23,13 +25,18 @@ Read [provider contracts](references/provider-contracts.md) only for the affecte
 - Preserve or integrate the customer-chosen application auth. Configure its callback URLs and private server secrets. Test login, protected access, session refresh/reload and logout; hosting login is separate.
 - Convert selected Storage, Functions and Realtime behavior only when the current runtime contract supports the equivalent application behavior. If it does not, state the gap and agree on the feature decision instead of inserting a fake success or silent fallback.
 - Selected Edge Functions become authenticated framework-native server routes or plain Worker handlers. Declare schedules through `functions.crons`; the platform owns cron delivery/retries, rather than customer Queue/Workflow bindings. Existing external functions may stay when the customer chooses them and their declared interfaces are verified.
-- Optional managed Better Auth uses explicit `auth.provider: better-auth` and its database. Managed mail is optional for verified-user/session/token flows; the bridge's verification/reset sends use its platform sender and need `mail.enabled: true`, Paid access and a verified sender. Keep a custom Resend callback in an application-owned Better Auth handler with `auth.provider: none`; this disables only the managed bridge, not Better Auth or login. SDK dependency detection selects no managed capability. CLI 0.1.24 may incorrectly return `managed_auth_mail_required`; use the corrective 0.1.25 release or later and preserve the selected auth and sender.
-- Keep application runtime secrets separate from repository/build inputs. Locally, use `secret_set_command` with the intended environment ID for private values. From a native chat, use `secret_input_request` with the environment name (`dev` or `prod`) and give its link only to the person who sets the value.
+- Optional managed Better Auth uses explicit `auth.provider: better-auth` and its database. Managed mail is optional for verified-user/session/token flows; the bridge's verification/reset sends go through ohmyho.st Mail from the customer's own verified sender (ohmyho.st has no sender of its own) and need `mail.enabled: true`, Paid access and that verified sender. Keep a custom Resend callback in an application-owned Better Auth handler with `auth.provider: none`; this disables only the managed bridge, not Better Auth or login. SDK dependency detection selects no managed capability. Preserve the selected auth and sender.
+- Keep application runtime secrets separate from repository/build inputs. Locally, use `secret_set_command` with the intended environment ID for private values when the customer is at a terminal, or `secret_form_request` and `secret_form_status` when they have none. From a native chat, use `secret_input_request` with the environment name (`dev` or `prod`) and give its link only to the person who sets the value.
 
 ## Verify and deploy
+
+Use the [preview workflow](../ohmyhost-deploy/references/preview.md) to show the saved app
+before deploying. Verify migrated data on the selected deployed site.
 
 Run relevant application tests and the real framework build, then rerun `init` until the selected conversion requirements are resolved. Use **ohmyhost-build-portable-app** for the resulting runtime and **ohmyhost-deploy-github** for publication.
 
 Check real login, data reads/writes, constraints and any required files, email or functions on the hosted Dev app. Promote only within the customer's request, preserving Prod records. Rollback or deletion tests belong only to separately requested or explicitly disposable test resources.
 
 For an unsupported operation or suspected platform bug, use `feedback_submit` with a minimal redacted reproduction and the safe operation/error ID. Keep the unresolved capability visible; do not claim the migration complete until the requested application behavior works.
+
+Skill release 0.1.83. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

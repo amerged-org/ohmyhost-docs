@@ -1,5 +1,8 @@
 # Make sure a workspace is selected
 
+In the portal, **Workspace** is the label above the workspace name or selector. In CLI and
+MCP results, look up that name in the returned organization.
+
 `login` and `whoami` select the workspace themselves when the customer has exactly one, and their
 response names the selected organization. A first sign-up gets **My workspace** from `login` itself.
 They report `next_action` with several choices, and then the customer decides; when the answer of
@@ -36,7 +39,11 @@ ohmyhost whoami --json
   the portal's Profile page (omit the flag for Direct); another value answers `forbidden`.
 - Reuse the same name, source and idempotency key after an interrupted response instead of creating a second organization.
 - Creating a workspace selects it immediately for a login that had none; `whoami` or `identity_get` confirms the selection before you create a project. A login already in another workspace keeps it, and the response names the `login` that adds one for the new workspace.
-- Over MCP, `organization_create`, `organization_list` and `organization_use` do the same and report the same `selected` workspace.
+- In local MCP, read `profile_list` for saved login names and `organization_list` for the
+  workspaces of the selected login. Use `organization_use` to bind an unscoped login to the
+  workspace the customer names. After binding or `organization_create`, verify the workspace
+  with `identity_get`. For GitHub work, check `github_status` before requesting a new connection
+  with `github_connect`.
 - Creating, listing and selecting a workspace need the interactive login. An API token can do none of them, and says so.
 - Never create another workspace on your own when the customer already has one. One user can start at most five new workspaces per hour; a sixth request answers `forbidden`, so reuse an existing workspace instead of retrying.
 - A session that selected none lists no projects: `projects_list` and `ohmyhost project list` answer `organization_required` instead of an empty page. Select a workspace, then read the list again.

@@ -1,11 +1,10 @@
 # Calling the ohmyho.st database from your application
 
-The server binding is `OHMYHOST_DATABASE`. The imports below need this exact line in the `dependencies` of
-`package.json`, with the lockfile committed: `"@ohmyhost/customer-runtime": "npm:@amerged/ohmyhost-runtime@0.1.81"`. The `vite-react` starter already contains it
-and its lockfile resolves it, so a project created from that starter must keep it and add no other spec for the
-runtime. A local checkout may read the current version from `ohmyhost init --dry-run --json` under
-`runtime.packages.customerRuntime`; the form is always `npm:@amerged/ohmyhost-runtime@<version>`. This applies to Next.js,
-TanStack Start, Vite companions and functions Workers alike.
+The server binding is `OHMYHOST_DATABASE`. In the managed Vite starter, preserve
+the runtime alias `"@ohmyhost/customer-runtime": "npm:@amerged/ohmyhost-runtime@0.1.82"` and its matching lockfile described in the [chat stack](chat-stack.md) when adding its API companion.
+In a local checkout, use the exact npm alias from `ohmyhost init --dry-run --json`
+under `runtime.packages.customerRuntime` and commit the matching lockfile. The
+same import name applies to Next.js, TanStack Start, Vite companions and functions Workers.
 
 ```ts
 import {
@@ -24,6 +23,9 @@ export default {
   },
 };
 ```
+
+`values` is required in every `query` call, also inside `withConnection`: `query({ text })` fails with
+`database_query_invalid` and no detail, so pass `values: []` for a statement without parameters.
 
 Several statements that are decided before the first result arrives go in one transaction:
 

@@ -1,0 +1,12 @@
+---
+title: "Github source access denied"
+description: "What the `github_source_access_denied` error means and what to do next."
+---
+
+The API, CLI and MCP return `github_source_access_denied` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Use GitHub status to check that the ohmyho.st GitHub App can read this repository. Verify the commit was pushed and re-link the repository if its name or installation changed, then plan again.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.
