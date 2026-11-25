@@ -28,7 +28,21 @@ The deployment plan (`deployment_plan`, `risks`), `ohmyhost init --dry-run` (`mi
 
 ## Make an additive change
 
-Add a nullable field, deploy code supporting both shapes, then backfill with authorized database writes of at most 1,000 rows or bounded application work, outside migrations. Dropping/renaming columns and tightening existing constraints are unsupported; leave retired columns unused and enforce new rules in application code. Commit each versioned migration with the application code and matching lockfile.
+Add a nullable field, deploy code supporting both shapes, then backfill with authorized database writes of at most 1,000 rows or bounded application work, outside migrations. Commit each versioned migration with the application code and matching lockfile.
+
+If adding `CHECK` or `UNIQUE` to an existing table returns `catalog_changed`, define a successor table with the required constraints in a new migration. For example:
+
+```sql
+CREATE TABLE public.stock_items_v2 (
+  id bigint PRIMARY KEY,
+  code text NOT NULL UNIQUE,
+  quantity integer NOT NULL CHECK (quantity >= 0)
+);
+```
+
+Carry forward the original keys, relationships, tenant isolation and access policies before allowing writes. Update all writers to keep both versions consistent in one transaction while you backfill in bounded batches. Resolve rows that violate the new rules and verify keys, values and references before switching reads and writes to the new table. Keep the original table and its data. Existing foreign keys still reference that table; moving a dependent table requires its own additive migration.
+
+For `ledger_conflict`, inspect the affected environment with `ohmyhost database psql --project "$PROJECT_ID" --environment prod --mode read --ttl 5m` (use `dev` for Dev). Run `SELECT path, encode(sha256, 'hex') AS sha256 FROM ohmyhost.schema_migrations ORDER BY path;`. Match every returned path and SHA-256 to the original file bytes from the Git commit or saved source version that applied it. Restore those files as the exact ordered prefix of your migration directory, then append later timestamped files. Leave the database ledger untouched.
 
 Before promotion, test the migration against representative existing records. A successful clean-database setup alone does not prove an upgrade preserves customer data.
 
