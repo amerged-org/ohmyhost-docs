@@ -1,37 +1,19 @@
 ---
 name: ohmyhost-deploy
-description: Develop and version an application with ohmyho.st, open a private live preview, apply the app's database changes where the user chooses, and deploy or publish on request from a local checkout or a connected native chat. Reuse the saved project and source; an unbound local checkout is published as it is, without GitHub, and GitHub is the later step for deployment on every push. Switch an existing project only on request. From a native chat, also set private application secrets with a one-hour link that needs no sign-in. Use troubleshooting for a stuck deployment.
+description: Develop and version an application with ohmyho.st, open a private live preview, apply the app's database changes where the user chooses, and deploy or publish on request from a local checkout or a connected native chat. Reuse the saved project and source; an unbound local checkout is published as it is, without GitHub, and GitHub is the later step for deployment on every push. Switch an existing project only on request. Set private application secrets with a one-hour link that needs no sign-in, from a native chat or from a local agent whose customer has no terminal. Use troubleshooting for a stuck deployment.
 ---
 
 # Develop and deploy an app
 
+Use the [customer voice](../ohmyhost-get-started/references/customer-voice.md) in replies.
+
 Read available MCP tool schemas or installed CLI help. Complete access with
-**ohmyhost-get-started**, preserving the user's selected account, organization and project.
-Keep explanations in the user's language; users need app versions, a preview and a working
-address, not the storage provider's implementation details.
-Use two short sentences, one link and at most one question.
-Share IDs, commit hashes, state words, codes and tool names only on request.
+**ohmyhost-get-started**, preserving the user's selected account, workspace and project.
 
 ## Show the app to the user
 
-Free and Paid workspaces can open a private live preview without deploying. Use
-`preview_open` after a save, when continuing an existing project even if no save is
-needed, or when the user asks to see the app. Read the project's workspace plan with
-`identity_get` or `organization_account_get` and its environments with `project_status`. Pass `environment: dev`
-if the workspace is Paid and the project has Dev. Otherwise pass `environment: prod`.
-If plan access is denied, ask the workspace Owner
-to confirm the plan.
-
-Follow the readiness checks in step 4 below. Give the returned preview `url` only when
-`ready_to_show` is true, exactly as returned: a shortened, retyped or broken link stops working. On the first handoff, ask whether the user wants to see the app.
-On later handoffs, give the link without repeating the question. Apply these rules to
-any link or question in `next_step` and `say_to_user`. Keep the link out of source, notes
-and logs. A preview link works for at most 24 hours (`expires_at`); afterwards it stops working
-and `preview_open` creates a new preview with a new link, so hand over only the newest link.
-
-The Dev site is a deployed test site for Paid workspaces. Prod is the deployed live site. Give a Dev site link only when
-the user asks for the deployed Dev site, and give only the `share_url` returned by
-`project_dev_share_link_get`. If no share link is available, explain the limitation.
+Follow the [preview workflow](references/preview.md) for every plan, before deploying.
+For a request to build or edit, the preview is the first handoff.
 
 ## Select the source once
 
@@ -51,9 +33,9 @@ those guards in either view. `ohmyhost source status` opts in for the local sour
 | Explicit request to use GitHub                           | **ohmyhost-deploy-github**, including GitHub setup if needed |
 | Explicit request to store/deploy directly with ohmyho.st | Managed source                                               |
 | New application developed entirely in native chat        | Managed source                                               |
-| Unbound local checkout, nothing else said                | Publish the working directory as it is: the local section    |
+| Unbound local checkout, nothing else said                | Save and preview the working directory as it is              |
 
-An unbound checkout is published as it is whether or not it has a GitHub remote and whether or
+Save an unbound checkout as it is whether or not it has a GitHub remote and whether or
 not the workspace has a GitHub installation; a remote can be a local Git proxy or another host,
 and a copied GitHub remote alone neither overrides a saved binding nor sends the checkout to
 GitHub. GitHub is the later step, for deployment on every push. If the existing source conflicts
@@ -82,10 +64,10 @@ ohmyhost project list --json
   - The workspace has projects: nothing is created silently. If exactly one project carries the
     name the customer gave, or exactly one has this checkout's repository as its saved source
     (`ohmyhost source status --project PROJECT_ULID --json`), continue that project and say so.
-    If several match, or none, ask once, with the handles and IDs, which project is meant or
+    If several match, or none, use recognizable app names to ask which project is meant or
     whether this is a new app, before anything is published or deployed.
 
-Only for an unbound checkout, in this order:
+For an unbound checkout, create the project and save its first version in this order:
 
 ```
 ohmyhost project create --organization ORGANIZATION_ULID --name NAME --region eu --idempotency-key KEY --json
@@ -93,9 +75,7 @@ ohmyhost operation get OPERATION_ULID --json
 ohmyhost init --dry-run --region eu --json
 ohmyhost init --region eu --json
 ohmyhost source publish --project PROJECT_ULID --mode initialize --expected-source-generation 0 --message "Initial version" --idempotency-key KEY --wait --json
-ohmyhost deploy --project PROJECT_ULID --commit COMMIT_SHA --environment dev --idempotency-key KEY --yes --wait --json
 ohmyhost project status --project PROJECT_ULID --json
-ohmyhost project preview open --project PROJECT_ULID --environment dev --json
 ```
 
 - `project create` answers `accepted`; read its operation until it succeeds.
@@ -105,17 +85,35 @@ ohmyhost project preview open --project PROJECT_ULID --environment dev --json
 - A first publication is generation 0 without a connection. Later ones take the generation and connection from `ohmyhost source status --project PROJECT_ULID --json`.
 - A publication that is still pending is finished with `ohmyhost source publish complete`, below.
 - The commit to deploy is `receipt.commit_sha` of the publication.
-- Stop before the upload on `application_root_ambiguous` (ask once which root) and on a snapshot over 2 MiB a file, 8 MiB in total or 2,000 files, or with a symbolic link. Report the named error and what the limit is, and ask the customer how to go on; do not promise that the GitHub route takes the same checkout, because it has limits of its own.
-- The `deploy` line is for a Paid workspace, the only one with a Dev site. On a Free workspace skip it and open the preview with `ohmyhost project preview open --project PROJECT_ULID --environment prod --json`; deploy to Prod only when the customer asks to go live.
-- Show the app through the live preview with the last command and the handoff rules above. Read the protected Dev share link (`ohmyhost project dev-share link --project PROJECT_ULID --json`) and send the customer its `share_url` only when they ask for the deployed Dev site. Do not request a second one-time ticket while the first is unused, and do not report the deployment as unverified only because you have no browser.
+- Stop before the upload on `application_root_ambiguous` (ask once which root) and on a snapshot over 2 MiB a file, 8 MiB in total or 2,000 files, or with a symbolic link. Explain what exceeds the limit and ask the customer how to go on; do not promise that the GitHub route takes the same checkout, because it has limits of its own.
+- Once the source save succeeds, choose the environment using the [preview workflow](references/preview.md).
+  Open and check the preview, then give the customer its link. On Free use `--environment prod`.
+  On Paid with Dev, use `--environment dev`.
 
-An app that needs private values (the customer is at a terminal, because a local agent has no other way to take a value): one command per secret, with the value on standard input and never in the arguments, the chat or the logs:
+```sh
+ohmyhost project preview open --project PROJECT_ULID --environment prod --json
+```
+
+For a requested deployment, deploy the version from the source receipt after the preview
+handoff. Use `--environment dev` for the Paid Dev site, or `--environment prod` for the live site.
+
+```sh
+ohmyhost deploy --project PROJECT_ULID --commit COMMIT_SHA --environment prod --idempotency-key KEY --yes --wait --json
+```
+
+Verify the deployed address and the main app action through the site access available to you.
+For a data app, use the [published-site save check](references/preview.md).
+
+An app that needs private values has two routes, and the value never enters chat, arguments, files or logs. `ENVIRONMENT_ULID` is the Dev or Prod environment ID from `ohmyhost project status --project PROJECT_ULID --json`; Prod has its own secrets and none is copied from Dev.
+
+- The customer has no terminal (a cloud session, a container, a chat client with local tools): create a protected form for one to ten distinct names with `ohmyhost secret form create --project PROJECT_ULID --environment ENVIRONMENT_ULID --names NAME_ONE,NAME_TWO --json` (tool `secret_form_request`). Give the customer its `url` as the last line of the reply, with nothing after it, and keep it out of files and notes. The link needs no sign-in, is single use and is valid for one hour; the customer types the values in the form. Then read `ohmyhost secret form status REQUEST_ID --project PROJECT_ULID --environment ENVIRONMENT_ULID --json` (tool `secret_form_status`): `saved` means every name is set, `pending` means the customer has not saved yet, and `expired` or `incomplete` (with the names that are `failed` or `unconfirmed`) needs a new form for those names. The form needs `secrets:write`: a revoked token, an ended session or a lost permission ends the link, and `ohmyhost logout` does not.
+- The customer is at a terminal: one command per secret, with the value on standard input:
 
 ```
 printf '%s' "$SECRET_VALUE" | ohmyhost secret set NAME --project PROJECT_ULID --environment ENVIRONMENT_ULID --idempotency-key KEY --stdin --json
 ```
 
-`ENVIRONMENT_ULID` is the Dev or Prod environment ID from `ohmyhost project status --project PROJECT_ULID --json`; Prod has its own secrets and none is copied from Dev. The protected one-hour form (`secret_input_request`) exists only in the remote connection.
+A chat with the remote tools uses `secret_input_request` instead.
 
 ## Local managed checkout
 
@@ -136,7 +134,8 @@ application manifest, uploads the changed blobs and commits
 the completed tree. Preserve executable bits. Exclude credentials, `.env` files, local caches,
 dependency directories and build outputs. Do not require `git push` to GitHub for this route.
 Save the returned project/source binding; the accepted server commit identifies the version
-to plan and deploy. An upload is not itself a successful build or publication.
+to preview. Follow the [preview workflow](references/preview.md), then plan and deploy that saved version
+when the customer requested it.
 
 If publication is pending, poll its saved `operation_get` and then run
 `ohmyhost source publish complete --project ULID --directory PATH --operation ULID --json`
@@ -174,9 +173,9 @@ This workflow needs the authenticated remote tools; it has no local filesystem o
 dependency. Verify the connected account and workspace using the get-started Skill before project actions.
 
 1. Reuse the chosen project via `project_list`/`project_get` and read `project_context_get`. For a new
-   app, use `project_create` with its approved organization, name, region, data mode and, when
+   app, use `project_create` with the selected organization, name, region, data mode and, when
    Dev is included, its access mode, `source_provider: "managed"` and the intended `template`. Choose `vite-react`
-   for a basic web app, or `empty` for a specifically chosen supported stack. Preserve an
+   for every app you build in the chat (it brings a finished lockfile; add packages by editing `package.json` only. Preview and build can update the pnpm lockfile when every saved dependency pin can be preserved), or `empty` for a specifically chosen supported stack whose lockfile you save yourself. Preserve an
    existing project's region and data; do not infer region from an
    agent's IP. Project creation defaults to Dev and Prod environment records. Deploying a Dev site
    requires a Paid workspace. Set `include_development_environment: false`
@@ -189,7 +188,7 @@ dependency. Verify the connected account and workspace using the get-started Ski
    is provisioned; a completed project operation can still have `source.status: "pending"`.
    Keep polling that source rather than starting a duplicate initialization. A `failed` source
    needs its recorded failure diagnosed. When `initialization_operation_id` is returned, follow
-   that actual child operation with `operation_get`; otherwise use the returned
+   that child operation with `operation_get`. Otherwise use the returned
    `initialization_error_code`. An `authorization_changed` failure needs the current account, role and token access checked through **ohmyhost-get-started** before retrying the source action.
    If initialization ends with `managed_source_dispatch_failed`, read the current source and follow any
    returned child operation. If the source is still unbound and no initialization is pending, use
@@ -215,24 +214,10 @@ dependency. Verify the connected account and workspace using the get-started Ski
    A change batch accepts at most 2 MiB of decoded content. For a complete atomic tree or
    related edits larger than that batch, use the remote upload flow below rather than
    splitting one intended version into several unrelated commits.
-4. After the source save succeeds, call `preview_open` for the project using the workspace
-   plan and environment above. While `ready_to_show` is false, read
-   `preview_get` for the same project and environment about every 10 seconds for at most 2 minutes.
-   Follow `next_step` and say `say_to_user` in the user's language when provided, applying the
-   handoff rules above to any link or question. If the preview still needs time after polling,
-   tell the user it is still getting ready.
-
-   If a result carries `failure`, stop polling and follow its `next_step`: it names the file or
-   action that fixes the start. When the `next_step` asks for a fix, call `preview_open` again only after the fix is saved,
-   because the same saved version fails the same way. When it says to wait, open the preview
-   again in a few seconds. The ohmyhost-troubleshoot-deployment Skill lists the codes.
-
-   A database app does not need a deployment to show its preview, but the preview shows the app only: it does not save data, so never tell the user that it does. Saving data works once the app is published (the Dev site on Paid, the live site on Free) after `database_migrate` has created its tables. `preview_open` and `preview_get` carry `data`, which informs and never delays the link: give the link first, say that saving works after publishing, then ask the question below. When `data.state` is `needs_database` or `migrations_pending`, ask the user in one sentence where to apply the saved migration files, then call `database_migrate` with the answer. A Free workspace, and a project without a Dev site, applies to `prod`: say so and do not ask about Dev. With a Dev site, ask whether to apply to Dev only or to Dev and Prod (`data.options`), and call `database_migrate` once per environment, `dev` first. When `data.shares_data_with` is `prod`, say that Dev and Prod are one database here, so either choice changes both. Pass `confirm: true`, the saved `commit_sha` (the `source.commit_sha` of the preview) and a new idempotency key, follow the operation with `operation_get` (the job starts within about a minute), then read `preview_get` again (the database is created when it does not exist yet, and the preview still does not save data). A refused file is named in `error.migration`: add a new migration file, never edit one that was applied. `migrations_pending` with an empty `data.pending_files` means the files are held but no migration run confirmed their contents (for instance after a deployment): call `database_migrate` once more, it skips the files already applied. Dev appears in `data.options` only for a Paid workspace with a Dev site. Applying tables does not publish the site. Deploy only when the user requests a deployment; after it the app saves data. A preview link lasts at most 24 hours and is replaced by calling `preview_open` again.
-
-   When `ready_to_show` is true, use the live preview handoff above.
-   For example, “Deine Seite ist als private Vorschau fertig: `<Link>`. Möchtest du sie dir ansehen?”
-   Later saves update the same preview without a deployment. Once a later save is ready to show,
-   say what changed and repeat the link.
+4. After the source save succeeds, follow the [preview workflow](references/preview.md).
+   Open the saved app, wait for readiness and give the customer the preview link first.
+   For data apps, explain when saving works and use the [database setup workflow](references/database-setup.md)
+   when it applies. Deploy only when the user requests a deployment.
 
 5. Use `source_versions` and `source_diff` to inspect saved work. `source_restore` creates a
    new version from the selected earlier commit under the same revision guards; it does not
@@ -262,6 +247,7 @@ dependency. Verify the connected account and workspace using the get-started Ski
    ticket while the first is unused. A repeated request revokes the unused ticket, and a key
    does not replay it.
    Open a public Dev site or direct Prod deployment at its deployed address for verification.
+   For a data app, follow the [published-site save check](references/preview.md) at that address.
    Keep these entry links out of notes, source and logs.
    Verify the app's meaningful
    interaction, expected content and any requested data flow before calling it ready. If the
@@ -271,7 +257,8 @@ dependency. Verify the connected account and workspace using the get-started Ski
    `promotion_plan` then `deployment_promote` for the verified Dev deployment, including the
    exact ETag, confirmation and idempotency guards. Alternatively plan an exact commit into
    Prod when that is the requested route, including with shared data. Prod needs its own secret inputs;
-   they are not copied from Dev. Poll the accepted operation and verify the public result.
+   they are not copied from Dev. Poll the accepted operation and verify the public result,
+   including the save check for a data app.
 
 Report the deployment verification result and any required user action. For a requested Prod
 deployment or publication, give the verified public address. To show the app, use the live preview
@@ -354,3 +341,5 @@ operation/idempotency key. Read `source_get` after completion before planning th
 Rollback, deletion, data-mode changes and domain/mail changes retain their own reviewed plans
 and scopes. Use the existing deployment, database and domains Skills as appropriate; switching
 source alone authorizes none of them.
+
+Skill release 0.1.83. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

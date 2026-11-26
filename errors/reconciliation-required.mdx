@@ -7,6 +7,6 @@ The API, CLI and MCP return `reconciliation_required` with HTTP 409. Repeating t
 
 ## What to do
 
-Read the original operation’s recovery facts before making one reconciliation attempt.
+Read the original operation’s recovery facts and confirm one attempt with the original write’s idempotency key.
 
 If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

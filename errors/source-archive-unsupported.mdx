@@ -1,0 +1,12 @@
+---
+title: "Source archive unsupported"
+description: "What the `source_archive_unsupported` error means and what to do next."
+---
+
+The API, CLI and MCP return `source_archive_unsupported` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Check the repository archive for symbolic links or unsupported paths. Replace them with regular files and directories, push the corrected commit and plan it. If the archive looks valid, report this request_id through feedback.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

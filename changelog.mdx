@@ -3,6 +3,13 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
+## Client release 0.1.83
+
+- Use `ohmyhost secret form create` and `ohmyhost secret form status` to collect application secrets through a private form. The web page receives the values directly. [Runtime secrets](/secrets)
+- A managed pnpm build can resolve newly added packages while preserving the saved lockfile's existing pins. The platform checks TanStack Start's generated Worker output and the complete Next.js Worker module budget, including scheduled functions. [TanStack Start](/frameworks/tanstack) · [Next.js](/frameworks/nextjs)
+- Deployment plans give more specific errors for GitHub source problems. Operation status can identify the provider verification step, and terminal failures point to the relevant migration or packaged artifact when that information is available. [Deployment status](/status) · [Troubleshooting](/troubleshooting)
+- A project operator can give its private Cloudflare DNS authorization link to the zone's DNS administrator. Newly deployed apps built with customer runtime 0.1.83 make managed mail and file requests with manual redirects. [Domains](/domains) · [Email](/email) · [Files](/files)
+
 ## Client release 0.1.82
 
 Apps using managed PostgreSQL can use the private database binding to hash and verify app-owned passwords. New hashes use Better Auth scrypt. Existing stock Better Auth hashes and supported 160,000-iteration PBKDF2-v1 records can be verified in place. See [application authentication](/application-auth#app-owned-password-hashing) for setup, password processing location and reset retries.

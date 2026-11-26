@@ -5,7 +5,9 @@ description: Explain ohmyho.st measured usage, remaining credits and project spe
 
 # Explain usage and spending
 
-Use `identity_get` to select the organization, then `organization_credits_get` and `organization_usage_get`, which lists the billed charges of the last up to 14 UTC days by day, project and meter and each project's use so far this month. Older days are not kept. Read `project_budget_get` for a project-specific limit and `project_context_get` for current project actions.
+Use the [customer voice](../ohmyhost-get-started/references/customer-voice.md) in replies.
+
+Use `identity_get` to select the workspace, then `organization_credits_get` and `organization_usage_get`, which lists the billed charges of the last up to 14 UTC days by day, project and meter and each project's use so far this month. Older days are not kept. Only a workspace Owner can read `organization_credits_get`, `organization_usage_get` and `organization_account_get`; ask an Owner if needed. Read `project_budget_get` for a project-specific limit and `project_context_get` for current project actions.
 
 Report the available balance, reserved credits, the days covered and the largest project/environment/meter costs. Distinguish billed consumption from reservations. Settlement lag varies by meter, and recent usage can still be pending. Explain quantities and credits together, for example database RAM and active time versus separately metered customer files. Reporting remains available at zero credits.
 
@@ -17,7 +19,7 @@ before interpreting changes in the balance.
 
 Before starting a build, show `deployment_plan.estimated_cost.credits` when available. It is the
 credit reservation quoted for the build. If the plan has no estimate, say it is unavailable.
-Provide these figures on request and follow the financial-action rules below.
+Give figures when the customer asks about costs or needs them to decide on spending.
 
 A wallet is shared across the organization. A new workspace starts Free. Paid feature access may come from a Stripe subscription or a granted entitlement; a grant does not create a subscription or another monthly Paid allowance. A full refund of a subscription invoice, or a dispute that withdraws its whole payment, also ends the Paid access that invoice gave; a partial refund only takes back credit. A referral grant adds 1,000 credits once and thirty days of Paid; read its `paid_until`. When a finite grant ends, the workspace returns to Free, managed mail and AI calls stop, and its custom domain needs the powered-by flag to keep serving.
 
@@ -35,9 +37,16 @@ Database schedules and webhook deliveries have no meter and no price of their ow
 
 ## Purchases and invoices
 
-Only start `billing_checkout_create` when the owner requested or approved that purchase. `paid` starts a USD 10/month subscription granting 1,000 credits per paid period. `topup` (Paid only; otherwise `paid_plan_required`) buys 1–100 USD 10 packs and does not extend Paid. In one checkout, dollars up to USD 100 buy 100 credits each, and dollars above buy 125 each: 25% more credits for that portion. Ten packs give 10,000 credits and twenty give 22,500. Prices exclude tax. Complete the returned checkout, then verify `billing_checkout_get` and the wallet. A browser return is not payment confirmation.
+Only start `billing_checkout_create` for the purchase the owner requested. `paid` starts a USD 10/month subscription granting 1,000 credits per paid period. `topup` (Paid only; otherwise `paid_plan_required`) buys 1–100 USD 10 packs and does not extend Paid. In one checkout, dollars up to USD 100 buy 100 credits each, and dollars above buy 125 each: 25% more credits for that portion. Ten packs give 10,000 credits and twenty give 22,500. Prices exclude tax. Complete the returned checkout, then verify `billing_checkout_get` and the wallet. A browser return is not payment confirmation.
 
-Use `billing_portal_create` for invoice history, payment methods and subscription management. Every successful purchase, including a one-time top-up, has an invoice. If checkout is unavailable for the selected platform, report that response; never call a test payment a real purchase.
+Read `required_action` on the original checkout. For `complete_checkout`, give the checkout URL
+to the human. For `open_billing_portal`, use `billing_portal_create` and give the human the new
+private URL. For `contact_support`, use https://ohmyho.st/contact with the original invoice.
+`none` means there is no payment step now. Verify the effective plan with
+`organization_account_get` and the spendable balance with `organization_credits_get`.
+
+Use `billing_portal_create` for invoice history, payment methods and management of an active,
+overdue, unpaid or paused subscription. Keep the original subscription when resolving payment. Every successful purchase, including a one-time top-up, has an invoice. If checkout is unavailable for the selected platform, report that response; never call a test payment a real purchase.
 
 Return a concise cost explanation and the requested next action. For a suspected incorrect charge, use `feedback_submit` with the period and safe receipt/error identifiers, without payment details or raw records. Use `feedback_submit` through local or remote MCP.
 
@@ -51,12 +60,14 @@ Enabling records the Owner's consent to these recurring off-session charges up t
 
 To turn it off, use the current revision, `enabled: false` and `consent: null`; already initiated payments may complete. Replay the same key and payload after uncertainty. `payment_required` pauses further attempts: return the private `invoice_url` when present, or ask the human to review Billing. Do not repeatedly re-enable or create another purchase to bypass a decline. `monthly_limit` resumes next UTC month; `needs_reconciliation` requires checking the original attempt rather than a new charge. Every paid refill has an invoice. Refunds/chargebacks adjust only their original credit lot and pause further automatic refills.
 
-CLI read: `ohmyhost billing recharge get --organization "$ORGANIZATION_ID" --json`. Authorized change: `ohmyhost billing recharge set --organization "$ORGANIZATION_ID" --enabled true --monthly-limit-minor 10000 --revision 0 --consent off_session_v1 --idempotency-key "$REQUEST_KEY" --json`; replace the example revision and USD 100 cap with the current read and approved amount. When disabling, use the latest revision and current saved limit, omit `--consent` and use `--enabled false`. Out-of-range limits or consent with disabled state answer `invalid_command`. If billing is unavailable for the chosen platform, report that result; do not switch the customer's environment.
+CLI read: `ohmyhost billing recharge get --organization "$ORGANIZATION_ID" --json`. Authorized change: `ohmyhost billing recharge set --organization "$ORGANIZATION_ID" --enabled true --monthly-limit-minor 10000 --revision 0 --consent off_session_v1 --idempotency-key "$REQUEST_KEY" --json`; replace the example revision and USD 100 cap with the current read and the amount the owner chose. When disabling, use the latest revision and current saved limit, omit `--consent` and use `--enabled false`. Out-of-range limits or consent with disabled state answer `invalid_command`. If billing is unavailable for the chosen platform, report that result; do not switch the customer's environment.
 
 ## Resolve an existing billing issue
 
 Read `billing_issue` from `billing_checkout_get` or `billing_recharge_get`; retain its `invoice_id`, `code`, observation time and `required_action`. An authorized project context may also surface that next action. `billing_tax_location_required` / `open_billing_portal` means call `billing_portal_create` and give the human a fresh private URL to correct billing details. `billing_tax_calculation_failed` or `billing_tax_configuration_required` / `contact_support` means use https://ohmyho.st/contact about the original invoice.
 
-After correction, inspect that same checkout/recharge policy and the actual credit account again. Reading does not authorize or initiate another charge. Keep the original invoice: never disable tax, create a second subscription/top-up, discard the invoice or repeatedly re-enable automatic refills to repair the issue. `tax_required` is a paused attempt, not a successful payment. Historical payment confirmation does not establish current Paid coverage or available credits. Preserve the approved gross monthly cap and recurring-payment consent.
+After correction, inspect that same checkout/recharge policy and the actual credit account again. Reading does not authorize or initiate another charge. Keep the original invoice: never disable tax, create a second subscription/top-up, discard the invoice or repeatedly re-enable automatic refills to repair the issue. `tax_required` is a paused attempt, not a successful payment. Historical payment confirmation does not establish current Paid coverage or available credits. Preserve the selected gross monthly cap and recurring-payment consent.
 
 Browser PDF calls use the same credits and Stop admission policy. The published variable provider browser cost is charged with exactly 100% markup (factor 2), without an additional general margin. At USD 0.09 per browser-hour this is 18 credits/hour, prorated from the provider's measured duration, including fractional milliseconds. Price is pinned when the call is admitted. Missing duration is charged zero; a client timeout is not proof that provider work stopped, and already admitted measured work can settle later. Read current credit usage; never estimate a missing measurement or promise a fixed request charge. [Runtime workflow](../ohmyhost-build-portable-app/references/browser-pdf.md).
+
+Skill release 0.1.83. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

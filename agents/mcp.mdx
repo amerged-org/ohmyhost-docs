@@ -36,7 +36,7 @@ For **Omh Native Auth**, use an approved Paid project as its Owner and verify th
 
 To enable **Google or GitHub in Native Auth** on an approved project, read the exact `callbackUrl` via `native_auth_provider_get` and have the customer register it in their own OAuth app. Call `native_auth_provider_secret_input_request` with the current configuration revision from `native_auth_config_get`, the provider, the Client ID and `enabled: true`. The Client Secret goes into the protected ten-minute portal link in remote MCP, or into the supplied stdin-only command in local MCP. In remote MCP, read the result via `connection_status`. Check provider status and verify a full login in the chosen environment. Use `native_auth_provider_set` for changes that need no new secret. [Availability and provider setup](/application-auth#add-google-or-github-to-omh-native-auth).
 
-For an **application-owned OAuth integration**, use `secret_input_request` for a private runtime secret form in remote MCP or `secret_set_command` for local stdin. [Set up Google or GitHub with Better Auth](/application-auth#set-up-google-or-github-sign-in).
+For an **application-owned OAuth integration**, use `secret_input_request` in remote MCP or `secret_form_request` in local MCP for a private form. Local MCP also supports `secret_set_command` for an operator entering the value through CLI stdin. [Runtime secrets](/secrets)
 
 ## Connected chat with remote OAuth
 

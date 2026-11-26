@@ -160,6 +160,8 @@
 | `native_auth_provider_secret_input_request` | `project_id`, `environment_id`, `provider`, `configuration_revision`, `enabled`, `idempotency_key` | Read |
 | `secrets_list` | `project_id`, `environment_id` | Read |
 | `secret_delete` | `project_id`, `environment_id`, `name`, `idempotency_key` | Change or prepare a change |
+| `secret_form_request` | `project_id`, `environment_id`, `names` | Change or prepare a change |
+| `secret_form_status` | `project_id`, `environment_id`, `request_id` | Read |
 | `secret_set_command` | `project_id`, `environment_id`, `name`, `idempotency_key` | Read |
 | `rollback_plan` | `project_id`, `deployment_id` | Change or prepare a change |
 | `rollback_execute` | `project_id`, `deployment_id`, `if_match`, `confirmation_token`, `idempotency_key` | Change or prepare a change |

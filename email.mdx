@@ -30,6 +30,8 @@ Do not recreate the domain or repeat correct records while verification propagat
 
 Use `createTransactionalMailClient` from `@ohmyhost/customer-runtime/mail` in server-side application code. A mail-enabled deployment supplies `OHMYHOST_MAIL_GATEWAY_URL`, `OHMYHOST_PROJECT_ID` and the environment-specific `OHMYHOST_MAIL_KEY`. Resolve these values from your hosted framework request context or Worker `env`:
 
+The 0.1.82 starter needs the explicit redirect mode shown below. An app built and redeployed with runtime 0.1.83 sets it through the SDK. Pass the original request through any custom transport so the mail submission stays at its configured gateway.
+
 ```ts
 import { createTransactionalMailClient } from "@ohmyhost/customer-runtime/mail";
 
@@ -37,7 +39,7 @@ const mail = createTransactionalMailClient({
   endpoint: env.OHMYHOST_MAIL_GATEWAY_URL,
   key: env.OHMYHOST_MAIL_KEY,
   projectId: env.OHMYHOST_PROJECT_ID,
-  fetch: (request) => fetch(request),
+  fetch: (request) => fetch(request, { redirect: "manual" }),
   timeoutMilliseconds: 30_000,
 });
 ```

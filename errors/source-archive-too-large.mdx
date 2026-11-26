@@ -1,0 +1,12 @@
+---
+title: "Source archive too large"
+description: "What the `source_archive_too_large` error means and what to do next."
+---
+
+The API, CLI and MCP return `source_archive_too_large` with HTTP 409. Repeating the same request unchanged does not help.
+
+## What to do
+
+Remove excess files or generated output, or reduce large files. Push a smaller commit and plan its SHA. Inspection checks the whole archive: up to 25,000,000 compressed bytes, 100 MiB expanded, 20,000 entries, 5 MiB per file, 16 MiB of retained configuration inputs and 32 MiB of retained source and JSON bodies.
+
+If the steps above do not resolve it, [report it](/feedback) with the `request_id` from the error.

@@ -14,7 +14,7 @@ Use this reference when a detected Supabase capability needs a replacement. Keep
 - The database service and provider management are platform-private. Customer code receives only the scoped `OHMYHOST_DATABASE` binding, never a database URL or migration credentials.
 - Convert RPCs to explicit transactions or reviewed PostgreSQL functions with fixed `search_path`, explicit authorization, idempotency, and concurrency tests.
 - Canonical migrations are expand-only `YYYYMMDDHHMMSS_name.sql` files. A reviewed PostgreSQL schema-only dump may include `public` and app-owned `private`, never Supabase `auth` or `storage`.
-- If the customer selects `auth.provider: better-auth`, the managed bridge owns the new `auth` schema, UUID identities, verification/reset callbacks, host-only cookies, session revocation and database sessions. It requires its managed database; verified-user/session/token flows need no mail sender. The private bridge's verification/reset sends use the platform sender and require `mail.enabled: true`, Paid access and a verified sender when invoked. Preserve a custom Resend callback in an application-owned Better Auth handler with `auth.provider: none`; this disables only the managed bridge and keeps application login. Never recreate browser-controlled JWT GUCs or Supabase roles.
+- If the customer selects `auth.provider: better-auth`, the managed bridge owns the new `auth` schema, UUID identities, verification/reset callbacks, host-only cookies, session revocation and database sessions. It requires its managed database; verified-user/session/token flows need no mail sender. The private bridge's verification/reset sends go through ohmyho.st Mail from the customer's own verified sender (ohmyho.st has no sender of its own) and require `mail.enabled: true`, Paid access and that verified sender when invoked. Preserve a custom Resend callback in an application-owned Better Auth handler with `auth.provider: none`; this disables only the managed bridge and keeps application login. Never recreate browser-controlled JWT GUCs or Supabase roles.
 
 First-party references: [Supabase migration scope](https://supabase.com/docs/guides/platform/migrating-to-supabase/postgres), [PostgreSQL pg_dump](https://www.postgresql.org/docs/current/app-pgdump.html), and [Better Auth PostgreSQL](https://better-auth.com/docs/adapters/postgresql). Hosted database code follows [the private runtime contract](../../ohmyhost-build-portable-app/references/database-runtime.md).
 
@@ -54,7 +54,7 @@ Use `--authorization-mode preserve-rls --rls-options <reviewed-json-file>` after
 }
 ```
 
-First run the local compatibility report. Keep the result private because it includes table and policy names.
+First run the local compatibility report. Keep the result private because it includes table and policy names. Both commands below are run with `node`. Over MCP the two helper files are text resources, not files on disk: save `skill://ohmyhost/ohmyhost-migrate-supabase-postgres/scripts/create-portable-baseline.mjs` and `skill://ohmyhost/ohmyhost-migrate-supabase-postgres/scripts/portable-rls.mjs` from their addresses into one directory named `scripts` first, then run the commands from its parent.
 
 ```text
 node scripts/create-portable-baseline.mjs --input <dump> --authorization-mode preserve-rls --rls-options <reviewed-json-file> --report-only
@@ -67,7 +67,7 @@ Declare `pg_trgm`, `citext`, or `ltree` explicitly with `CREATE EXTENSION IF NOT
 After reviewing a passing report, generate the migrations:
 
 ```text
-scripts/create-portable-baseline.mjs --input <dump> --output-directory <migrations> --migration-prefix <YYYYMMDDHHMMSS_slug> --authorization-mode preserve-rls --rls-options <reviewed-json-file>
+node scripts/create-portable-baseline.mjs --input <dump> --output-directory <migrations> --migration-prefix <YYYYMMDDHHMMSS_slug> --authorization-mode preserve-rls --rls-options <reviewed-json-file>
 ```
 
 - `backendRlsTables` is an explicit selection of newly created ordinary tables in `public` or app-owned `private`. It must cover every original policy and RLS-enabled/forced table. Each selected table must have an input ENABLE statement; the output retains ENABLE and adds FORCE where absent. Review `normalizedForceRlsTables` before applying the baseline, including every application/job that uses a shared Dev/Prod database.
@@ -84,7 +84,7 @@ Retaining policies does not select Better Auth or another auth provider. If an i
 Only after the customer chooses Better Auth and its replacement server authorization/boundaries are implemented and reviewed, run:
 
 ```text
-scripts/create-portable-baseline.mjs --input <dump> --output-directory <migrations> --migration-prefix <YYYYMMDDHHMMSS_slug> --auth-mode better-auth-uuid --authorization-mode server
+node scripts/create-portable-baseline.mjs --input <dump> --output-directory <migrations> --migration-prefix <YYYYMMDDHHMMSS_slug> --auth-mode better-auth-uuid --authorization-mode server
 ```
 
 This explicitly selected mode converts only executable `auth.users` and `auth.uid()` references, replaces the service-request helper, reports omitted RLS policies, retains admitted app-private functions, and splits output under platform limits. It keeps the existing `public.current_actor_id()` contract. Nonzero conversion/omission counts require review; they are never automatic approval. It is not a fallback when RLS preservation cannot translate a policy.

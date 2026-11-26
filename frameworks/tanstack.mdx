@@ -13,6 +13,8 @@ SSR script/style tags receive the request nonce automatically. Attributes, event
 
 Scheduled work is declared as `functions.crons` and runs `scheduled` from the default export of `src/ohmyhost/worker.ts`, a module the platform bundles outside the TanStack Start build; see [Functions and cron](/functions).
 
+The packager uses a contained Worker source entry declared in Wrangler or lets TanStack resolve the server entry during the Vite build. Use root-relative `/assets/` paths for bundled assets so the same artifact works on preview and on the deployed origin.
+
 ## Deploy and verify
 
 Follow [the GitHub deployment workflow](/quickstart). Set server credentials through [runtime secrets](/secrets), and configure the exact application-auth callback/logout URLs.
