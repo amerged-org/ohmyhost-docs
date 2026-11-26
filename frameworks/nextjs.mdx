@@ -124,7 +124,7 @@ Keep the app's system-theme, transition and native color-scheme settings. Waitin
 
 ## Files read by server code
 
-The deployed Next.js Worker has a **15 MiB uncompressed** and **10 MiB gzip-compressed** module budget. The app entry, traced runtime files and any bundled scheduled functions share both limits. If packaging reports an oversized Worker, check the combined size in the build log. Reduce large server imports or split unused dependencies out of the scheduled entry, then deploy the updated commit.
+The deployed Next.js Worker has a **25 MiB uncompressed** and **10 MiB gzip-compressed** module budget (with un-uploaded Wrangler source-map evidence bounded at **64 MiB**). The app entry, traced runtime files and any bundled scheduled functions share both limits. If packaging reports an oversized Worker, check the combined size in the build log. Reduce large server imports or split unused dependencies out of the scheduled entry, then deploy the updated commit.
 
 The platform includes non-executable files recorded in Next.js output-file traces (`.nft.json`) as read-only data modules in the Worker. Use ordinary Node filesystem reads for those deployed files and keep them inside the application root. When Next cannot infer a dynamic filename, declare the required files with its normal `outputFileTracingIncludes` configuration. Missing or invalid traced files fail packaging, and data modules count toward the Worker size limits.
 
