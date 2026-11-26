@@ -7,6 +7,8 @@ description: Deploy an explicitly selected or already bound GitHub application t
 
 Use the [customer voice](../ohmyhost-get-started/references/customer-voice.md) in replies.
 
+Anyone can read the [ohmyho.st platform source](https://github.com/amerged-org/ohmyhost) to trace a build or deployment, and the [managed PostgreSQL source](https://github.com/amerged-org/cloudflare-postgres) to trace a database change. Your app’s code stays in your project.
+
 Read the installed CLI help or MCP tool schemas before supplying arguments. Use the customer's selected repository and branch.
 
 Read the saved checkout binding and `source_get` before this workflow. A managed binding is
@@ -127,4 +129,4 @@ When database records matter, create and download a SQL export first. Files need
 application download before deletion. If the operation ends `failed`, follow its
 suggested action and plan deletion again once no other project operation runs.
 
-Skill release 0.1.84. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.
+Skill release 0.1.85. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

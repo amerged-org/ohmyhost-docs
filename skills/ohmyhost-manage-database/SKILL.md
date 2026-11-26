@@ -7,6 +7,26 @@ description: Read or update authorized ohmyho.st project data, open time-bound p
 
 Use the [customer voice](../ohmyhost-get-started/references/customer-voice.md) in replies.
 
+Anyone can read the [ohmyho.st platform source](https://github.com/amerged-org/ohmyhost) to trace a build or deployment, and the [managed PostgreSQL source](https://github.com/amerged-org/cloudflare-postgres) (PGCF) to trace database sizing, migrations, credentials, exports, events, schedules or recovery. Your app’s code and data stay in your project.
+
+| PGCF topic                                    | Authoritative reference                                                                                                                             |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Integrator handover & runtime architecture    | [integrator-handover.md](https://github.com/amerged-org/cloudflare-postgres/blob/main/docs/operations/integrator-handover.md)                       |
+| Database webhooks, watches & schedules        | [database-events-and-schedules.md](https://github.com/amerged-org/cloudflare-postgres/blob/main/docs/architecture/database-events-and-schedules.md) |
+| Time-bound `psql` credentials & WSS transport | [credentials.md](https://github.com/amerged-org/cloudflare-postgres/blob/main/docs/operations/credentials.md)                                       |
+| Custody SQL exports                           | [custody-export.md](https://github.com/amerged-org/cloudflare-postgres/blob/main/docs/operations/custody-export.md)                                 |
+| Backup & point-in-time recovery               | [recovery.md](https://github.com/amerged-org/cloudflare-postgres/blob/main/docs/operations/recovery.md)                                             |
+
+Anyone can read the [ohmyho.st platform source](https://github.com/amerged-org/ohmyhost) to trace a build or deployment, and the [managed PostgreSQL source](https://github.com/amerged-org/cloudflare-postgres) (PGCF) to trace database sizing, migrations, credentials, exports, events, schedules or recovery. Your app’s code and data stay in your project.
+
+| PGCF topic                                    | Authoritative reference                                                                                                                             |
+| --------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Integrator handover & runtime architecture    | [integrator-handover.md](https://github.com/amerged-org/cloudflare-postgres/blob/main/docs/operations/integrator-handover.md)                       |
+| Database webhooks, watches & schedules        | [database-events-and-schedules.md](https://github.com/amerged-org/cloudflare-postgres/blob/main/docs/architecture/database-events-and-schedules.md) |
+| Time-bound `psql` credentials & WSS transport | [credentials.md](https://github.com/amerged-org/cloudflare-postgres/blob/main/docs/operations/credentials.md)                                       |
+| Custody SQL exports                           | [custody-export.md](https://github.com/amerged-org/cloudflare-postgres/blob/main/docs/operations/custody-export.md)                                 |
+| Backup & point-in-time recovery               | [recovery.md](https://github.com/amerged-org/cloudflare-postgres/blob/main/docs/operations/recovery.md)                                             |
+
 Read `project_context_get` and `database_compute_get` for the selected Dev or Prod environment. The compute tool reads metadata without waking the database; use its observation rather than inferring size from the plan.
 
 | RAM     | Included total disk | Credits per active hour | Access       |
@@ -236,4 +256,4 @@ Add a nullable column, deploy compatible code and backfill through bounded, auth
 
 Use `promotion_plan` to review the artifact and, for isolated Prod, the migration signatures, trigger targets and any source admission refusals. Then use the connected execution tool within the requested scope: local `promotion_execute` or remote `deployment_promote`. Follow its exact reviewed plan/confirmation schema. Verify the new application behavior and preservation of existing Prod records. Use `database_query` for explicitly selected Dev or Prod verification and `database_write` only for an authorized data change; both retain application RLS. Record the selected profile and data decision in project notes with the current version; use live compute for current status.
 
-Skill release 0.1.84. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.
+Skill release 0.1.85. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

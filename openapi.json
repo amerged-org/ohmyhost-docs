@@ -3,7 +3,7 @@
   "info": {
     "title": "ohmyho.st API",
     "version": "0.0.0",
-    "description": "Public REST API for ohmyho.st hosting, projects, domains, email, credits and exports."
+    "description": "Public REST API for ohmyho.st hosting, projects, domains, email, credits and exports. Documentation: https://docs.ohmyho.st. Public source repositories: https://github.com/amerged-org/ohmyhost (platform) and https://github.com/amerged-org/cloudflare-postgres (managed PostgreSQL / PGCF)."
   },
   "jsonSchemaDialect": "https://json-schema.org/draft/2020-12/schema",
   "servers": [
@@ -6749,7 +6749,7 @@
           "tool": {
             "name": "delete_execute",
             "title": "Delete a project",
-            "description": "Permanently delete the selected project and its Dev and Prod resources, including deployments, databases, files, schedules, SQL exports, managed code history and project-owned routes, mail and DNS. Both addresses stop working. if_match guards the resource revision and confirmation_token binds the exact deletion. An unchanged request with the same idempotency key identifies the original deletion. Returns an asynchronous operation.",
+            "description": "Execute a planned deletion for one selected project using its if_match revision and ten-minute confirmation_token, removing its Dev and Prod deployments, databases, files, schedules, SQL exports, managed code history and project-owned routes, mail and DNS. Both addresses stop working. An unchanged request with the same idempotency key identifies the original deletion. Returns an asynchronous operation.",
             "annotations": {
               "readOnlyHint": false,
               "destructiveHint": true,
@@ -23288,6 +23288,32 @@
             ]
           },
           "prod_url": {
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https://[a-z0-9]+(?:-[a-z0-9]+){0,4}\\.(?:dev\\.)?check\\.omh\\.st$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expected_dev_url": {
+            "description": "Deterministic Dev gateway address this project will receive once deployed, or null when the project has no Dev environment.",
+            "oneOf": [
+              {
+                "type": "string",
+                "format": "uri",
+                "pattern": "^https://dev-[a-z0-9]+(?:-[a-z0-9]+){0,4}\\.(?:dev\\.)?check\\.omh\\.st$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "expected_prod_url": {
+            "description": "Deterministic Prod gateway address this project will receive once deployed.",
             "oneOf": [
               {
                 "type": "string",

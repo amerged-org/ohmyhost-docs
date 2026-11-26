@@ -1,4 +1,4 @@
-Master Tool Contract SHA-256: `e15aa91ca539355fc0540c518d89b171744c4633cd0fdf8dd328289f65f6097a`. These are the shared remote server's named tools; discover the current host's exact input schema with `tools/list`. New definitions may still be undergoing host checks.
+Master Tool Contract SHA-256: `d6b121e5815e026156a7ff78b3176eb80e529d817507839e45cc2e6301fd4c39`. These are the shared remote server's named tools; discover the current host's exact input schema with `tools/list`. New definitions may still be undergoing host checks.
 
 | Tool | Purpose |
 | --- | --- |
@@ -52,7 +52,7 @@ Master Tool Contract SHA-256: `e15aa91ca539355fc0540c518d89b171744c4633cd0fdf8dd
 | `database_webhook_subscription_status` | Read a database webhook subscription |
 | `database_webhook_test` | Send one signed test request to the selected existing database webhook and report the outcome synchronously. |
 | `database_write` | Execute one INSERT, UPDATE or DELETE/upsert in the chosen Dev or Prod database. |
-| `delete_execute` | Permanently delete the selected project and its Dev and Prod resources, including deployments, databases, files, schedules, SQL exports, managed code history and project-owned routes, mail and DNS. |
+| `delete_execute` | Execute a planned deletion for one selected project using its if_match revision and ten-minute confirmation_token, removing its Dev and Prod deployments, databases, files, schedules, SQL exports, managed code history and project-owned routes, mail and DNS. |
 | `delete_plan` | Persist a ten-minute deletion plan for the selected project_id. |
 | `deployment_create` | Create a deployment |
 | `deployment_get` | Get deployment status |
