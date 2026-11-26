@@ -46,6 +46,6 @@ the delivered link, its single use, subsequent sign-in and any required MFA.
 The starter pins customer runtime 0.1.82. For managed mail and storage on that
 version, set the client's `fetch` and storage's `capabilityFetch` callbacks to
 `(request) => fetch(request, { redirect: "manual" })`. An app built and
-redeployed with runtime 0.1.84 receives this mode on SDK-created requests by
+redeployed with runtime 0.1.85 receives this mode on SDK-created requests by
 default. For an application-issued signed download,
 use the returned URL and required headers with the same redirect mode.

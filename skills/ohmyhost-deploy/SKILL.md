@@ -7,6 +7,8 @@ description: Develop and version an application with ohmyho.st, open a private l
 
 Use the [customer voice](../ohmyhost-get-started/references/customer-voice.md) in replies.
 
+Anyone can read the [ohmyho.st platform source](https://github.com/amerged-org/ohmyhost) to trace a build or deployment, and the [managed PostgreSQL source](https://github.com/amerged-org/cloudflare-postgres) to trace a database change. Your app’s code stays in your project.
+
 Read available MCP tool schemas or installed CLI help. Complete access with
 **ohmyhost-get-started**, preserving the user's selected account, workspace and project.
 
@@ -342,4 +344,4 @@ Rollback, deletion, data-mode changes and domain/mail changes retain their own r
 and scopes. Use the existing deployment, database and domains Skills as appropriate; switching
 source alone authorizes none of them.
 
-Skill release 0.1.84. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.
+Skill release 0.1.85. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

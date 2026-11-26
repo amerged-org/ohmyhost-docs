@@ -9,6 +9,12 @@ Use the [customer voice](../ohmyhost-get-started/references/customer-voice.md) i
 
 Anyone can read the [ohmyho.st platform source](https://github.com/amerged-org/ohmyhost) to trace a build or deployment, and the [managed PostgreSQL source](https://github.com/amerged-org/cloudflare-postgres) to trace a database change. Your app’s code stays in your project.
 
+## Hard runtime budgets & pre-save checklist
+
+- **Worker request budget**: 50 ms CPU and 10 subrequests per request; 120 s wall clock for scheduled runs; no headless browser or heavy native binary inside the request Worker (use [Browser PDF](references/browser-pdf.md) or [container jobs](references/container-jobs.md)).
+- **Next.js bundle budget**: at most 25 MiB per Worker module, 10 MiB gzipped Worker bundle, and 64 MiB source map (prefer plain Route Handlers over many duplicated Server Actions, and keep `lucide-react`/chart/PDF packages lean).
+- **Pre-save checklist**: keep `database.migrations` in `ohmyhost.yaml` when the app uses PostgreSQL; keep `@ohmyhost/customer-runtime` in `package.json`; name every migration `YYYYMMDDHHMMSS_name.sql` (never `0001_...`); route app-owned Better Auth password hashing through the platform password-hashing binding rather than pure-JS `scrypt` in the Worker; check `ohmyhost init --dry-run --json` locally before saving.
+
 Prepare the application's real capabilities, then verify them after deployment.
 
 For a finite task that needs its own npm, Python or native binary dependencies, publish a private job from the project Dockerfile. The job entry point receives private files, produces an output manifest and stops. Use the [container job workflow](references/container-jobs.md) for version, credit and cancellation details.
@@ -53,4 +59,4 @@ Report a suspected hosting bug with `feedback_submit` and a minimal redacted rep
 
 Use the [Astro guide](https://docs.ohmyho.st/frameworks/astro). Static uses `astro build`, `runtime.mode: static` and `build.output: dist` without a server adapter. SSR uses the official `@astrojs/cloudflare` adapter, `output: "server"`, `runtime.mode: edge`, `build.output: dist/client`, `session: false` and `cloudflare({ imageService: "passthrough" })`. Keep the standard `src/` and output directories. The service supplies the deployment config. No native KV sessions, provider cache, Images or customer-defined Cloudflare resources are supported initially. Keep server imports in frontmatter or ordinary modules; put dynamic browser imports in a normal statically imported browser module rather than an Astro template. Verify request-time behavior plus browser islands under hosted CSP. Static build-time filesystem/MDX work remains ordinary Node build work; enable no request-time capabilities on a static plan.
 
-Skill release 0.1.84. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.
+Skill release 0.1.85. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

@@ -350,7 +350,7 @@ reference describes server support; a host may still be checking a new or change
 - `rollback_plan` — Plan a rollback
 - `rollback_execute` — Execute a reviewed rollback (local only)
 - `delete_plan` — Persist a ten-minute deletion plan for the selected project_id.
-- `delete_execute` — Permanently delete the selected project and its Dev and Prod resources, including deployments, databases, files, schedules, SQL exports, managed code history and project-owned routes, mail and DNS.
+- `delete_execute` — Execute a planned deletion for one selected project using its if_match revision and ten-minute confirmation_token, removing its Dev and Prod deployments, databases, files, schedules, SQL exports, managed code history and project-owned routes, mail and DNS.
 
 ## Remote MCP tools
 
@@ -408,7 +408,7 @@ Current account rights and credential restrictions are checked by the canonical 
 - `database_webhook_subscription_status` — Read a database webhook subscription
 - `database_webhook_test` — Send one signed test request to the selected existing database webhook and report the outcome synchronously.
 - `database_write` — Execute one INSERT, UPDATE or DELETE/upsert in the chosen Dev or Prod database.
-- `delete_execute` — Permanently delete the selected project and its Dev and Prod resources, including deployments, databases, files, schedules, SQL exports, managed code history and project-owned routes, mail and DNS.
+- `delete_execute` — Execute a planned deletion for one selected project using its if_match revision and ten-minute confirmation_token, removing its Dev and Prod deployments, databases, files, schedules, SQL exports, managed code history and project-owned routes, mail and DNS.
 - `delete_plan` — Persist a ten-minute deletion plan for the selected project_id.
 - `deployment_create` — Create a deployment
 - `deployment_get` — Get deployment status
@@ -528,7 +528,7 @@ Current account rights and credential restrictions are checked by the canonical 
 
 ## Master Tool Contract and API reference
 
-Master Tool Contract SHA-256: `e15aa91ca539355fc0540c518d89b171744c4633cd0fdf8dd328289f65f6097a`.
+Master Tool Contract SHA-256: `d6b121e5815e026156a7ff78b3176eb80e529d817507839e45cc2e6301fd4c39`.
 
 The complete public OpenAPI contract is at <https://ohmyho.st/api> and mirrored per release.
 Its MCP metadata accounts for every API operation: a named tool, a protected handoff, an
