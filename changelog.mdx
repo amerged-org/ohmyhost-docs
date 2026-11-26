@@ -3,6 +3,10 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
+## Client release 0.1.84
+
+- **Project-owned container jobs.** Build a Dockerfile from your saved project revision once, run finite offline Linux programs (such as photo-to-PDF conversion or PDF/PNG/JPEG optimization) on private files up to 60 seconds and 64 MiB per run, retrieve outputs after exit, and cancel active runs. Available via REST, SDK, MCP, `ohmyhost job`, and directly from deployed apps using `runtime.egress.allow` (`https://jobs.ohmyho.st`) with injected `OHMYHOST_JOBS_BASE_URL` and `OHMYHOST_JOBS_TOKEN`. [Run your own container job](/container-jobs) · [Pricing](/pricing)
+
 ## Client release 0.1.83
 
 - Use `ohmyhost secret form create` and `ohmyhost secret form status` to collect application secrets through a private form. The web page receives the values directly. [Runtime secrets](/secrets)

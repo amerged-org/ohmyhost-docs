@@ -1,4 +1,4 @@
-Master Tool Contract SHA-256: `8ad0d2c951347bb0ea88b2d670656a3c47686a564ff5a21744d920300a6a95ab`. These are the shared remote server's named tools; discover the current host's exact input schema with `tools/list`. New definitions may still be undergoing host checks.
+Master Tool Contract SHA-256: `e15aa91ca539355fc0540c518d89b171744c4633cd0fdf8dd328289f65f6097a`. These are the shared remote server's named tools; discover the current host's exact input schema with `tools/list`. New definitions may still be undergoing host checks.
 
 | Tool | Purpose |
 | --- | --- |
@@ -18,6 +18,14 @@ Master Tool Contract SHA-256: `8ad0d2c951347bb0ea88b2d670656a3c47686a564ff5a2174
 | `billing_recharge_get` | Owner-only. |
 | `connection_revoke` | Revoke only the current remote connection through its existing consent workflow. |
 | `connection_status` | Read protected secret/GitHub handoff state without credentials. |
+| `container_job_cancel` | Request cancellation of exactly one run. |
+| `container_job_get` | Read the job state, confirmed cost and ordered output file IDs. |
+| `container_job_input_upload` | Create a short-lived PUT grant for one bounded private input or parameters file. |
+| `container_job_output_download` | Get a short-lived GET grant for one committed output of a successful run. |
+| `container_job_quote` | Return the expiring maximum run charge in microcredits for a ready version, ordered private file IDs and optional parameters file. |
+| `container_job_start` | Accept a previously quoted job, reserve up to the specified microcredits and queue its isolated container. |
+| `container_job_version_get` | Read this project's job version and build status. |
+| `container_job_version_publish` | Publish one project job from its immutable saved source revision. |
 | `database_access_list` | List this project's issued database credentials with their state (active, expired or revoked). |
 | `database_access_revoke` | Revoke one issued database credential immediately: open sessions end and its PostgreSQL role is removed. |
 | `database_compute_get` | Read current managed database memory, total storage, region and observed state without running SQL or waking the database. |

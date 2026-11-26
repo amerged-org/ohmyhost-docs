@@ -11,6 +11,14 @@
 | `source_publish` | `project_id`, `expected_source_generation`, `message`, `idempotency_key`, `mode`, `expected_source_connection_id` | Change or prepare a change |
 | `source_publish_complete` | `project_id` | Change or prepare a change |
 | `source_upload` | `project_id`, `operation_id` | Read |
+| `container_job_version_publish` | `project_id`, `environment_id`, `idempotency_key`, `name`, `source_revision`, `context_path`, `dockerfile`, `entrypoint`, `max_runtime_seconds`, `max_build_credit_micros` | Change or prepare a change |
+| `container_job_version_get` | `project_id`, `environment_id`, `name`, `version_id` | Read |
+| `container_job_quote` | `project_id`, `environment_id`, `version_id`, `input_refs`, `max_runtime_seconds` | Read |
+| `container_job_start` | `project_id`, `environment_id`, `idempotency_key`, `quote_id`, `max_credit_micros` | Change or prepare a change |
+| `container_job_get` | `project_id`, `environment_id`, `run_id` | Read |
+| `container_job_cancel` | `project_id`, `environment_id`, `run_id` | Change or prepare a change |
+| `container_job_input_upload` | `project_id`, `environment_id`, `kind`, `size_bytes`, `media_type` | Change or prepare a change |
+| `container_job_output_download` | `project_id`, `environment_id`, `run_id`, `file_id` | Change or prepare a change |
 | `database_compute_get` | `project_id` | Read |
 | `database_compute_set` | `project_id`, `environment`, `confirm`, `idempotency_key` | Change or prepare a change |
 | `database_migrate` | `project_id`, `environment`, `commit_sha`, `confirm`, `idempotency_key` | Change or prepare a change |

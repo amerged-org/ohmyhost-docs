@@ -342,4 +342,4 @@ Rollback, deletion, data-mode changes and domain/mail changes retain their own r
 and scopes. Use the existing deployment, database and domains Skills as appropriate; switching
 source alone authorizes none of them.
 
-Skill release 0.1.83. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.
+Skill release 0.1.84. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

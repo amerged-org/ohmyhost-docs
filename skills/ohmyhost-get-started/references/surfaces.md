@@ -7,6 +7,7 @@ reference describes server support; a host may still be checking a new or change
 
 ## CLI commands
 
+- `ohmyhost job` — ohmyhost job publish|version|quote|start|get|cancel|upload|download --project ULID --environment ULID --input JSON [--idempotency-key KEY] --json. Supply REST fields including resource IDs in --input. Publish and start require an idempotency key. Only transfer file bytes to the returned short-lived URL.
 - `ohmyhost init` — ohmyhost init [--directory PATH] [--root PATH] [--project SLUG] [--region us|eu] [--dry-run] --json (preserve existing storage jurisdiction; for new storage pass the project's region, us when omitted)
 - `ohmyhost login` — ohmyhost login [--organization ULID] [--user USER_ID] [--profile-name NAME] --json (adds one saved login; nothing is saved unless the browser signed in as that user and organization)
 - `ohmyhost logout` — ohmyhost logout [--profile-name NAME] [--revoke] --json (removes only the selected saved login)
@@ -186,6 +187,14 @@ reference describes server support; a host may still be checking a new or change
 - `source_publish` — Local MCP only: capture current filtered files, including uncommitted/new files, and save one managed version without importing Git history. (local only)
 - `source_publish_complete` — Complete a local pending source publication for a successfully completed operation. (local only)
 - `source_upload` — Read the status of the specified managed snapshot upload.
+- `container_job_version_publish` — Publish one project job from its immutable saved source revision.
+- `container_job_version_get` — Read this project's job version and build status.
+- `container_job_quote` — Return the expiring maximum run charge in microcredits for a ready version, ordered private file IDs and optional parameters file.
+- `container_job_start` — Accept a previously quoted job, reserve up to the specified microcredits and queue its isolated container.
+- `container_job_get` — Read the job state, confirmed cost and ordered output file IDs.
+- `container_job_cancel` — Request cancellation of exactly one run.
+- `container_job_input_upload` — Create a short-lived PUT grant for one bounded private input or parameters file.
+- `container_job_output_download` — Get a short-lived GET grant for one committed output of a successful run.
 - `database_compute_get` — Read current managed database memory, total storage, region and observed state without running SQL or waking the database.
 - `database_compute_set` — Choose fixed database RAM: 256, 512, 1024, 2048 or 4096 MiB.
 - `database_migrate` — Apply the migration files at commit_sha to the project's selected Dev or Prod database, provisioning it if needed.
@@ -365,6 +374,14 @@ Current account rights and credential restrictions are checked by the canonical 
 - `billing_recharge_get` — Owner-only.
 - `connection_revoke` — Revoke only the current remote connection through its existing consent workflow.
 - `connection_status` — Read protected secret/GitHub handoff state without credentials.
+- `container_job_cancel` — Request cancellation of exactly one run.
+- `container_job_get` — Read the job state, confirmed cost and ordered output file IDs.
+- `container_job_input_upload` — Create a short-lived PUT grant for one bounded private input or parameters file.
+- `container_job_output_download` — Get a short-lived GET grant for one committed output of a successful run.
+- `container_job_quote` — Return the expiring maximum run charge in microcredits for a ready version, ordered private file IDs and optional parameters file.
+- `container_job_start` — Accept a previously quoted job, reserve up to the specified microcredits and queue its isolated container.
+- `container_job_version_get` — Read this project's job version and build status.
+- `container_job_version_publish` — Publish one project job from its immutable saved source revision.
 - `database_access_list` — List this project's issued database credentials with their state (active, expired or revoked).
 - `database_access_revoke` — Revoke one issued database credential immediately: open sessions end and its PostgreSQL role is removed.
 - `database_compute_get` — Read current managed database memory, total storage, region and observed state without running SQL or waking the database.
@@ -511,7 +528,7 @@ Current account rights and credential restrictions are checked by the canonical 
 
 ## Master Tool Contract and API reference
 
-Master Tool Contract SHA-256: `8ad0d2c951347bb0ea88b2d670656a3c47686a564ff5a21744d920300a6a95ab`.
+Master Tool Contract SHA-256: `e15aa91ca539355fc0540c518d89b171744c4633cd0fdf8dd328289f65f6097a`.
 
 The complete public OpenAPI contract is at <https://ohmyho.st/api> and mirrored per release.
 Its MCP metadata accounts for every API operation: a named tool, a protected handoff, an

@@ -127,4 +127,4 @@ When database records matter, create and download a SQL export first. Files need
 application download before deletion. If the operation ends `failed`, follow its
 suggested action and plan deletion again once no other project operation runs.
 
-Skill release 0.1.83. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.
+Skill release 0.1.84. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

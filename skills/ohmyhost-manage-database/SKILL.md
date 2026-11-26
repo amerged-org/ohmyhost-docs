@@ -236,4 +236,4 @@ Add a nullable column, deploy compatible code and backfill through bounded, auth
 
 Use `promotion_plan` to review the artifact and, for isolated Prod, the migration signatures, trigger targets and any source admission refusals. Then use the connected execution tool within the requested scope: local `promotion_execute` or remote `deployment_promote`. Follow its exact reviewed plan/confirmation schema. Verify the new application behavior and preservation of existing Prod records. Use `database_query` for explicitly selected Dev or Prod verification and `database_write` only for an authorized data change; both retain application RLS. Record the selected profile and data decision in project notes with the current version; use live compute for current status.
 
-Skill release 0.1.83. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.
+Skill release 0.1.84. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.
