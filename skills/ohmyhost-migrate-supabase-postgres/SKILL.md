@@ -39,4 +39,4 @@ Check real login, data reads/writes, constraints and any required files, email o
 
 For an unsupported operation or suspected platform bug, use `feedback_submit` with a minimal redacted reproduction and the safe operation/error ID. Keep the unresolved capability visible; do not claim the migration complete until the requested application behavior works.
 
-Skill release 0.1.83. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.
+Skill release 0.1.84. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

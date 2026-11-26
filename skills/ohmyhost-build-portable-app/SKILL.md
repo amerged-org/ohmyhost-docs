@@ -11,6 +11,8 @@ Anyone can read the [ohmyho.st platform source](https://github.com/amerged-org/o
 
 Prepare the application's real capabilities, then verify them after deployment.
 
+For a finite task that needs its own npm, Python or native binary dependencies, publish a private job from the project Dockerfile. The job entry point receives private files, produces an output manifest and stops. Use the [container job workflow](references/container-jobs.md) for version, credit and cancellation details.
+
 ## Choose a framework for a new app
 
 Keep the customer's existing framework and sign-in. For a new app in chat, use the
@@ -51,4 +53,4 @@ Report a suspected hosting bug with `feedback_submit` and a minimal redacted rep
 
 Use the [Astro guide](https://docs.ohmyho.st/frameworks/astro). Static uses `astro build`, `runtime.mode: static` and `build.output: dist` without a server adapter. SSR uses the official `@astrojs/cloudflare` adapter, `output: "server"`, `runtime.mode: edge`, `build.output: dist/client`, `session: false` and `cloudflare({ imageService: "passthrough" })`. Keep the standard `src/` and output directories. The service supplies the deployment config. No native KV sessions, provider cache, Images or customer-defined Cloudflare resources are supported initially. Keep server imports in frontmatter or ordinary modules; put dynamic browser imports in a normal statically imported browser module rather than an Astro template. Verify request-time behavior plus browser islands under hosted CSP. Static build-time filesystem/MDX work remains ordinary Node build work; enable no request-time capabilities on a static plan.
 
-Skill release 0.1.83. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.
+Skill release 0.1.84. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

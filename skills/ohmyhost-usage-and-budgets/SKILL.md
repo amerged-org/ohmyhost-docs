@@ -70,4 +70,4 @@ After correction, inspect that same checkout/recharge policy and the actual cred
 
 Browser PDF calls use the same credits and Stop admission policy. The published variable provider browser cost is charged with exactly 100% markup (factor 2), without an additional general margin. At USD 0.09 per browser-hour this is 18 credits/hour, prorated from the provider's measured duration, including fractional milliseconds. Price is pinned when the call is admitted. Missing duration is charged zero; a client timeout is not proof that provider work stopped, and already admitted measured work can settle later. Read current credit usage; never estimate a missing measurement or promise a fixed request charge. [Runtime workflow](../ohmyhost-build-portable-app/references/browser-pdf.md).
 
-Skill release 0.1.83. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.
+Skill release 0.1.84. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

@@ -1,0 +1,83 @@
+---
+title: "Run your own container job"
+description: "Build a version of your own Linux program, run it on private files, retrieve its outputs and cancel active work."
+---
+
+A job runs a finite Linux program from a saved project revision. Choose the npm packages, Python wheels or native libraries in your Dockerfile. Build a version once and start a fresh instance for each run. A Paid workspace needs enough available credits and room in its project Stop budget for the maximum charge.
+
+## Prepare the program
+
+Put a Dockerfile and the application source in a directory in your project. Pin your base image and dependencies. Supply an argument array such as `["python3", "/app/convert.py"]` when publishing. The runtime appends two arguments: the absolute input manifest path and the output directory. Read input paths relative to the input manifest's directory and preserve their array order when order matters.
+
+A Node-based PDF merger can install its own locked dependencies with this Dockerfile. Put `pdf-lib` in the project's `package.json`, commit its `package-lock.json`, and publish the version with `["node", "/app/merge.mjs"]`.
+
+```dockerfile
+FROM node:22-alpine@sha256:1314fb30ec37592d5845e5a160d522c0e680972aa534549940b8d73bde88481a
+WORKDIR /app
+COPY package.json package-lock.json ./
+RUN npm ci --omit=dev --ignore-scripts --no-audit --no-fund
+COPY merge.mjs ./
+USER node
+ENTRYPOINT ["node", "/app/merge.mjs"]
+```
+
+The input manifest contains `inputs` (each with a `path`) and `parameters`. Write regular files to the output directory and an ordered `outputs.json` alongside them. Every output entry includes `path`, `media_type` and exact `size_bytes`:
+
+```json
+{"outputs":[{"path":"report.pdf","media_type":"application/pdf","size_bytes":1861}]}
+```
+
+Use one directory level for output names. A guest gets private scratch space and runs without public internet. Install dependencies at build time. Chain several operations inside your entry point to process intermediates locally in the same run.
+
+## Publish, run and retrieve files
+
+1. Save the exact source revision. Use `container_job_version_publish` with the project and environment, job name, source revision, context path, Dockerfile relative to the context, entry point, runtime limit and build credit cap. Keep the idempotency key when retrying. Poll `container_job_version_get` for `ready`.
+2. Request a private upload using `container_job_input_upload` with `kind: input`, the content type and exact byte length. `PUT` the file bytes to the returned URL with that content type. Keep the file ID. Supply optional JSON parameters using a separate upload with `kind: parameters` and `application/json`. Short-lived transfer URLs are bearer credentials.
+3. Use `container_job_quote` with the pinned version ID, ordered file IDs, optional parameters file ID and maximum runtime. Pass the quote ID, maximum microcredits and a stable idempotency key to `container_job_start`. The response includes a run ID. One credit equals 1,000,000 microcredits.
+4. Poll `container_job_get` with the same project and environment. When it succeeds, request each output using `container_job_output_download`. The result can be downloaded after the container has stopped. Copy the output to durable project files if it must outlive the temporary retention period.
+5. Use `container_job_cancel` to stop a queued or active run. Poll until it reaches a terminal state. Closing the caller's connection leaves the job running.
+
+These operations are available through the project/environment REST API, generated SDK, MCP and the `ohmyhost job` commands.
+
+## Submit and poll jobs from a deployed app
+
+A deployed backend can call the Jobs gateway directly by adding its environment's HTTPS origin to `runtime.egress.allow` in `ohmyhost.yaml` (`https://jobs.dev.ohmyho.st` in Development, `https://jobs.ohmyho.st` in Production). The platform automatically injects two runtime variables into deployments that allow the Jobs gateway origin, and permits the matching file-transfer host (`https://job-files.dev.ohmyho.st` or `https://job-files.ohmyho.st`):
+
+- `OHMYHOST_JOBS_BASE_URL` — the environment's Jobs gateway origin.
+- `OHMYHOST_JOBS_TOKEN` — a deployment-scoped bearer credential bound to this project, environment and deployment. Keep it server-side and send it only to `OHMYHOST_JOBS_BASE_URL`.
+
+Call `/v1/job-inputs`, `/v1/job-quotes`, `/v1/job-runs`, `/v1/job-runs/{run_id}`, `/v1/job-runs/{run_id}/outputs/{file_id}/download` and `/v1/job-runs/{run_id}/cancel` with `Authorization: Bearer ${env.OHMYHOST_JOBS_TOKEN}`. The app controls which of its end users may submit work or retrieve a result.
+
+For example, this server-side function submits an already published version. Pass your stored idempotency key and the maximum the user accepted. A retry of the same start must reuse the same quote and key.
+
+```js
+async function startQuotedJob(env, quote, acceptedMicros, idempotencyKey) {
+  if (BigInt(quote.max_credit_micros) > BigInt(acceptedMicros)) {
+    throw new Error("Job quote exceeds the approved maximum");
+  }
+  const response = await fetch(new URL("/v1/job-runs", env.OHMYHOST_JOBS_BASE_URL), {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${env.OHMYHOST_JOBS_TOKEN}`,
+      "Content-Type": "application/json",
+      "Idempotency-Key": idempotencyKey,
+    },
+    body: JSON.stringify({
+      quote_id: quote.quote_id,
+      max_credit_micros: String(acceptedMicros),
+    }),
+  });
+  if (!response.ok) throw new Error(`Job admission failed (${response.status})`);
+  return response.json();
+}
+```
+
+Poll the returned `status_url` against `env.OHMYHOST_JOBS_BASE_URL` with the same bearer token after `next_poll_after_seconds`.
+
+## Limits, pricing and placement
+
+Each project can run two jobs at once, with four across its workspace and one active build per project. An environment supports nine named jobs and reserves a tenth version slot for an update. Existing quotes and active runs keep their earlier version until they finish or expire. A failed update leaves the prior version usable.
+
+The initial run profile provides up to 60 seconds, 16 input files, 16 output files, 64 MiB of input and 64 MiB of output. Temporary files expire after 24 hours. Jobs run on Cloudflare. Both US and EU projects can use private jobs. The service does not promise end-to-end EU residency.
+
+A 60-second Basic run reserves 153,378 microcredits. At 12 measured seconds the charge is 30,676 microcredits and the unused balance becomes available. Cancellation before execution releases the hold. Active cancellation settles measured time up to the cutoff. Building a new image is a separate reservation and charge. Infrastructure faults release the customer's reservation. [Pricing](/pricing) · [Project budgets](/budgets)

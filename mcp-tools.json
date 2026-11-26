@@ -545,6 +545,466 @@
       }
     },
     {
+      "name": "container_job_version_publish",
+      "description": "Publish one project job from its immutable saved source revision. Supply its build context, Dockerfile, argv and maximum accepted build charge in microcredits. Returns a queued build. Reuse the idempotency key only for this request.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Project identifier."
+          },
+          "environment_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Environment identifier."
+          },
+          "idempotency_key": {
+            "allOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              {
+                "type": "string",
+                "pattern": "^[!-~](?:[ -~]*[!-~])?$"
+              }
+            ],
+            "description": "Identifies one mutation and its canonical request payload."
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "source_revision": {
+            "type": "string",
+            "pattern": "^(?!0{40})[0-9a-f]{40}$"
+          },
+          "context_path": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^(?:\\.|(?!\\.{1,2}(?:\\/|$))[A-Za-z0-9_.-]+(?:\\/(?!\\.{1,2}(?:\\/|$))[A-Za-z0-9_.-]+)*)$",
+            "description": "Relative path within the selected source revision."
+          },
+          "dockerfile": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 256,
+            "pattern": "^(?!\\.{1,2}(?:\\/|$))[A-Za-z0-9_.-]+(?:\\/(?!\\.{1,2}(?:\\/|$))[A-Za-z0-9_.-]+)*$",
+            "description": "Relative path within the selected source revision."
+          },
+          "entrypoint": {
+            "minItems": 1,
+            "maxItems": 32,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 256,
+              "pattern": "^[^\\u0000]+$"
+            }
+          },
+          "max_runtime_seconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          },
+          "max_build_credit_micros": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,15})$",
+            "description": "Integer microcredits. One credit equals 1000000 microcredits."
+          },
+          "profile_name": {
+            "description": "Name of the saved login for this request. Required when several logins could run the request. The name must match OHMYHOST_PROFILE when the server is bound to one login.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "idempotency_key",
+          "name",
+          "source_revision",
+          "context_path",
+          "dockerfile",
+          "entrypoint",
+          "max_runtime_seconds",
+          "max_build_credit_micros"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "container_job_version_get",
+      "description": "Read this project's job version and build status. A ready version can be quoted for execution.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Project identifier."
+          },
+          "environment_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Environment identifier."
+          },
+          "name": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9-]{0,62}$"
+          },
+          "version_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "profile_name": {
+            "description": "Name of the saved login for this request. Required when several logins could run the request. The name must match OHMYHOST_PROFILE when the server is bound to one login.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "name",
+          "version_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "container_job_quote",
+      "description": "Return the expiring maximum run charge in microcredits for a ready version, ordered private file IDs and optional parameters file. Quoting is free.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Project identifier."
+          },
+          "environment_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Environment identifier."
+          },
+          "version_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "input_refs": {
+            "maxItems": 16,
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+            }
+          },
+          "parameters_ref": {
+            "anyOf": [
+              {
+                "type": "string",
+                "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+              },
+              {
+                "type": "null"
+              }
+            ]
+          },
+          "max_runtime_seconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 60
+          },
+          "profile_name": {
+            "description": "Name of the saved login for this request. Required when several logins could run the request. The name must match OHMYHOST_PROFILE when the server is bound to one login.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "version_id",
+          "input_refs",
+          "max_runtime_seconds"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "container_job_start",
+      "description": "Accept a previously quoted job, reserve up to the specified microcredits and queue its isolated container. A retry with the same idempotency key returns the original acceptance.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Project identifier."
+          },
+          "environment_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Environment identifier."
+          },
+          "idempotency_key": {
+            "allOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 128
+              },
+              {
+                "type": "string",
+                "pattern": "^[!-~](?:[ -~]*[!-~])?$"
+              }
+            ],
+            "description": "Identifies one mutation and its canonical request payload."
+          },
+          "quote_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "max_credit_micros": {
+            "type": "string",
+            "pattern": "^(0|[1-9][0-9]{0,15})$",
+            "description": "Integer microcredits. One credit equals 1000000 microcredits."
+          },
+          "profile_name": {
+            "description": "Name of the saved login for this request. Required when several logins could run the request. The name must match OHMYHOST_PROFILE when the server is bound to one login.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "idempotency_key",
+          "quote_id",
+          "max_credit_micros"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "container_job_get",
+      "description": "Read the job state, confirmed cost and ordered output file IDs. Poll at the returned interval. Output IDs become available on success.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Project identifier."
+          },
+          "environment_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Environment identifier."
+          },
+          "run_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "profile_name": {
+            "description": "Name of the saved login for this request. Required when several logins could run the request. The name must match OHMYHOST_PROFILE when the server is bound to one login.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "run_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": true,
+        "destructiveHint": false,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "container_job_cancel",
+      "description": "Request cancellation of exactly one run. A queued job incurs no run cost. A running job settles measured duration up to its cap. Poll for confirmation.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Project identifier."
+          },
+          "environment_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Environment identifier."
+          },
+          "run_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "profile_name": {
+            "description": "Name of the saved login for this request. Required when several logins could run the request. The name must match OHMYHOST_PROFILE when the server is bound to one login.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "run_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": true,
+        "idempotentHint": true,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "container_job_input_upload",
+      "description": "Create a short-lived PUT grant for one bounded private input or parameters file. Upload the exact bytes with the declared Content-Type. The file ID is then available for a quote.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Project identifier."
+          },
+          "environment_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Environment identifier."
+          },
+          "kind": {
+            "type": "string",
+            "enum": [
+              "input",
+              "parameters"
+            ]
+          },
+          "size_bytes": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 67108864
+          },
+          "media_type": {
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9.+-]{0,63}\\/[a-z0-9][a-z0-9.+-]{0,63}$",
+            "description": "Lowercase MIME type. Parameters files require application/json and are limited to 65536 bytes."
+          },
+          "profile_name": {
+            "description": "Name of the saved login for this request. Required when several logins could run the request. The name must match OHMYHOST_PROFILE when the server is bound to one login.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "kind",
+          "size_bytes",
+          "media_type"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
+      "name": "container_job_output_download",
+      "description": "Get a short-lived GET grant for one committed output of a successful run. Anyone holding this temporary URL can download that file until its expiry.",
+      "inputSchema": {
+        "type": "object",
+        "$schema": "https://json-schema.org/draft/2020-12/schema",
+        "properties": {
+          "project_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Project identifier."
+          },
+          "environment_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$",
+            "description": "Environment identifier."
+          },
+          "run_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "file_id": {
+            "type": "string",
+            "pattern": "^[0-9A-HJKMNP-TV-Z]{26}$"
+          },
+          "profile_name": {
+            "description": "Name of the saved login for this request. Required when several logins could run the request. The name must match OHMYHOST_PROFILE when the server is bound to one login.",
+            "type": "string",
+            "pattern": "^[a-z0-9][a-z0-9_-]{0,62}$"
+          }
+        },
+        "required": [
+          "project_id",
+          "environment_id",
+          "run_id",
+          "file_id"
+        ],
+        "additionalProperties": false
+      },
+      "annotations": {
+        "readOnlyHint": false,
+        "destructiveHint": false,
+        "idempotentHint": false,
+        "openWorldHint": false
+      }
+    },
+    {
       "name": "database_compute_get",
       "description": "Read current managed database memory, total storage, region and observed state without running SQL or waking the database. Shared Dev/Prod resolves to one physical database. First provisioning is distinct from cold (sleeping) and warm (running). An existing environment without a confirmed database placement returns not_set_up with guidance for provisioning or setup. A configured size does not prove an in-progress resize finished. This read never resizes or changes billing.",
       "inputSchema": {
