@@ -1,18 +1,18 @@
 # Native chat with a remote connection
 
-Use this path when the task's established access context calls for the authenticated remote
-server.
-Discover its tools and call `identity_get`; do not install a CLI,
+Use this path when the task's established access context calls for the remote server.
+For a brand-new user who has not signed in yet and wants to try an app right away, remote MCP exposes `preview_draft` without OAuth (`noauth`): pass the app's files to create a temporary 24-hour live preview (including a small unclaimed Postgres database up to 5 tables and 5 MiB when `ohmyhost.yaml` declares database migrations), return `preview_url` and `claim_url`, and pass `draft_id` with `edit_token` on follow-up edits to update the same preview in place. If the database exceeds 5 tables or 5 MiB, ohmyho.st returns `guest_database_limit_exceeded` and asks the user to open `claim_url` to sign up and unlock full Postgres storage. After 24 hours without claim, live compute and Postgres are deleted and a compressed snapshot of the app and database stays in R2 for 30 days so `claim_url` can still restore and claim them. Opening `claim_url` (or clicking **Save project** in the preview bar) signs the user in and copies the draft (and database, if used) into their workspace permanently.
+
+For authenticated workspace work, discover the server's tools and call `identity_get`; do not install a CLI,
 start a device-code login, or ask for an API key in this chat. The client completes the managed
-OAuth sign-in itself. A configured plugin or completed browser page is not proof of authorization.
+OAuth sign-in itself, and the first verified OAuth connection automatically creates **My workspace** when the user has none. A configured plugin or completed browser page is not proof of authorization.
 
 Verify the account with `identity_get` and use `project_list` to find the intended project.
 Current workspace membership, role and any explicit token restrictions determine access. Continue
 with the requested work when authorized; a role denial needs the appropriate workspace role,
 so tell the customer which workspace access is missing. Keep using the intended project.
 
-An identity with no organization needs `workspace_setup` before project work. In the portal,
-**Workspace** is the label. Present its
+If an identity still has no organization (for example while email verification is pending), use `workspace_setup` before project work. In the portal, **Workspace** is the label. Present its
 returned portal URL and ask the customer to sign in there with the same connected account.
 After setup, call `identity_get` again. Never guess an organization from a project name.
 

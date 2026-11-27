@@ -46,7 +46,9 @@ For a client that supports authenticated remote MCP, connect:
 https://app.ohmyho.st/mcp
 ```
 
-Complete the client's OAuth sign-in. The agent verifies `identity_get`, the intended workspace and the requested project before continuing. Current workspace membership, role and any explicit token restrictions determine access. If you already described an application or task, the agent continues it; otherwise it asks what you would like to host.
+Complete the client's OAuth sign-in. New accounts with no existing workspace automatically receive an initial `My workspace` during Connect sign-in. The agent verifies `identity_get`, the intended workspace and the requested project before continuing. Current workspace membership, role and any explicit token restrictions determine access. If you already described an application or task, the agent continues it; otherwise it asks what you would like to host.
+
+Before OAuth sign-in, remote clients can also call `preview_draft` without authentication to spin up a 24-hour [loginless preview draft](/previews#loginless-preview-drafts) (with an optional 5-table / 5 MiB temporary PostgreSQL database and 30-day claim archive via `/claim/{token}`). Updating a draft requires the `edit_token` returned when the draft was created; all other remote MCP tools continue to require OAuth authentication.
 
 Existing authenticated connections continue to use their current OAuth identity. If a client has cached older tools or instructions, refresh its catalog or start a fresh chat; a catalog refresh does not require a new OAuth connection. A role or resource denial needs the appropriate current access. An account with no workspace can use `workspace_setup` and verify identity again afterward.
 
