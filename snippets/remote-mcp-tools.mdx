@@ -1,4 +1,4 @@
-Master Tool Contract SHA-256: `d6b121e5815e026156a7ff78b3176eb80e529d817507839e45cc2e6301fd4c39`. These are the shared remote server's named tools; discover the current host's exact input schema with `tools/list`. New definitions may still be undergoing host checks.
+Master Tool Contract SHA-256: `a143ba4c91f5a70227c350472125818c4b202e8c3fb08684caf5ee9f8f08347f`. These are the shared remote server's named tools; discover the current host's exact input schema with `tools/list`. New definitions may still be undergoing host checks.
 
 | Tool | Purpose |
 | --- | --- |
@@ -114,6 +114,7 @@ Master Tool Contract SHA-256: `d6b121e5815e026156a7ff78b3176eb80e529d817507839e4
 | `organization_usage_get` | Read the billed usage of the last up to 14 UTC days (today included) grouped by day, project and meter, and what each project has used so far this UTC month. |
 | `powered_by_flag_get` | Read whether the production site shows the opt-in "Powered by ohmyho.st" flag. |
 | `powered_by_flag_set` | Owner-only. |
+| `preview_draft` | Creates or updates a temporary 24-hour live preview on ohmyho.st without signing in (including a small unclaimed Postgres database up to 5 tables and 5 MiB when ohmyhost.yaml declares database migrations; exceeding 5 tables or 5 MiB returns guest_database_limit_exceeded with claim_url so the user can sign up and unlock full Postgres storage). Pass files to build and preview an app immediately (omitting package.json starts from the vite-react template). Returns preview_url, claim_url (to sign in and save permanently), draft_id and edit_token. Pass draft_id and edit_token on follow-up edits to update the same live preview in place. After 24 hours without claim, live compute and database are deleted and the app plus database snapshot stay archived in R2 for 30 days so claim_url can still restore and claim them. |
 | `preview_get` | Read the preview for a project environment |
 | `preview_open` | Open or create a project environment preview |
 | `preview_rotate` | Rotate a preview capability URL |

@@ -24,4 +24,4 @@ This workflow needs the separately selected local CLI/MCP password-input path. A
 
 The plaintext SQL limit is 256 MiB. The platform stores the encrypted export in Cloudflare R2. A customer-selected S3, R2 or Drive destination is not currently available. This on-demand SQL export is separate from the database size's included seven-day operational backups. Restoring is a separate requested action: choose the destination explicitly and do not overwrite the existing production database to test a backup.
 
-Skill release 0.1.85. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.
+Skill release 0.1.86. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

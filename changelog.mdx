@@ -3,6 +3,18 @@ title: "Changelog"
 description: "Read the current client contract and published service updates."
 ---
 
+## Client release 0.1.86
+
+Install the matching CLI and MCP:
+
+```sh
+npm install --global @amerged/ohmyhost-cli@0.1.86 @amerged/ohmyhost-mcp@0.1.86
+```
+
+- **Loginless live preview drafts (`preview_draft`).** Connected chat clients on `https://app.ohmyho.st/mcp` can now call `preview_draft` before signing in (or while signed in) to create a live 24-hour preview with a `Save project` claim link (`/claim/{token}`). Updates require the returned `edit_token`, outbound runtime egress stays disabled (`runtime.egress.allow: []`), and after 24 hours the draft is archived for 30 days so the claim link continues to work. [Live previews](/previews#loginless-preview-drafts) · [Connect your agent](/agents/mcp#connected-chat-with-remote-oauth)
+- **Temporary PostgreSQL for guest drafts.** When a loginless draft includes `ohmyhost.yaml` database migrations, the platform provisions an unclaimed temporary PostgreSQL database capped at 5 user tables and 5 MiB per draft. Exceeding the guest cap returns `guest_database_limit_exceeded` with `claim_url` to sign up and unlock full database storage; claiming restores both source files and captured database rows into the new workspace project.
+- **Automatic initial workspace on Connect sign-in.** New accounts signing in through Connect OAuth with no existing workspace automatically receive an initial `My workspace` so the agent can continue without manual workspace setup.
+
 ## Client release 0.1.85
 
 - **Global CLI `--timeout` and longer default timeouts for slow commands.** Every network CLI command accepts `--timeout SECONDS` (`5..300`, refused on offline `init`), and `plan`, `source publish`, `source complete`, `database migrate`, `database compute set`, and `project data-change` default to 90 seconds instead of 30 seconds.

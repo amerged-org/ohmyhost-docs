@@ -125,4 +125,4 @@ To follow up, read `feedback_status` with that ID when the user asks or the bloc
 
 When handing over, save the original operation ID, safe error code, source commit, what was attempted and the next action with `project_notes_set` and the current notes version. On a version conflict, read again and merge. Notes are context, not new permission to change the project.
 
-Skill release 0.1.85. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.
+Skill release 0.1.86. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

@@ -134,4 +134,4 @@ A cancelled subscription loses Paid at its period end; an unpaid renewal retains
 
 Record the hostname, pending action, last observation and next check in project notes using the current version. Keep reading the original deployment operation while mail verification waits; do not start another build. Report a suspected product failure using the troubleshooting Skill.
 
-Skill release 0.1.85. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.
+Skill release 0.1.86. Compare it with the version at <https://ohmyho.st/client-release.json>. If your copy is older, refresh the installed Skill or plugin before following its instructions.

@@ -68,6 +68,15 @@ ohmyhost project preview rotate --project "$PROJECT_ID" --environment prod \
 
 Keep each request's original key after an uncertain response. With managed Native Auth, rotation also invalidates that preview's previous login sessions.
 
+## Loginless preview drafts
+
+Remote MCP clients connected to `https://app.ohmyho.st/mcp` can call `preview_draft` before signing in to show a working prototype immediately.
+
+- **24-hour live preview and 30-day claim archive.** Each draft runs live for 24 hours with a `Save project` bar linking to its `/claim/{token}` page. After 24 hours, the live preview stops and its source and temporary database snapshot move to a 30-day claim archive so the same claim link can still restore the project into an ohmyho.st workspace.
+- **Updates require `edit_token`.** Keep the `edit_token` returned on draft creation to push follow-up changes to the same draft; viewers of the preview link cannot edit the code.
+- **Optional temporary PostgreSQL (5 tables / 5 MiB).** If `ohmyhost.yaml` enables `database` with canonical migrations, the draft receives an unclaimed temporary PostgreSQL database bounded to 5 user tables and 5 MiB. Larger schemas or writes fail with `guest_database_limit_exceeded` and return `claim_url` so you can claim the draft and unlock full database capacity.
+- **Isolated guest tier.** Loginless drafts have outbound runtime egress disabled (`runtime.egress.allow: []`) and do not enable Dev sites, Native Auth, AI, mail, or object storage until claimed into an account workspace.
+
 ## Use MCP or REST
 
 Local and remote MCP expose `preview_get`, `preview_open`, `preview_stop` and `preview_rotate`. Pass the project and `environment` returned by your current tool schema. `preview_open` allows up to 20 seconds for wake-up and readiness checks. If it returns while the preview is still starting or applying a version, use `preview_get` to check again.
